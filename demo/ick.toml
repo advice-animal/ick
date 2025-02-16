@@ -1,0 +1,4 @@
+[[collection]]
+language = "python"
+deps = ["ick-api", "nflx-factstore"]
+

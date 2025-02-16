@@ -1,0 +1,8 @@
+# In order to test ONLY here, make sure you run
+#
+#   ick --isolated-repo
+#
+# to ignore your user config and parse just these hooks.
+
+[[mount]]
+path = "meta/"

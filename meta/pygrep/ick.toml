@@ -1,0 +1,12 @@
+[[pattern]]
+risk = "high"
+filenames = ["*.md"]
+search = "FIXME"
+msg = "Markdown files should not contain FIXME"
+
+[[pattern]]
+risk = "high"
+filenames = ["*.py"]
+exclude_filenames = ["tests/**"]
+search = "^\\s*print\\("
+msg = "Python files should not contain print statements"

@@ -1,0 +1,71 @@
+[[hook]]
+name = "pyproject"
+language = "merge-toml"
+files = ["pyproject.toml"]
+# scope=single-file
+# priority=50
+# external_state=False
+data = """
+[tool.foo]
+hello = 1
+"""
+
+[[hook]]
+name = "edit-shebang"
+language = "edit-first-line"
+files = ["scripts/*.py"]
+# scope=single-file
+# priority=50
+# external_state=False
+search = "#!"
+replace = "#!/usr/bin/env python"
+
+[[hook]]
+name = "no-fixme-in-readme"
+language = "pygrep"
+files = ["README", "README.md"]
+# scope=single-file
+# priority=50
+# external_state=False
+search = "FIXME"
+urgency = "now"
+
+[[hook]]
+name = "uppercase-the-word-all"
+language = "python"
+files = ["*.md"]
+# scope=single-file
+# priority=50
+# external_state=False
+search = "all"
+# this gets run with 'path' var
+data = """
+text = path.read_text()
+text = text.replace("all", "ALL")
+path.write_text(text)
+"""
+
+[[hook]]
+name = "long-form-grep"
+language = "shell"
+files = ["*.md"]
+# scope=single-file
+priority = 90
+# external_state=False
+data = """
+die() { echo "$1"; exit 99 }
+grep -q ALL "$@" || die "No shouting!"
+"""
+
+[[collection]]
+name = "collection"
+language = "python"
+# files = ["*"]
+subdir = "." # could be the default?
+
+[[collection]]
+name = "alternate-collection"
+language = "python"
+subdir = "p1"
+priority = 1
+deps = ["attrs"]
