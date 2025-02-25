@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional, Sequence, Union
 
 import appdirs
+from keke import ktrace
 from msgspec import Struct, ValidationError, field
 from msgspec.structs import replace as replace
 from msgspec.toml import decode as decode_toml
@@ -81,7 +82,8 @@ class HookConfig(Struct):
     command: Optional[str] = None
     data: Optional[str] = None
     search: Optional[str] = None
-    replace: Optional[str] = None
+    # ruff bug: https://github.com/astral-sh/ruff/issues/10874
+    replace: Optional[str] = None  # noqa: F811
 
     deps: Optional[list[str]] = None
     hook_path: Optional[Path] = None  # set later, test dir is under this
@@ -107,6 +109,7 @@ class CollectionConfig(Struct):
     collection_path: Optional[Path] = None  # set later, test dir is under this
 
 
+@ktrace()
 def load_hooks_config(cur: Path) -> HooksConfig:
     conf = HooksConfig()
     repo_root = find_repo_root(cur)
@@ -140,10 +143,13 @@ def load_hooks_config(cur: Path) -> HooksConfig:
                 except ValidationError as e:
                     # TODO surely there's a cleaner way to validate _inside_
                     # but not care if [tool.other] is present...
-                    if "Object missing required field `ick` - at `$.tool`" not in e.args[0]:
+                    if "Object missing required field `ick`" not in e.args[0]:
                         raise
             else:
                 c = decode_toml(p.read_bytes(), type=HooksConfig)
+
+            for mount in c.mount:
+                mount.base_path = p.parent
 
             # TODO finalize mount paths so relative works
             conf.inherit(c)

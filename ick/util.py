@@ -5,6 +5,8 @@ def merge(a, b):
         return a
     elif isinstance(a, list):
         return a + b
+    elif not a and isinstance(b, list):
+        return b
     elif isinstance(a, dict):
         keys = a.keys | b.keys()
         d = {}

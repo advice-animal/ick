@@ -5,7 +5,7 @@ from msgspec.json import encode
 from ..base_language import BaseHook
 
 
-class Hook(BaseHook):
+class Language(BaseHook):
     """
     Implementation of a simple hook that can edit the first line of a file.
     """

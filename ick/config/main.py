@@ -8,9 +8,10 @@ from __future__ import annotations
 
 from logging import getLogger
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import appdirs
+from keke import ktrace
 from msgspec import Struct, ValidationError, field
 from msgspec.structs import replace as replace
 from msgspec.toml import decode as decode_toml
@@ -97,6 +98,7 @@ class ToolConfig(Struct):
     ick: MainConfig
 
 
+@ktrace()
 def load_main_config(cur: Path) -> MainConfig:
     conf = MainConfig()
     repo_root = find_repo_root(cur)
@@ -137,8 +139,6 @@ def load_main_config(cur: Path) -> MainConfig:
             else:
                 # TODO warn when there's a tool.ick here, someone likely forgot what file they were editing...
                 c = decode_toml(p.read_bytes(), type=MainConfig)
-            for mount in c.mount:
-                mount.base_path = p.parent
             LOG.log(VLOG_2, "Loaded %s of %r", p, c)
             conf.inherit(c)
 
@@ -153,6 +153,7 @@ class RuntimeConfig(Struct):
     """
 
     main_config: MainConfig
+    hooks_config: Any  # Avoiding possible circular reference
     settings: Settings
     filter_config: FilterConfig = field(default_factory=FilterConfig)
 

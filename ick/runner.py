@@ -6,14 +6,14 @@ from logging import getLogger
 from pathlib import Path
 from typing import Sequence, Type
 
+from keke import ktrace
 from msgspec import ValidationError
 from msgspec.json import encode as encode_json
 from msgspec.toml import decode as decode_toml
 from vmodule import VLOG_1, VLOG_2
 
 from .base_language import BaseCollection
-from .config import RuntimeConfig
-from .config_workspace import CollectionConfig, HookConfig, HookRepoConfig, WorkspaceHookConfig, WorkspaceMount
+from .config import CollectionConfig, HookConfig, HookRepoConfig, Mount, PyprojectHooksConfig, RuntimeConfig
 from .git import update_local_cache
 
 LOG = getLogger(__name__)
@@ -30,14 +30,15 @@ class Runner:
                 if hook.urgency_enum < self.rtc.filter_config.urgency_filter:
                     continue
             i = get_impl(hook)(hook, self.rtc)
-            print(i, list(i.iterate_hooks()))
+            print(i, list(i.list()))
 
+    @ktrace()
     def echo_hooks(self) -> None:
         d = {}
         for config_hook in self.hooks:
             i = get_impl(config_hook)(config_hook, self.rtc)
-            for hook in i.iterate_hooks():
-                d.setdefault(hook.urgency, []).append(hook)
+            for hook in i.list().hook_names:
+                d.setdefault(config_hook.urgency, []).append(hook)
 
         first = True
         for u in sorted(d.keys()):
@@ -52,6 +53,7 @@ class Runner:
                 print(f"* {v}")
 
 
+@ktrace()
 def discover_hooks(rtc: RuntimeConfig) -> Sequence[HookConfig | CollectionConfig]:
     """
     Update and populate our knowledge of hooks that are present.
@@ -59,7 +61,7 @@ def discover_hooks(rtc: RuntimeConfig) -> Sequence[HookConfig | CollectionConfig
     hooks: list[HookConfig | CollectionConfig] = []
 
     mounts = {}
-    for mount in rtc.main_config.mount:
+    for mount in rtc.hooks_config.mount:
         LOG.log(VLOG_1, "Processing %s", mount)
         # Prefixes should be unique; they override here
         mounts[mount.prefix] = load_hook_repo(mount)
@@ -74,7 +76,8 @@ def discover_hooks(rtc: RuntimeConfig) -> Sequence[HookConfig | CollectionConfig
     return hooks
 
 
-def load_hook_repo(mount: WorkspaceMount) -> HookRepoConfig:
+@ktrace("mount.url", "mount.path")
+def load_hook_repo(mount: Mount) -> HookRepoConfig:
     if mount.url:
         # TODO config for a subdir within?
         repo_path = update_local_cache(mount.url, skip_update=False)  # TODO
@@ -91,7 +94,7 @@ def load_hook_repo(mount: WorkspaceMount) -> HookRepoConfig:
         LOG.log(VLOG_1, "Config found at %s", filename)
         if filename.endswith("pyproject.toml"):
             try:
-                c = decode_toml(p.read_bytes(), type=WorkspaceHookConfig).tool.ick
+                c = decode_toml(p.read_bytes(), type=PyprojectHooksConfig).tool.ick
             except ValidationError as e:
                 # TODO surely there's a cleaner way to validate _inside_
                 # but not care if [tool.other] is present...
@@ -117,11 +120,12 @@ def load_hook_repo(mount: WorkspaceMount) -> HookRepoConfig:
     return rc
 
 
+@ktrace("hook.language")
 def get_impl(hook: HookConfig | CollectionConfig) -> Type[BaseCollection]:
     name = f"ick.languages.{hook.language}"
     if isinstance(hook, CollectionConfig):
         name += "_collection"
     name = name.replace("-", "_")
     __import__(name)
-    impl: Type[BaseCollection] = sys.modules[name].Hook  # type: ignore[assignment]
+    impl: Type[BaseCollection] = sys.modules[name].Language  # type: ignore[assignment]
     return impl
