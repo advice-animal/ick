@@ -16,6 +16,10 @@ endif
 .venv:
 	$(VENV) .venv
 
+.PHONY: setup
+setup: .venv
+	source $(ACTIVATE) && $(PIP) install -Ue .[dev,test]
+
 .PHONY: html
 html: .venv README.md docs/*.rst docs/conf.py
 	source $(ACTIVATE) && sphinx-build -ab html docs html
@@ -28,3 +32,7 @@ format:
 .PHONY: test
 test:
 	pytest --cov=ick
+
+.PHONY: lint
+lint:
+	mypy --strict

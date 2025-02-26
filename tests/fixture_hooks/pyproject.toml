@@ -1,0 +1,3 @@
+[[tool.ick.hook]]
+name = "goodbye"
+language = "shell"

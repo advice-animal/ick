@@ -1,9 +1,10 @@
-from .hooks import CollectionConfig, HookConfig, HookRepoConfig, HooksConfig, PyprojectHooksConfig, load_hooks_config
+from .hooks import CollectionConfig, HookConfig, HookRepoConfig, HooksConfig, Mount, PyprojectHooksConfig, load_hooks_config
 from .main import MainConfig, RuntimeConfig, load_main_config
 from .settings import FilterConfig, Settings
 
 __all__ = [
     "CollectionConfig",
+    "Mount",
     "HookConfig",
     "HookRepoConfig",
     "PyprojectHooksConfig",

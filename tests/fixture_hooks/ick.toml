@@ -1,0 +1,4 @@
+[[hook]]
+name = "hello"
+language = "shell"
+

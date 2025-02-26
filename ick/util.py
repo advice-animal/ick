@@ -8,7 +8,7 @@ def merge(a, b):
     elif not a and isinstance(b, list):
         return b
     elif isinstance(a, dict):
-        keys = a.keys | b.keys()
+        keys = a.keys() | b.keys()
         d = {}
         for k in keys:
             d[k] = merge(a.get(k), b.get(k))
