@@ -29,10 +29,12 @@ format:
 	ruff format
 	ruff check --fix
 
+.PHONY: lint
+lint:
+	ruff check
+	python -m checkdeps --allow-names ick,ick_protocol ick
+	#mypy --strict --install-types --non-interactive advice_animal
+
 .PHONY: test
 test:
 	pytest --cov=ick
-
-.PHONY: lint
-lint:
-	mypy --strict

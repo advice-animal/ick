@@ -1,4 +1,13 @@
+import sys
+from pathlib import Path
+
 from ..base_language import BaseHook
+
+
+def find_uv() -> Path:
+    uv_path = Path(sys.executable).parent / "uv"
+    assert uv_path.exists()
+    return uv_path
 
 
 class Hook(BaseHook):

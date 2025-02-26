@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from logging import getLogger
+from typing import Any
 
 from keke import ktrace
 
@@ -15,7 +16,7 @@ class Runner:
         self.rtc = rtc
         self.hooks = discover_hooks(rtc)
 
-    def run(self) -> list[Result]:
+    def run(self) -> Any:
         for hook in self.hooks:
             if isinstance(hook, HookConfig):
                 if hook.urgency_enum < self.rtc.filter_config.urgency_filter:
