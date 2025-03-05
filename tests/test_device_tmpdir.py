@@ -34,7 +34,7 @@ def test_device_tmpdir(mocker):
     mocker.patch("os.path.expanduser", expanduser)
     mocker.patch("os.makedirs", lambda *x, **y: None)
     mocker.patch("os.mkdir", lambda *x, **y: None)
-    mocker.patch("os.getenv", lambda x: None)
+    mocker.patch("ick.device_tmpdir.HARDCODED_DEFAULTS", ["/tmp", ".tox", ".git"])
     mocker.patch("appdirs.user_cache_dir", lambda *x: Path("/home/user/.cache/ick"))
     assert find_tmpdir(Path("/root")) == Path("/tmp")
     assert find_tmpdir(Path(".git")) == Path(".tox")
