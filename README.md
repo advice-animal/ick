@@ -1,11 +1,22 @@
 # Ick
 
 <img align="right" src="_static/ick.png" width="300" height="287">
-In a nutshell, ick can tell you what best practices you haven't adopted, and
-in many cases[citation needed] fix them for you.  It's not tied to any one use
-case or CI/CD platform, and is completely free to use, improve (MIT license),
-and customize (it comes with no inbuilt opinions, but makes it easy to add your
-own or others').
+Code that's a little bit out of date might make you say "ick!"  But code that's
+really out of date could probably use starting over from modern templates.
+
+You *could* chain together a bunch of shell scripts to modernize things using
+appropriate tools.  But if this is the sort of thing you do at scale and want
+to distribute recommendations that people can adopt as they have time, you need
+automation.
+
+Ick is the lightweight, polyglot automation around running language-specific
+tools (including autofixes) and letting the user know what they can improve.
+
+Its primary job is to let you *move towards a goal over time* and make it
+*trivially easy to write fixes with good tests*.  You can adopt ick without
+your entire team having to commit to it, and you can walk away if it doesn't do
+what you want.
+
 
 *The Elevator Pitch*
 

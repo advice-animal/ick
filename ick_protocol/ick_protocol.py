@@ -28,37 +28,41 @@ modifications have dependencies, and multiple linters can run in the same
 process (regular LSP just has "format_file").
 """
 
-from enum import IntEnum
+from enum import Enum, StrEnum, auto
 from typing import Optional, Sequence, Union
 
 from msgspec import Struct
 from msgspec.structs import replace as replace
 
-# Basic linter qualifications (these numbers are fixed in stone!)
 
-
-class Risk(IntEnum):
+class Risk(Enum):
     # These are structured for easier translation to a bit field (IntFlags)
     # later, in case it makes sense for collections in particular to be able to
     # return one of several risk values after actually analyzing your code.
 
-    HIGH = 1
-    MED = 2
-    LOW = 4
+    HIGH = auto()
+    MED = auto()
+    LOW = auto()
+
+    def __lt__(self, other):
+        return self._sort_order_ < other._sort_order_
 
 
-class Urgency(IntEnum):
-    MANUAL = 0
-    LATER = 10
-    SOON = 20
-    NOW = 30
-    NOT_SUPPORTED = 40
+class Urgency(StrEnum):
+    MANUAL = auto()
+    LATER = auto()
+    SOON = auto()
+    NOW = auto()
+    NOT_SUPPORTED = auto()
+
+    def __lt__(self, other):
+        return self._sort_order_ < other._sort_order_
 
 
-class Scope(IntEnum):
-    REPO = 1
-    PROJECT = 2
-    SINGLE_FILE = 3
+class Scope(Enum):
+    REPO = "repo"
+    PROJECT = "project"
+    SINGLE_FILE = "single-file"
 
 
 # Basic API Requests

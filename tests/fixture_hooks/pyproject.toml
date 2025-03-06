@@ -1,3 +1,4 @@
 [[tool.ick.hook]]
 name = "goodbye"
 language = "shell"
+command = "exit 1"

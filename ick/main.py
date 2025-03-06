@@ -93,8 +93,13 @@ def run(ctx, v, verbose, vmodule, trace, dry_run: bool, yolo: bool, filters: lis
     verbose_init(v, verbose, vmodule)
     ctx.with_resource(keke.TraceOutput(file=trace))
 
-    conf = load_main_config(Path(target))
-    ctx.obj = RuntimeConfig(conf, Settings())
+    cur = Path(target)
+    conf = load_main_config(cur)
+    repo_path = find_repo_root(cur)
+    repo = Repo(repo_path)
+
+    hc = load_hooks_config(cur)
+    ctx.obj = RuntimeConfig(conf, hc, Settings())
     ctx.obj.settings.dry_run = dry_run
     ctx.obj.settings.yolo = yolo
 
@@ -108,7 +113,7 @@ def run(ctx, v, verbose, vmodule, trace, dry_run: bool, yolo: bool, filters: lis
 
     # DO THE NEEDFUL
 
-    r = Runner(ctx.obj)
+    r = Runner(ctx.obj, repo, explicit_project=None)
     r.run()
 
     # PRINT THE OUTPUT

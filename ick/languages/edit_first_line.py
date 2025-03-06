@@ -14,6 +14,9 @@ class Language(BaseHook):
         self.hook_config = hook_config
         self.repo_config = repo_config
 
+    def prepare(self):
+        pass
+
     # def work_on_project(self, project_path):
     #     return SubprocessManager(
     #         command=self.COMMAND,

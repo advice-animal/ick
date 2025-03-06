@@ -1,7 +1,7 @@
 [[hook]]
 name = "pyproject"
 language = "merge-toml"
-files = ["pyproject.toml"]
+inputs = ["pyproject.toml"]
 # scope=single-file
 # priority=50
 # external_state=False
@@ -10,20 +10,20 @@ data = """
 hello = 1
 """
 
-[[hook]]
-name = "edit-shebang"
-language = "edit-first-line"
-files = ["scripts/*.py"]
-# scope=single-file
-# priority=50
-# external_state=False
-search = "#!"
-replace = "#!/usr/bin/env python"
+# [[hook]]
+# name = "edit-shebang"
+# language = "edit-first-line"
+# files = ["scripts/*.py"]
+# # scope=single-file
+# # priority=50
+# # external_state=False
+# search = "#!"
+# replace = "#!/usr/bin/env python"
 
 [[hook]]
 name = "no-fixme-in-readme"
 language = "pygrep"
-files = ["README", "README.md"]
+inputs = ["README", "README.md"]
 # scope=single-file
 # priority=50
 # external_state=False
@@ -33,7 +33,7 @@ urgency = "now"
 [[hook]]
 name = "uppercase-the-word-all"
 language = "python"
-files = ["*.md"]
+inputs = ["*.md"]
 # scope=single-file
 # priority=50
 # external_state=False
@@ -48,7 +48,7 @@ path.write_text(text)
 [[hook]]
 name = "long-form-grep"
 language = "shell"
-files = ["*.md"]
+inputs = ["*.md"]
 # scope=single-file
 priority = 90
 # external_state=False
@@ -69,3 +69,10 @@ language = "python"
 subdir = "p1"
 priority = 1
 deps = ["attrs"]
+
+[[hook]]
+name = "no-prints"
+language = "ast-grep"
+search = "print($$$)"
+replace = ""
+inputs = ["*.py"]

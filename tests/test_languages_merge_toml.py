@@ -1,7 +1,7 @@
 import subprocess
 
 from ick.config import HookConfig
-from ick.languages.pygrep import Language
+from ick.languages.merge_toml import Language
 from ick_protocol import Finished, Modified
 
 
@@ -9,33 +9,35 @@ def test_pygrep_works(tmp_path):
     pygrep = Language(
         HookConfig(
             name="foo",
-            language="pygrep",
-            search="hello",
-            replace="bar",
+            language="merge_toml",
+            data="""\
+[foo]
+baz = 99
+""",
         ),
         None,
     )
     subprocess.check_call(["git", "init"], cwd=tmp_path)
-    (tmp_path / "foo.py").write_text("xhello\n")
+    (tmp_path / "foo.toml").write_text("# doc comment\n[foo]\nbar = 0\nbaz = 1\nfloof = 2\n")
     subprocess.check_call(["git", "add", "-N", "."], cwd=tmp_path)
     subprocess.check_call(["git", "commit", "-a", "-msync"], cwd=tmp_path)
 
     with pygrep.work_on_project(tmp_path) as work:
-        resp = list(work.run("pygrep", ["foo.py"]))
+        resp = list(work.run("merge_toml", ["foo.toml"]))
 
     assert len(resp) == 2
     resp[0].diff = "X"
     assert resp[0] == Modified(
-        hook_name="pygrep",
-        filename="foo.py",
-        new_bytes=b"xbar\n",
+        hook_name="merge_toml",
+        filename="foo.toml",
+        new_bytes=b"# doc comment\n[foo]\nbar = 0\nbaz = 99\nfloof = 2\n",
         additional_input_filenames=(),
         diffstat="+1-1",
         diff="X",
     )
 
     assert resp[1] == Finished(
-        hook_name="pygrep",
+        hook_name="merge_toml",
         error=False,
-        message="pygrep",
+        message="merge_toml",
     )

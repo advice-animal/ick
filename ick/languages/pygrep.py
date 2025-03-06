@@ -10,6 +10,12 @@ from msgspec.json import encode as json_encode
 from ..base_language import BaseHook, ExecWork
 
 
+def default(x):
+    if isinstance(x, Path):
+        return str(x)
+    raise NotImplementedError
+
+
 def main(filenames):
     config = json_decode(os.environ["HOOK_CONFIG"])
     name = config["name"]
@@ -33,10 +39,13 @@ class Language(BaseHook):
         super().__init__(conf, repo_config)
         self.command_parts = [sys.executable, "-m", __name__]
         self.command_env = {
-            "HOOK_CONFIG": json_encode(conf),
+            "HOOK_CONFIG": json_encode(conf, enc_hook=default),
         }
         if "PYTHONPATH" in os.environ:
             self.command_env["PYTHONPATH"] = os.environ["PYTHONPATH"]
+
+    def prepare(self):
+        pass
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ from typing import Generator, Type
 from ick_protocol import Finished, ListResponse, Msg, Scope
 
 from .git_diff import get_diff_messages
+from .sh import run_cmd
 
 
 class Work:
@@ -25,16 +26,24 @@ class Work:
         protocol-speaking tool, or a standard tool and emulate.
         """
 
-        raise NotImplementedError()
+        raise NotImplementedError(self.collection.__class__)
 
 
 class ExecWork(Work):
     def run(self, hook_name, filenames) -> Generator[Msg, None, None]:
         try:
             if self.collection.hook_config.scope == Scope.SINGLE_FILE:
-                subprocess.check_call(self.collection.command_parts + filenames, env=self.collection.command_env, cwd=self.project_path)
+                run_cmd(
+                    self.collection.command_parts + filenames,
+                    env=self.collection.command_env,
+                    cwd=self.project_path,
+                )
             else:
-                subprocess.check_call(self.collection.command_parts, env=self.collection.command_env, cwd=self.project_path)
+                run_cmd(
+                    self.collection.command_parts,
+                    env=self.collection.command_env,
+                    cwd=self.project_path,
+                )
         except FileNotFoundError as e:
             yield Finished(hook_name, error=True, message=str(e))
             return
@@ -49,9 +58,9 @@ class ExecProtocolWork(Work):
     def run(self, hook_name, filenames) -> Generator[Msg, None, None]:
         try:
             if self.collection.hook_config.scope == Scope.SINGLE_FILE:
-                subprocess.check_call(self.collection.command_parts + filenames, env=self.collection.command_env, cwd=self.project_path)
+                run_cmd(self.collection.command_parts + filenames, env=self.collection.command_env, cwd=self.project_path)
             else:
-                subprocess.check_call(self.collection.command_parts, env=self.collection.command_env, cwd=self.project_path)
+                run_cmd(self.collection.command_parts, env=self.collection.command_env, cwd=self.project_path)
         except FileNotFoundError as e:
             yield Finished(hook_name, error=True, message=str(e))
             return
@@ -71,7 +80,10 @@ class BaseCollection:
         self.repo_config = repo_config
 
     def list(self) -> ListResponse:
-        raise NotImplementedError()
+        raise NotImplementedError(self.__class__)
+
+    def prepare(self) -> None:
+        raise NotImplementedError(self.__class__)
 
     @contextmanager
     def work_on_project(self, project_path):

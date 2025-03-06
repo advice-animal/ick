@@ -4,6 +4,7 @@ import sys
 from glob import glob
 from logging import getLogger
 from pathlib import Path
+from posixpath import dirname
 from typing import Sequence, Type
 
 from keke import ktrace
@@ -22,7 +23,10 @@ LOG = getLogger(__name__)
 @ktrace()
 def discover_hooks(rtc: RuntimeConfig) -> Sequence[HookConfig | CollectionConfig]:
     """
-    Update and populate our knowledge of hooks that are present.
+    Returns list of hooks in the order that they would be applied.
+
+    It is the responsibility of the caller to filter and handle things like
+    project-level ignores.
     """
     hooks: list[HookConfig | CollectionConfig] = []
 
@@ -70,8 +74,15 @@ def load_hook_repo(mount: Mount) -> HookRepoConfig:
             continue
 
         LOG.log(VLOG_2, "Loaded %s", encode_json(c).decode("utf-8"))
+        base = dirname(filename).lstrip("/")
+        if base:
+            base += "/"
         for hook in c.hook:
-            hook.hook_path = p.parent
+            hook.qualname = base + hook.name
+            if (p.parent / hook.name).exists():
+                hook.test_path = repo_path / base / hook.name / "tests"
+            else:
+                hook.test_path = repo_path / base / "tests" / hook.name
         for collection in c.collection:
             collection.collection_path = p.parent
 

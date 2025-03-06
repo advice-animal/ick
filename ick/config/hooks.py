@@ -71,26 +71,24 @@ class HookConfig(Struct):
     scope: Scope = Scope.SINGLE_FILE
     command: Optional[Union[str, list[str]]] = None
 
-    # See post_init workaround because we can't seem to decode IntEnum from name
-    # here.
-    risk: str = "high"
-    risk_enum: Optional[Risk] = None
-    urgency: str = "later"
-    urgency_enum: Optional[Risk] = None
-
+    risk: Optional[Risk] = Risk.HIGH
+    urgency: Optional[Urgency] = Urgency.LATER
     order: int = 50
+
     command: Optional[str] = None
     data: Optional[str] = None
+
     search: Optional[str] = None
     # ruff bug: https://github.com/astral-sh/ruff/issues/10874
     replace: Optional[str] = None  # noqa: F811
 
     deps: Optional[list[str]] = None
-    hook_path: Optional[Path] = None  # set later, test dir is under this
+    test_path: Optional[Path] = None
+    qualname: str = ""  # the name _within its respective repo_
 
-    def __post_init__(self):
-        self.urgency_enum = Urgency[self.urgency.upper()]
-        self.risk_enum = Risk[self.risk.upper()]
+    inputs: Optional[Sequence[str]] = None
+    outputs: Optional[Sequence[str]] = None
+    extra_inputs: Optional[Sequence[str]] = None
 
 
 class CollectionConfig(Struct):
@@ -116,7 +114,7 @@ def load_hooks_config(cur: Path) -> HooksConfig:
     config_dir = appdirs.user_config_dir("advice-animal", "ick")
     paths = []
     # TODO revisit whether defining hooks in pyproject.toml is a good idea
-    if cur != repo_root:
+    if cur.resolve() != repo_root.resolve():
         paths.extend(
             [
                 Path(cur, "ick.toml"),

@@ -15,7 +15,7 @@ from keke import ktrace
 from msgspec import Struct, ValidationError, field
 from msgspec.structs import replace as replace
 from msgspec.toml import decode as decode_toml
-from vmodule import VLOG_1, VLOG_2
+from vmodule import VLOG_1
 
 from ..git import find_repo_root
 from ..util import merge
@@ -99,12 +99,12 @@ class ToolConfig(Struct):
 
 
 @ktrace()
-def load_main_config(cur: Path) -> MainConfig:
+def load_main_config(cur: Path, isolated_repo: bool = False) -> MainConfig:
     conf = MainConfig()
     repo_root = find_repo_root(cur)
     config_dir = appdirs.user_config_dir("advice-animal", "ick")
     paths: List[Path] = []
-    if cur != repo_root:
+    if cur.resolve() != repo_root.resolve():
         paths.extend(
             [
                 Path(cur, "ick.toml"),
@@ -115,36 +115,48 @@ def load_main_config(cur: Path) -> MainConfig:
         [
             Path(repo_root, "ick.toml"),
             Path(repo_root, "pyproject.toml"),
-            Path(config_dir, "ick.toml"),
         ]
     )
+    if not isolated_repo:
+        paths.append(
+            Path(config_dir, "ick.toml"),
+        )
 
     LOG.log(VLOG_1, "Loading main config near %s", cur)
+    print(paths)
 
     for p in paths:
         LOG.debug("Looking for config at %s", p)
         if p.exists():
-            LOG.log(VLOG_1, "Config found at %s", p)
+            LOG.info("Config found at %s", p)
             if p.name == "pyproject.toml":
-                try:
-                    c = decode_toml(p.read_bytes(), type=PyprojectConfig).tool.ick
-                except ValidationError as e:
-                    # TODO surely there's a cleaner way to validate _inside_
-                    # but not care if [tool.other] is present...
-                    if "Object missing required field `ick` - at `$.tool`" in e.args[0]:
-                        continue
-                    if "Object missing required field `tool`" in e.args[0]:
-                        continue
-                    raise
+                c = load_pyproject(p, p.read_bytes())
             else:
-                # TODO warn when there's a tool.ick here, someone likely forgot what file they were editing...
-                c = decode_toml(p.read_bytes(), type=MainConfig)
-            LOG.log(VLOG_2, "Loaded %s of %r", p, c)
+                c = load_regular(p, p.read_bytes())
+            LOG.log(VLOG_1, "Loaded %s of %r", p, c)
             conf.inherit(c)
 
     conf.inherit(MainConfig.DEFAULT)
 
     return conf
+
+
+def load_pyproject(p: Path, data: bytes) -> MainConfig:
+    try:
+        c = decode_toml(data, type=PyprojectConfig).tool.ick
+    except ValidationError as e:
+        # TODO surely there's a cleaner way to validate _inside_
+        # but not care if [tool.other] is present...
+        if "Object missing required field `ick` - at `$.tool`" in e.args[0]:
+            return MainConfig()
+        if "Object missing required field `tool`" in e.args[0]:
+            return MainConfig()
+        raise
+    return c
+
+
+def load_regular(p: Path, data: bytes) -> MainConfig:
+    return decode_toml(data, type=MainConfig)
 
 
 class RuntimeConfig(Struct):

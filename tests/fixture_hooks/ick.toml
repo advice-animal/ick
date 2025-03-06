@@ -1,4 +1,18 @@
 [[hook]]
 name = "hello"
 language = "shell"
+command = "echo hi"
+scope = "repo"
 
+[[hook]]
+name = "shouty"
+language = "shell"
+scope = "single-file"
+inputs = ["*.md"]
+# This is perl-speak for uppercasing only the first line of a file in-place.
+# Because this is scope=single-file, filenames will be added after it (similar
+# to how commands are run using xargs).
+command = '''
+perl -ipe 's/(.*)/\U\1/g if $.==1'
+'''
+order = 75
