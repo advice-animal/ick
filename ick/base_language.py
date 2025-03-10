@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import subprocess
 from contextlib import contextmanager
+from logging import getLogger
 from typing import Generator, Type
 
 from ick_protocol import Finished, ListResponse, Msg, Scope
 
 from .git_diff import get_diff_messages
 from .sh import run_cmd
+
+LOG = getLogger(__name__)
 
 
 class Work:
@@ -34,9 +37,10 @@ class ExecWork(Work):
         try:
             if self.collection.hook_config.scope == Scope.SINGLE_FILE:
                 run_cmd(
-                    self.collection.command_parts + filenames,
+                    self.collection.command_parts,
                     env=self.collection.command_env,
                     cwd=self.project_path,
+                    input="\0".join(filenames),
                 )
             else:
                 run_cmd(
@@ -48,7 +52,10 @@ class ExecWork(Work):
             yield Finished(hook_name, error=True, message=str(e))
             return
         except subprocess.CalledProcessError as e:
-            yield Finished(hook_name, error=True, message=str(e))
+            if e.returncode == 1:
+                yield Finished(hook_name, error=True, message=e.stdout)
+            else:
+                yield Finished(hook_name, error=True, message=str(e) + "\n" + e.stderr)
             return
 
         yield from get_diff_messages(hook_name, hook_name, self.project_path)  # TODO msg

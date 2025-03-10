@@ -53,7 +53,7 @@ class Language(BaseHook):
 
     def __init__(self, conf, repo_config) -> None:
         super().__init__(conf, repo_config)
-        self.command_parts = [sys.executable, "-m", __name__]
+        self.command_parts = ["xargs", "-0", sys.executable, "-m", __name__]
         self.command_env = {
             "HOOK_CONFIG": json_encode(conf, enc_hook=default),
         }

@@ -13,6 +13,6 @@ inputs = ["*.md"]
 # Because this is scope=single-file, filenames will be added after it (similar
 # to how commands are run using xargs).
 command = '''
-perl -ipe 's/(.*)/\U\1/g if $.==1'
+perl -i -pe 's/(.*)/\U\1/g if $.==1'
 '''
 order = 75

@@ -3,7 +3,7 @@ import subprocess
 from contextlib import contextmanager
 
 from ick.config import HookConfig
-from ick.languages.exec import Language
+from ick.languages.shell import Language
 from ick_protocol import Finished, Modified
 
 
@@ -16,7 +16,7 @@ def test_smoke_single_file(tmp_path):
 
     conf = HookConfig(
         name="hello",
-        language="exec",
+        language="shell",
         command="sed -i -e 's/hello/HELLO/'",
     )
     lang = Language(conf, None)
@@ -41,7 +41,7 @@ def test_smoke_not_found(tmp_path):
 
     conf = HookConfig(
         name="hello",
-        language="exec",
+        language="shell",
         command="/bin/zzyzx",
     )
     lang = Language(conf, None)
@@ -63,7 +63,7 @@ def test_smoke_failure(tmp_path):
 
     conf = HookConfig(
         name="hello",
-        language="exec",
+        language="shell",
         command="/bin/sh -c 'exit 1'",
     )
     lang = Language(conf, None)
@@ -85,7 +85,7 @@ def test_smoke_repo(tmp_path):
 
     conf = HookConfig(
         name="hello",
-        language="exec",
+        language="shell",
         scope="repo",
         command="sed -i -e 's/hello/HELLO/' README.md",
     )

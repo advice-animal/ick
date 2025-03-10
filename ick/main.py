@@ -71,6 +71,30 @@ def list_hooks(ctx, v, verbose, vmodule, trace, target):
 
 
 @main.command()
+@click.option("-v", count=True, default=0, help="Verbosity, specify once for INFO and repeat for more")
+@click.option("--verbose", type=int, help="Log verbosity (unset = WARNING, 0 = INFO, 1 = VLOG_1, ..., 10 = DEBUG)")
+@click.option("--vmodule", help="comma-separated logger:level values, same scheme as --verbose")
+@click.option("--trace", type=click.File(mode="w"), help="Trace output filename")
+@click.option("--target", default=".", help="Directory to modify")  # TODO path, existing
+@click.pass_context
+def selftest(ctx, v, verbose, vmodule, trace, target):
+    """ """
+    verbose_init(v, verbose, vmodule)
+    ctx.with_resource(keke.TraceOutput(file=trace))
+
+    # This takes a target because hooks can be defined in the target repo too
+    cur = Path(target)
+    conf = load_main_config(cur)
+    hc = load_hooks_config(cur)
+    ctx.obj = RuntimeConfig(conf, hc, Settings())
+    repo_path = find_repo_root(cur)
+    repo = Repo(repo_path)
+
+    r = Runner(ctx.obj, repo)
+    r.selftest()
+
+
+@main.command()
 # These are ALL defined here (and repeated elsewhere) because click is picky
 # about whether they come before or after the subcommand.
 @click.option("-v", count=True, default=0, help="Verbosity, specify once for INFO and repeat for more")

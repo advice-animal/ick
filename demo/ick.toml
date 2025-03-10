@@ -1,4 +1,19 @@
-[[collection]]
-language = "python"
-deps = ["ick-api", "nflx-factstore"]
+[[hook]]
+language = "ast-grep"
+name = "my-print"
+search = "print($$$A)"
+replace = "my_print($$$A)"
 
+[[hook]]
+language = "pygrep"
+name = "speling"
+search = " speling"
+replace = " spelling"
+
+[[hook]]
+language = "shell"
+name = "always-fail"
+data = """
+echo 'fail'
+exit 1
+"""
