@@ -123,7 +123,6 @@ def load_main_config(cur: Path, isolated_repo: bool = False) -> MainConfig:
         )
 
     LOG.log(VLOG_1, "Loading main config near %s", cur)
-    print(paths)
 
     for p in paths:
         LOG.debug("Looking for config at %s", p)

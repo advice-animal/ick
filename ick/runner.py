@@ -9,7 +9,7 @@ from shutil import copytree
 from tempfile import TemporaryDirectory
 from typing import Any
 
-import moreorless.click
+import moreorless
 from keke import ktrace
 from rich.progress import Progress
 
@@ -103,8 +103,10 @@ class Runner:
                     assert r.filename not in files_to_check
                 else:
                     assert r.filename in files_to_check
-                    # print(r.diff)
-                    assert (bp / r.filename).read_bytes() == r.new_bytes, f"{r.filename} (modified) differs"
+                    if (bp / r.filename).read_bytes() != r.new_bytes:
+                        print(hook_instance.hook_config.name, "fail")
+                        print(r.diff)
+                        assert False, f"{r.filename} (modified) differs"
                     files_to_check.remove(r.filename)
 
             for unchanged_file in files_to_check:
