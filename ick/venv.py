@@ -36,13 +36,12 @@ class PythonEnv:
 
     def prepare(self):
         with FileLock(self.env_path.with_suffix(".lock")):
-            if self.health_check():
-                return
             uv = find_uv()
-            if self.env_path.exists():
-                shutil.rmtree(self.env_path)
-            # TODO selection of python
-            subprocess.check_output([uv, "venv", "-q", self.env_path], env={"UV_PYTHON_PREFERENCE": "system"})
+            if not self.health_check():
+                if self.env_path.exists():
+                    shutil.rmtree(self.env_path)
+                # TODO selection of python
+                subprocess.check_output([uv, "venv", "-q", self.env_path], env={"UV_PYTHON_PREFERENCE": "system"})
             # A bit silly to create a venv with no deps, but handle it gracefully
             if self.deps:
                 subprocess.check_output([uv, "pip", "install", "-q", *self.deps], env={"VIRTUAL_ENV": self.env_path})
