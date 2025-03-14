@@ -37,5 +37,5 @@ def test_env_happy_path(tmp_path):
 def test_env_with_deps(tmp_path):
     p = PythonEnv(tmp_path, ["ast-grep-cli"])
     p.prepare()
-    assert p.bin("sg").exists()
-    subprocess.check_output([str(p.bin("sg")), "--version"])
+    assert p.bin("ast-grep").exists()
+    subprocess.check_output([p.bin("ast-grep"), "--version"])

@@ -17,7 +17,7 @@ class Language(BaseHook):
         self.venv = PythonEnv(venv_path, ["ast-grep-cli"])
         if hook_config.replace is not None:
             self.command_parts = [
-                self.venv.bin("sg"),
+                self.venv.bin("ast-grep"),
                 "--pattern",
                 hook_config.search,
                 "--rewrite",
@@ -29,7 +29,7 @@ class Language(BaseHook):
         else:
             # TODO output hook_config.message if found
             self.command_parts = [
-                self.venv.bin("sg"),
+                self.venv.bin("ast-grep"),
                 "--pattern",
                 hook_config.search,
                 "--lang",
