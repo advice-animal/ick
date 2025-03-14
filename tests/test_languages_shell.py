@@ -51,7 +51,7 @@ def test_smoke_not_found(tmp_path):
     assert len(resp) == 1
     assert isinstance(resp[0], Finished)
     assert resp[0].error
-    assert "No such file or directory: '/bin/zzyzx'" in resp[0].message
+    assert "xargs: /bin/zzyzx: No such file or directory" in resp[0].message
 
 
 def test_smoke_failure(tmp_path):
