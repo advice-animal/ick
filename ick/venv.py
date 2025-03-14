@@ -41,7 +41,7 @@ class PythonEnv:
                 if self.env_path.exists():
                     shutil.rmtree(self.env_path)
                 # TODO selection of python
-                subprocess.check_output([uv, "venv", "-q", self.env_path], env={"UV_PYTHON_PREFERENCE": "system"})
+                subprocess.check_output([uv, "venv", self.env_path], env={"UV_PYTHON_PREFERENCE": "system"})
             # A bit silly to create a venv with no deps, but handle it gracefully
             if self.deps:
-                subprocess.check_output([uv, "pip", "install", "-q", *self.deps], env={"VIRTUAL_ENV": self.env_path})
+                subprocess.check_output([uv, "pip", "install", *self.deps], env={"VIRTUAL_ENV": self.env_path})
