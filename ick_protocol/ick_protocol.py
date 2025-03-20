@@ -69,7 +69,7 @@ class Scope(Enum):
 
 
 class Setup(Struct, tag_field="t", tag="S"):
-    hook_path: str
+    rule_path: str
     timeout_seconds: int
     collection_name: Optional[str] = None
     # either common stuff, or serialized config
@@ -80,7 +80,7 @@ class List(Struct, tag_field="t", tag="L"):
 
 
 class Run(Struct, tag_field="t", tag="R"):
-    hook_name: str
+    rule_name: str
     working_dir: str
 
 
@@ -92,11 +92,11 @@ class SetupResponse(Struct, tag_field="t", tag="SR"):
 
 
 class ListResponse(Struct, tag_field="t", tag="LR"):
-    hook_names: Sequence[str]
+    rule_names: Sequence[str]
 
 
 class Modified(Struct, tag_field="t", tag="M"):
-    hook_name: str
+    rule_name: str
     filename: str
     new_bytes: bytes
     additional_input_filenames: Sequence[str] = ()
@@ -105,9 +105,9 @@ class Modified(Struct, tag_field="t", tag="M"):
 
 
 class Finished(Struct, tag_field="t", tag="F"):
-    hook_name: str
+    rule_name: str
     error: bool
-    # the entire hook is only allowed one message; it's used as the commit
+    # the entire rule is only allowed one message; it's used as the commit
     # message or displayed inline.
     message: str
 

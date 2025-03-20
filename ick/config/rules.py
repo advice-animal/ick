@@ -1,5 +1,5 @@
 """
-Hook definitions, merged from repo config and user config.
+Rule definitions, merged from repo config and user config.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from ..util import merge
 LOG = getLogger(__name__)
 
 
-class HooksConfig(Struct):
+class RulesConfig(Struct):
     """ """
 
     mount: Sequence[Mount] = ()
@@ -39,30 +39,30 @@ class Mount(Struct):
     prefix: Optional[str] = None
     base_path: Optional[Path] = None  # Dir of the config that referenced this
 
-    repo: Optional[HookRepoConfig] = None
+    repo: Optional[RuleRepoConfig] = None
 
 
-class PyprojectHooksConfig(Struct):
+class PyprojectRulesConfig(Struct):
     tool: PyprojectToolConfig
 
 
 class PyprojectToolConfig(Struct):
-    ick: HookRepoConfig
+    ick: RuleRepoConfig
 
 
-class HookRepoConfig(Struct):
-    hook: list[HookConfig] = field(default_factory=list)
+class RuleRepoConfig(Struct):
+    rule: list[RuleConfig] = field(default_factory=list)
     collection: list[CollectionConfig] = field(default_factory=list)
     repo_path: Optional[Path] = None
 
     def inherit(self, less_specific_defaults):
-        self.hook = merge(self.hook, less_specific_defaults.hook)
+        self.rule = merge(self.rule, less_specific_defaults.rule)
         self.collection = merge(self.collection, less_specific_defaults.collection)
 
 
-class HookConfig(Struct):
+class RuleConfig(Struct):
     """
-    Configuration for a single hook
+    Configuration for a single rule
     """
 
     language: str
@@ -93,7 +93,7 @@ class HookConfig(Struct):
 
 class CollectionConfig(Struct):
     """
-    Configuration for a collection (single process implementing multiple hooks)
+    Configuration for a collection (single process implementing multiple rules)
     """
 
     language: str
@@ -108,12 +108,12 @@ class CollectionConfig(Struct):
 
 
 @ktrace()
-def load_hooks_config(cur: Path) -> HooksConfig:
-    conf = HooksConfig()
+def load_rules_config(cur: Path) -> RulesConfig:
+    conf = RulesConfig()
     repo_root = find_repo_root(cur)
     config_dir = appdirs.user_config_dir("advice-animal", "ick")
     paths = []
-    # TODO revisit whether defining hooks in pyproject.toml is a good idea
+    # TODO revisit whether defining rules in pyproject.toml is a good idea
     if cur.resolve() != repo_root.resolve():
         paths.extend(
             [
@@ -144,7 +144,7 @@ def load_hooks_config(cur: Path) -> HooksConfig:
                     if "Object missing required field `ick`" not in e.args[0]:
                         raise
             else:
-                c = decode_toml(p.read_bytes(), type=HooksConfig)
+                c = decode_toml(p.read_bytes(), type=RulesConfig)
 
             for mount in c.mount:
                 mount.base_path = p.parent

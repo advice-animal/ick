@@ -15,13 +15,13 @@ LOG = getLogger(__name__)
 
 class Work:
     def __init__(self, collection: BaseCollection, project_path):
-        self.collection = collection  # BaseHook is a subtype
+        self.collection = collection  # BaseRule is a subtype
         self.project_path = project_path
 
     def invalidate(self, filename):
         pass
 
-    def run(self, hook_name: str, filenames=()):
+    def run(self, rule_name: str, filenames=()):
         """
         Call after `project_path` has settled to execute this collection.
 
@@ -33,9 +33,9 @@ class Work:
 
 
 class ExecWork(Work):
-    def run(self, hook_name, filenames) -> Generator[Msg, None, None]:
+    def run(self, rule_name, filenames) -> Generator[Msg, None, None]:
         try:
-            if self.collection.hook_config.scope == Scope.SINGLE_FILE:
+            if self.collection.rule_config.scope == Scope.SINGLE_FILE:
                 run_cmd(
                     self.collection.command_parts,
                     env=self.collection.command_env,
@@ -49,38 +49,38 @@ class ExecWork(Work):
                     cwd=self.project_path,
                 )
         except FileNotFoundError as e:
-            yield Finished(hook_name, error=True, message=str(e))
+            yield Finished(rule_name, error=True, message=str(e))
             return
         except subprocess.CalledProcessError as e:
             if e.returncode == 1:
                 yield Finished(
-                    hook_name,
+                    rule_name,
                     error=True,
                     message=(e.stdout or e.stderr or f"{self.collection.command_parts[0]} returned non-zero exit status {e.returncode}"),
                 )
             else:
-                yield Finished(hook_name, error=True, message=str(e) + "\n" + e.stderr)
+                yield Finished(rule_name, error=True, message=str(e) + "\n" + e.stderr)
             return
 
-        yield from get_diff_messages(hook_name, hook_name, self.project_path)  # TODO msg
+        yield from get_diff_messages(rule_name, rule_name, self.project_path)  # TODO msg
 
 
 class ExecProtocolWork(Work):
-    def run(self, hook_name, filenames) -> Generator[Msg, None, None]:
+    def run(self, rule_name, filenames) -> Generator[Msg, None, None]:
         try:
-            if self.collection.hook_config.scope == Scope.SINGLE_FILE:
+            if self.collection.rule_config.scope == Scope.SINGLE_FILE:
                 run_cmd(self.collection.command_parts + filenames, env=self.collection.command_env, cwd=self.project_path)
             else:
                 run_cmd(self.collection.command_parts, env=self.collection.command_env, cwd=self.project_path)
         except FileNotFoundError as e:
-            yield Finished(hook_name, error=True, message=str(e))
+            yield Finished(rule_name, error=True, message=str(e))
             return
         except subprocess.CalledProcessError as e:
-            yield Finished(hook_name, error=True, message=str(e))
+            yield Finished(rule_name, error=True, message=str(e))
             return
 
-        yield from get_diff_messages(hook_name, hook_name, self.project_path)  # TODO msg
-        yield Finished(hook_name)
+        yield from get_diff_messages(rule_name, rule_name, self.project_path)  # TODO msg
+        yield Finished(rule_name)
 
 
 class BaseCollection:
@@ -101,12 +101,12 @@ class BaseCollection:
         yield self.work_cls(self, project_path)
 
 
-class BaseHook(BaseCollection):
-    def __init__(self, hook_config, repo_config):
-        self.hook_config = hook_config
+class BaseRule(BaseCollection):
+    def __init__(self, rule_config, repo_config):
+        self.rule_config = rule_config
         self.repo_config = repo_config
 
     def list(self) -> ListResponse:
         return ListResponse(
-            hook_names=[self.hook_config.name],
+            rule_names=[self.rule_config.name],
         )

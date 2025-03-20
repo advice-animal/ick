@@ -1,10 +1,10 @@
-[[hook]]
+[[rule]]
 name = "hello"
 language = "shell"
 command = "echo hi"
 scope = "repo"
 
-[[hook]]
+[[rule]]
 name = "shouty"
 language = "shell"
 scope = "single-file"

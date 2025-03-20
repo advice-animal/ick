@@ -26,7 +26,7 @@ class Language(BaseCollection):
             root_dir=self.collection_config.collection_path,
         )
         return ListResponse(
-            hook_names=[dirname(n) for n in names],
+            rule_names=[dirname(n) for n in names],
         )
 
     def prepare(self):

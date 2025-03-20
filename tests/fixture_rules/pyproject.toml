@@ -1,4 +1,4 @@
-[[tool.ick.hook]]
+[[tool.ick.rule]]
 name = "goodbye"
 language = "shell"
 command = "exit 1"

@@ -5,7 +5,7 @@ from typing import Optional
 from ick_protocol import Finished, Modified
 
 
-def get_diff_messages(msg, hook_name: str, workdir: Path):
+def get_diff_messages(msg, rule_name: str, workdir: Path):
     buf = []
     plus_count = None
     minus_count = None
@@ -20,7 +20,7 @@ def get_diff_messages(msg, hook_name: str, workdir: Path):
             pass
 
         return Modified(
-            hook_name=hook_name,
+            rule_name=rule_name,
             filename=filename,
             additional_input_filenames=(),
             diffstat=f"+{plus_count}-{minus_count}",
@@ -70,4 +70,4 @@ def get_diff_messages(msg, hook_name: str, workdir: Path):
     if buf:
         yield get_chunk()
 
-    yield Finished(error=False, hook_name=hook_name, message=msg)
+    yield Finished(error=False, rule_name=rule_name, message=msg)

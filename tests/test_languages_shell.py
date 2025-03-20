@@ -2,7 +2,7 @@ import os
 import subprocess
 from contextlib import contextmanager
 
-from ick.config import HookConfig
+from ick.config import RuleConfig
 from ick.languages.shell import Language
 from ick_protocol import Finished, Modified
 
@@ -14,7 +14,7 @@ def test_smoke_single_file(tmp_path):
     subprocess.check_call(["git", "add", "-N", "."], cwd=tmp_path)
     subprocess.check_call(["git", "commit", "-a", "-m", "temp"], cwd=tmp_path)
 
-    conf = HookConfig(
+    conf = RuleConfig(
         name="hello",
         language="shell",
         command="sed -i -e 's/hello/HELLO/'",
@@ -39,7 +39,7 @@ def test_smoke_not_found(tmp_path):
     subprocess.check_call(["git", "add", "-N", "."], cwd=tmp_path)
     subprocess.check_call(["git", "commit", "-a", "-m", "temp"], cwd=tmp_path)
 
-    conf = HookConfig(
+    conf = RuleConfig(
         name="hello",
         language="shell",
         command="/bin/zzyzx",
@@ -61,7 +61,7 @@ def test_smoke_failure(tmp_path):
     subprocess.check_call(["git", "add", "-N", "."], cwd=tmp_path)
     subprocess.check_call(["git", "commit", "-a", "-m", "temp"], cwd=tmp_path)
 
-    conf = HookConfig(
+    conf = RuleConfig(
         name="hello",
         language="shell",
         command="/bin/sh -c 'exit 1'",
@@ -83,7 +83,7 @@ def test_smoke_repo(tmp_path):
     subprocess.check_call(["git", "add", "-N", "."], cwd=tmp_path)
     subprocess.check_call(["git", "commit", "-a", "-m", "temp"], cwd=tmp_path)
 
-    conf = HookConfig(
+    conf = RuleConfig(
         name="hello",
         language="shell",
         scope="repo",

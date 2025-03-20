@@ -1,13 +1,13 @@
 import subprocess
 
-from ick.config import HookConfig
+from ick.config import RuleConfig
 from ick.languages.ast_grep import Language
 from ick_protocol import Finished, Modified
 
 
 def test_pygrep_works(tmp_path):
     ast_grep = Language(
-        HookConfig(
+        RuleConfig(
             name="foo",
             language="ast-grep",
             search="F($$$X)",
@@ -28,7 +28,7 @@ def test_pygrep_works(tmp_path):
     assert len(resp) == 2
     resp[0].diff = "X"
     assert resp[0] == Modified(
-        hook_name="ast-grep",
+        rule_name="ast-grep",
         filename="foo.py",
         new_bytes=b"A(1,2,3)\nG(4,5,6)\n",
         additional_input_filenames=(),
@@ -37,7 +37,7 @@ def test_pygrep_works(tmp_path):
     )
 
     assert resp[1] == Finished(
-        hook_name="ast-grep",
+        rule_name="ast-grep",
         error=False,
         message="ast-grep",
     )

@@ -15,48 +15,48 @@ from vmodule import VLOG_1, VLOG_2
 
 from ..base_language import BaseCollection
 from ..git import update_local_cache
-from . import CollectionConfig, HookConfig, HookRepoConfig, Mount, PyprojectHooksConfig, RuntimeConfig
+from . import CollectionConfig, RuleConfig, RuleRepoConfig, Mount, PyprojectRulesConfig, RuntimeConfig
 
 LOG = getLogger(__name__)
 
 
 @ktrace()
-def discover_hooks(rtc: RuntimeConfig) -> Sequence[HookConfig | CollectionConfig]:
+def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig | CollectionConfig]:
     """
-    Returns list of hooks in the order that they would be applied.
+    Returns list of rules in the order that they would be applied.
 
     It is the responsibility of the caller to filter and handle things like
     project-level ignores.
     """
-    hooks: list[HookConfig | CollectionConfig] = []
+    rules: list[RuleConfig | CollectionConfig] = []
 
     mounts = {}
-    for mount in rtc.hooks_config.mount:
+    for mount in rtc.rules_config.mount:
         LOG.log(VLOG_1, "Processing %s", mount)
         # Prefixes should be unique; they override here
-        mounts[mount.prefix] = load_hook_repo(mount)
+        mounts[mount.prefix] = load_rule_repo(mount)
 
     for k, v in mounts.items():
         # TODO handle mount prefix
-        hooks.extend(v.hook)
-        hooks.extend(v.collection)
+        rules.extend(v.rule)
+        rules.extend(v.collection)
 
-    hooks.sort(key=lambda h: (h.order, h.name))
+    rules.sort(key=lambda h: (h.order, h.name))
 
-    return hooks
+    return rules
 
 
 @ktrace("mount.url", "mount.path")
-def load_hook_repo(mount: Mount) -> HookRepoConfig:
+def load_rule_repo(mount: Mount) -> RuleRepoConfig:
     if mount.url:
         # TODO config for a subdir within?
         repo_path = update_local_cache(mount.url, skip_update=False)  # TODO
     else:
         repo_path = Path(mount.base_path, mount.path).resolve()
 
-    rc = HookRepoConfig(repo_path=repo_path)
+    rc = RuleRepoConfig(repo_path=repo_path)
 
-    LOG.log(VLOG_1, "Loading hooks from %s", repo_path)
+    LOG.log(VLOG_1, "Loading rules from %s", repo_path)
     # We use a regular glob here because it might not be from a git repo, or
     # that repo might be modified.  It also will let us more easily refer to a
     # subdir in the future.
@@ -70,19 +70,19 @@ def load_hook_repo(mount: Mount) -> HookRepoConfig:
         else:
             c = load_regular(p, p.read_bytes())
 
-        if not c.hook and not c.collection:
+        if not c.rule and not c.collection:
             continue
 
         LOG.log(VLOG_2, "Loaded %s", encode_json(c).decode("utf-8"))
         base = dirname(filename).lstrip("/")
         if base:
             base += "/"
-        for hook in c.hook:
-            hook.qualname = base + hook.name
-            if (p.parent / hook.name).exists():
-                hook.test_path = repo_path / base / hook.name / "tests"
+        for rule in c.rule:
+            rule.qualname = base + rule.name
+            if (p.parent / rule.name).exists():
+                rule.test_path = repo_path / base / rule.name / "tests"
             else:
-                hook.test_path = repo_path / base / "tests" / hook.name
+                rule.test_path = repo_path / base / "tests" / rule.name
         for collection in c.collection:
             collection.collection_path = p.parent
 
@@ -91,28 +91,28 @@ def load_hook_repo(mount: Mount) -> HookRepoConfig:
     return rc
 
 
-def load_pyproject(p: Path, data: bytes) -> HookRepoConfig:
+def load_pyproject(p: Path, data: bytes) -> RuleRepoConfig:
     try:
-        c = decode_toml(data, type=PyprojectHooksConfig).tool.ick
+        c = decode_toml(data, type=PyprojectRulesConfig).tool.ick
     except ValidationError as e:
         # TODO surely there's a cleaner way to validate _inside_
         # but not care if [tool.other] is present...
         if "Object missing required field `ick` - at `$.tool`" in e.args[0]:
-            return HookRepoConfig()
+            return RuleRepoConfig()
         if "Object missing required field `tool`" in e.args[0]:
-            return HookRepoConfig()
+            return RuleRepoConfig()
         raise
     return c
 
 
-def load_regular(p: Path, data: bytes) -> HookRepoConfig:
-    return decode_toml(data, type=HookRepoConfig)
+def load_regular(p: Path, data: bytes) -> RuleRepoConfig:
+    return decode_toml(data, type=RuleRepoConfig)
 
 
-@ktrace("hook.language")
-def get_impl(hook: HookConfig | CollectionConfig) -> Type[BaseCollection]:
-    name = f"ick.languages.{hook.language}"
-    if isinstance(hook, CollectionConfig):
+@ktrace("rule.language")
+def get_impl(rule: RuleConfig | CollectionConfig) -> Type[BaseCollection]:
+    name = f"ick.languages.{rule.language}"
+    if isinstance(rule, CollectionConfig):
         name += "_collection"
     name = name.replace("-", "_")
     __import__(name)

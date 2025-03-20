@@ -7,7 +7,7 @@ from pathlib import Path
 from msgspec.json import decode as json_decode
 from msgspec.json import encode as json_encode
 
-from ..base_language import BaseHook, ExecWork
+from ..base_language import BaseRule, ExecWork
 
 
 def default(x):
@@ -17,7 +17,7 @@ def default(x):
 
 
 def main(filenames):
-    config = json_decode(os.environ["HOOK_CONFIG"])
+    config = json_decode(os.environ["RULE_CONFIG"])
     name = config["name"]
     search = config["search"]
     replace = config["replace"]
@@ -32,14 +32,14 @@ def main(filenames):
                 Path(f).write_text(new_contents)
 
 
-class Language(BaseHook):
+class Language(BaseRule):
     work_cls = ExecWork
 
     def __init__(self, conf, repo_config) -> None:
         super().__init__(conf, repo_config)
         self.command_parts = ["xargs", "-n1", "-0", sys.executable, "-m", __name__]
         self.command_env = {
-            "HOOK_CONFIG": json_encode(conf, enc_hook=default),
+            "RULE_CONFIG": json_encode(conf, enc_hook=default),
         }
         if "PYTHONPATH" in os.environ:
             self.command_env["PYTHONPATH"] = os.environ["PYTHONPATH"]

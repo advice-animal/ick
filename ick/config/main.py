@@ -1,7 +1,7 @@
 """
 The "main" config, which is merged from several locations.
 
-This controls where we look for hooks and how we find projects.
+This controls where we look for rules and how we find projects.
 """
 
 from __future__ import annotations
@@ -164,7 +164,7 @@ class RuntimeConfig(Struct):
     """
 
     main_config: MainConfig
-    hooks_config: Any  # Avoiding possible circular reference
+    rules_config: Any  # Avoiding possible circular reference
     settings: Settings
     filter_config: FilterConfig = field(default_factory=FilterConfig)
 

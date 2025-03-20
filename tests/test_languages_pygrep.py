@@ -1,13 +1,13 @@
 import subprocess
 
-from ick.config import HookConfig
+from ick.config import RuleConfig
 from ick.languages.pygrep import Language
 from ick_protocol import Finished, Modified
 
 
 def test_pygrep_works(tmp_path):
     pygrep = Language(
-        HookConfig(
+        RuleConfig(
             name="foo",
             language="pygrep",
             search="hello",
@@ -26,7 +26,7 @@ def test_pygrep_works(tmp_path):
     assert len(resp) == 2
     resp[0].diff = "X"
     assert resp[0] == Modified(
-        hook_name="pygrep",
+        rule_name="pygrep",
         filename="foo.py",
         new_bytes=b"xbar\n",
         additional_input_filenames=(),
@@ -35,7 +35,7 @@ def test_pygrep_works(tmp_path):
     )
 
     assert resp[1] == Finished(
-        hook_name="pygrep",
+        rule_name="pygrep",
         error=False,
         message="pygrep",
     )

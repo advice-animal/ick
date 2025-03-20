@@ -6,7 +6,7 @@ from .api import Hello, HelloResponse
 
 
 class SubprocessServer:
-    def __init__(self, hook_config):
+    def __init__(self, rule_config):
         pass
 
 

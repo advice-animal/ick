@@ -1,17 +1,17 @@
 import sys
 
-from ..base_language import BaseHook
+from ..base_language import BaseRule
 
 
-class Language(BaseHook):
+class Language(BaseRule):
     """
-    Implementation of a simple hook that can edit the first line of a file.
+    Implementation of a simple rule that can edit the first line of a file.
     """
 
     COMMAND = [sys.executable, "-m", __name__]
 
-    def __init__(self, hook_config, repo_config):
-        self.hook_config = hook_config
+    def __init__(self, rule_config, repo_config):
+        self.rule_config = rule_config
         self.repo_config = repo_config
 
     def prepare(self):
@@ -21,9 +21,9 @@ class Language(BaseHook):
     #     return SubprocessManager(
     #         command=self.COMMAND,
     #         env={
-    #             "HOOK_DIR": self.hook_config.dir,
-    #             "HOOK_NAME": self.hook_config.name,
-    #             "HOOK_CONFIG": encode(self.hook_config),
+    #             "RULE_DIR": self.rule_config.dir,
+    #             "RULE_NAME": self.rule_config.name,
+    #             "RULE_CONFIG": encode(self.rule_config),
     #         },
     #         cwd=project_path,
     #     )
