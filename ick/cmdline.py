@@ -10,7 +10,7 @@ from vmodule import vmodule_init
 from ick_protocol import Urgency
 
 from ._regex_translate import advice_name_re
-from .config import RuntimeConfig, Settings, load_hooks_config, load_main_config
+from .config import RuntimeConfig, Settings, load_rules_config, load_main_config
 from .git import find_repo_root
 from .project_finder import find_projects as find_projects_fn
 from .runner import Runner
@@ -54,20 +54,20 @@ def find_projects(ctx, v, verbose, vmodule, trace, target):
 @click.option("--trace", type=click.File(mode="w"), help="Trace output filename")
 @click.option("--target", default=".", help="Directory to modify")  # TODO path, existing
 @click.pass_context
-def list_hooks(ctx, v, verbose, vmodule, trace, target):
+def list_rules(ctx, v, verbose, vmodule, trace, target):
     """
     Lists projects in the current repo, using current settings
     """
     verbose_init(v, verbose, vmodule)
     ctx.with_resource(keke.TraceOutput(file=trace))
 
-    # This takes a target because hooks can be defined in the target repo too
+    # This takes a target because rules can be defined in the target repo too
     conf = load_main_config(Path(target))
-    hc = load_hooks_config(Path(target))
+    hc = load_rules_config(Path(target))
     ctx.obj = RuntimeConfig(conf, hc, Settings())
 
     r = Runner(ctx.obj)
-    r.echo_hooks()
+    r.echo_rules()
 
 
 @main.command()
@@ -82,10 +82,10 @@ def selftest(ctx, v, verbose, vmodule, trace, target):
     verbose_init(v, verbose, vmodule)
     ctx.with_resource(keke.TraceOutput(file=trace))
 
-    # This takes a target because hooks can be defined in the target repo too
+    # This takes a target because rules can be defined in the target repo too
     cur = Path(target)
     conf = load_main_config(cur)
-    hc = load_hooks_config(cur)
+    hc = load_rules_config(cur)
     ctx.obj = RuntimeConfig(conf, hc, Settings())
     repo_path = find_repo_root(cur)
     repo = Repo(repo_path)
@@ -108,10 +108,10 @@ def selftest(ctx, v, verbose, vmodule, trace, target):
 @click.pass_context
 def run(ctx, v, verbose, vmodule, trace, dry_run: bool, yolo: bool, filters: list[str], target: str):
     """
-    Run all (or explicitly specified) hooks, by default in a medium-dry-run
+    Run all (or explicitly specified) rules, by default in a medium-dry-run
     mode, in their defined order.
 
-    Otherwise, pass either a hook name, hook prefix, or an urgency string like
+    Otherwise, pass either a rule name, rule prefix, or an urgency string like
     "now" to apply all necessary, successful ones in order.
     """
     verbose_init(v, verbose, vmodule)
@@ -122,7 +122,7 @@ def run(ctx, v, verbose, vmodule, trace, dry_run: bool, yolo: bool, filters: lis
     repo_path = find_repo_root(cur)
     repo = Repo(repo_path)
 
-    hc = load_hooks_config(cur)
+    hc = load_rules_config(cur)
     ctx.obj = RuntimeConfig(conf, hc, Settings())
     ctx.obj.settings.dry_run = dry_run
     ctx.obj.settings.yolo = yolo
