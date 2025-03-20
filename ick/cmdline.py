@@ -62,11 +62,14 @@ def list_rules(ctx, v, verbose, vmodule, trace, target):
     ctx.with_resource(keke.TraceOutput(file=trace))
 
     # This takes a target because rules can be defined in the target repo too
-    conf = load_main_config(Path(target))
-    hc = load_rules_config(Path(target))
+    cur = Path(target)
+    conf = load_main_config(cur)
+    hc = load_rules_config(cur)
     ctx.obj = RuntimeConfig(conf, hc, Settings())
+    repo_path = find_repo_root(cur)
+    repo = Repo(repo_path)
 
-    r = Runner(ctx.obj)
+    r = Runner(ctx.obj, repo)
     r.echo_rules()
 
 
