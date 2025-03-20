@@ -15,7 +15,7 @@ from msgspec.structs import replace as replace
 from msgspec.toml import decode as decode_toml
 from vmodule import VLOG_1
 
-from ick_protocol import Risk, Scope, Urgency
+from ick_protocol import Risk, Scope, Success, Urgency
 
 from ..git import find_repo_root
 from ..util import merge
@@ -70,6 +70,7 @@ class RuleConfig(Struct):
 
     scope: Scope = Scope.SINGLE_FILE
     command: Optional[Union[str, list[str]]] = None
+    success: Success = Success.EXIT_STATUS
 
     risk: Optional[Risk] = Risk.HIGH
     urgency: Optional[Urgency] = Urgency.LATER

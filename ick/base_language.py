@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from logging import getLogger
 from typing import Generator, Type
 
-from ick_protocol import Finished, ListResponse, Msg, Scope
+from ick_protocol import Finished, ListResponse, Msg, Scope, Success
 
 from .git_diff import get_diff_messages
 from .sh import run_cmd
@@ -36,14 +36,14 @@ class ExecWork(Work):
     def run(self, rule_name, filenames) -> Generator[Msg, None, None]:
         try:
             if self.collection.rule_config.scope == Scope.SINGLE_FILE:
-                run_cmd(
+                stdout, rc = run_cmd(
                     self.collection.command_parts,
                     env=self.collection.command_env,
                     cwd=self.project_path,
                     input="\0".join(filenames),
                 )
             else:
-                run_cmd(
+                stdout, rc = run_cmd(
                     self.collection.command_parts,
                     env=self.collection.command_env,
                     cwd=self.project_path,
@@ -61,6 +61,15 @@ class ExecWork(Work):
             else:
                 yield Finished(rule_name, error=True, message=str(e) + "\n" + e.stderr)
             return
+
+        if self.collection.rule_config.success == Success.NO_OUTPUT:
+            if stdout:
+                yield Finished(
+                    rule_name,
+                    error=True,
+                    message=stdout,
+                )
+                return
 
         yield from get_diff_messages(rule_name, rule_name, self.project_path)  # TODO msg
 

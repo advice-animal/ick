@@ -65,6 +65,11 @@ class Scope(Enum):
     SINGLE_FILE = "single-file"
 
 
+class Success(Enum):
+    EXIT_STATUS = "exit-status"
+    NO_OUTPUT = "no-output"
+
+
 # Basic API Requests
 
 
