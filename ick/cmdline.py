@@ -80,7 +80,7 @@ def list_rules(ctx, v, verbose, vmodule, trace, target):
 @click.option("--trace", type=click.File(mode="w"), help="Trace output filename")
 @click.option("--target", default=".", help="Directory to modify")  # TODO path, existing
 @click.pass_context
-def selftest(ctx, v, verbose, vmodule, trace, target):
+def test_rules(ctx, v, verbose, vmodule, trace, target):
     """ """
     verbose_init(v, verbose, vmodule)
     ctx.with_resource(keke.TraceOutput(file=trace))
@@ -94,7 +94,7 @@ def selftest(ctx, v, verbose, vmodule, trace, target):
     repo = Repo(repo_path)
 
     r = Runner(ctx.obj, repo)
-    r.selftest()
+    r.test_rules()
 
 
 @main.command()

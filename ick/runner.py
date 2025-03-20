@@ -45,7 +45,7 @@ class Runner:
             i = get_impl(rule)(rule, self.rtc)
             yield i
 
-    def selftest(self) -> Any:
+    def test_rules(self) -> Any:
         with ThreadPoolExecutor() as tpe, Progress() as progress:
             outstanding = {}
             prepare_key = progress.add_task("Prepare", total=None)
