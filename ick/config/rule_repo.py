@@ -61,6 +61,7 @@ def load_rule_repo(mount: Mount) -> RuleRepoConfig:
     # that repo might be modified.  It also will let us more easily refer to a
     # subdir in the future.
     potential_configs = glob("**/ick.toml", root_dir=repo_path, recursive=True)
+    potential_configs.extend(glob("**/ick.toml.local", root_dir=repo_path, recursive=True))
     potential_configs.extend(glob("**/pyproject.toml", root_dir=repo_path, recursive=True))
     for filename in potential_configs:
         p = Path(repo_path, filename)
