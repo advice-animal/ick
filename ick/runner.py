@@ -144,6 +144,9 @@ class Runner:
                 for r in responses:
                     if isinstance(r, Modified):
                         print("    ", r.filename, r.diffstat)
+                    elif isinstance(r, Finished) and r.error:
+                        for line in r.message.splitlines():
+                            print("    ", line)
                     else:
                         print("    ", r)
 
