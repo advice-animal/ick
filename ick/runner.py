@@ -133,7 +133,6 @@ class Runner:
         for impl in self.iter_rule_impl():
             if hasattr(impl, "rule_config"):
                 name = impl.rule_config.name
-                print(impl.rule_config.test_path)
             else:
                 name = repr(impl)
 
@@ -176,7 +175,7 @@ class Runner:
         for impl in self.iter_rule_impl():
             impl.prepare()
             for rule in impl.list().rule_names:
-                d.setdefault(impl.rule_config.urgency, []).append(rule)
+                d.setdefault(impl.rule_config.urgency, []).append(f"{rule} ({impl.rule_config.hours} {pl('hour', impl.rule_config.hours)})")
 
         first = True
         for u in sorted(d.keys()):
@@ -189,3 +188,8 @@ class Runner:
             print("=" * len(str(u.name)))
             for v in d[u]:
                 print(f"* {v}")
+
+def pl(noun: str, count: int) -> str:
+    if count == 1:
+        return noun
+    return noun + "s"
