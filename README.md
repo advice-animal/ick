@@ -1,7 +1,53 @@
 # Ick
 
 <img align="right" src="_static/ick.png" width="300" height="287">
-Code that's a little bit out of date might make you say "ick!"  But code that's
+
+Let's say you know of a bunch of repos that might need updating.
+
+Not like "format my code" updating, but things that reduce tech debt like
+moving from pinned urllib3 1.x to urllib3 2.x.  That'd be good, right?  But
+maybe not for everyone.
+
+## Elevator Pitch
+
+`ick` looks at your source code and gives you an evaluation against *someone's*
+rules.  Those rules might come from a central team at your work, or a trusted
+friend, or they might be ones you maintain yourself (like my hobbyhorse, "text
+files must end with a newline" -- I'm looking at you, default vscode config).
+
+If you're ever tempted to make a one-off shell script and put it in your
+`~/.local/bin` directory, or put a `scripts/` directory in a repo that's not
+run by CI, then this is probably the loose automation framework you're looking
+for that makes that easier to scale past a couple of repos.
+
+## For Whom Is It?
+
+* Central teams with opinions (e.g. at a company, there might be a language
+  team, a testing team, a loadbalancing team, and they all might want to let
+  you know if there are deprecations coming).
+* Projects with opinions (say your ML project has decided to only bless a
+  certain model or license)
+* Individuals with multiple repositories they want to keep looking similar
+  (see [inspiration](docs/inspiration.md) for some of the giants' shoulders)
+* Individuals with [hobby horses](https://wiki.c2.com/?HobbyHorse), who are
+  stricter about things others don't (yet) care about.
+
+## More Details
+
+Each rule runs in parallel.  Best case, this means you get to use all youre
+cores and get a fully passing score.  We all want that.  But if your code has
+some fixes that we think you'd want, then subsequent rules get re-run.
+
+I know what you're thinking, *CS Student*, "but isn't that `O(n**2)`?"  Yes,
+but with just a tiny bit of optimism (things aren't always going to change)
+it's much more like `k * O(n)`.
+
+
+**In More Detail**
+
+
+
+
 really out of date could probably use starting over from modern templates.
 
 You *could* chain together a bunch of shell scripts to modernize things using
