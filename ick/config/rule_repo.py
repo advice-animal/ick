@@ -15,7 +15,7 @@ from vmodule import VLOG_1, VLOG_2
 
 from ..base_language import BaseCollection
 from ..git import update_local_cache
-from . import CollectionConfig, RuleConfig, RuleRepoConfig, Mount, PyprojectRulesConfig, RuntimeConfig
+from . import CollectionConfig, Mount, PyprojectRulesConfig, RuleConfig, RuleRepoConfig, RuntimeConfig
 
 LOG = getLogger(__name__)
 

@@ -10,7 +10,7 @@ from vmodule import vmodule_init
 from ick_protocol import Urgency
 
 from ._regex_translate import advice_name_re
-from .config import RuntimeConfig, Settings, load_rules_config, load_main_config
+from .config import RuntimeConfig, Settings, load_main_config, load_rules_config
 from .git import find_repo_root
 from .project_finder import find_projects as find_projects_fn
 from .runner import Runner

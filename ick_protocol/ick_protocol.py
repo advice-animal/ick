@@ -11,7 +11,7 @@ This is basically a simplistic LSP but with the ability to report more informati
 
 A typical session goes like:
 
-Ick       Hook
+Ick       Rule
 Request ->
       <- HaveLinter
       <- Chunk
@@ -117,7 +117,7 @@ class Finished(Struct, tag_field="t", tag="F"):
     message: str
 
 
-class RunHookFinished(Struct, tag_field="t", tag="Y"):
+class RunRuleFinished(Struct, tag_field="t", tag="Y"):
     # just for good measure -- I don't think these will cross paths?
     name: str
     msg: str

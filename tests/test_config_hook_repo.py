@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from ick.config import RuleConfig, RuleRepoConfig, RulesConfig, MainConfig, Mount, RuntimeConfig, Settings
-from ick.config.rule_repo import discover_rules, get_impl, load_rule_repo, load_pyproject
+from ick.config import MainConfig, Mount, RuleConfig, RuleRepoConfig, RulesConfig, RuntimeConfig, Settings
+from ick.config.rule_repo import discover_rules, get_impl, load_pyproject, load_rule_repo
 from ick_protocol import Scope
 
 
