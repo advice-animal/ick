@@ -13,7 +13,7 @@ To avoid getting into the weeds on the many ways to configure it, let's assume
 you have an empty directory `/tmp/foo` (adjust command lines as needed) that you
 want to put your hook in.
 
-First you'll need to create a user/repo-type config in `ick.toml` there:
+First you'll need to create a user/repo-type config in `ick.toml` in your Python project's root:
 
 ```toml
 [[mount]]

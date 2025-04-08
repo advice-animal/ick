@@ -112,7 +112,7 @@ class CollectionConfig(Struct):
 def load_rules_config(cur: Path) -> RulesConfig:
     conf = RulesConfig()
     repo_root = find_repo_root(cur)
-    config_dir = appdirs.user_config_dir("advice-animal", "ick")
+    config_dir = appdirs.user_config_dir("ick", "advice-animal")
     paths = []
     # TODO revisit whether defining rules in pyproject.toml is a good idea
     if cur.resolve() != repo_root.resolve():
@@ -144,6 +144,10 @@ def load_rules_config(cur: Path) -> RulesConfig:
                     # but not care if [tool.other] is present...
                     if "Object missing required field `ick`" not in e.args[0]:
                         raise
+
+                    else:
+                        LOG.log(VLOG_1, "No ick config found in %s", p)
+                        continue
             else:
                 c = decode_toml(p.read_bytes(), type=RulesConfig)
 
