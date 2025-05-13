@@ -24,7 +24,7 @@ path = "."
 This tells `ick` to look in subdirectories of that for hooks, which
 coincidentally can also be put in `ick.toml` in the next step.
 
-In this step though, if you run `ick list-hooks --isolated
+In this step though, if you run `ick list-rules --isolated
 --config=/tmp/foo/ick.toml` it shouldn't find any.
 
 ## Creating a hook definition
@@ -53,7 +53,7 @@ outputs = ["pyproject.toml", "isort.ini"]
 
 Leaving this at the default (*any* files) is safer, but waaay slower.
 
-If you run the `list-hooks` again, it should error because it can't find the
+If you run the `list-rules` again, it should error because it can't find the
 code backing this hook.  For that, we need to create a subdir matching the hook
 name with an `__init__.py`.  The reason it's a subdir will be more obvious
 later, when we add tests.  For now, just roll with it.
@@ -92,7 +92,7 @@ print("files in the root of your repo.  See http://go/unified-config")
 
 N.b. If you don't modify files, and exit 0, anything you print is ignored.
 
-You should now be able to run `list-hooks` and have it show the name at least.
+You should now be able to run `list-rules` and have it show the name at least.
 However if you change the verb to `run`, it will fail trying to import those
 dependencies -- that's because you haven't told `ick` that you need them.
 
