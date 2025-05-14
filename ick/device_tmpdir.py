@@ -51,7 +51,7 @@ def _get_device(p: Path) -> int:
 
 def find_tmpdir(near: Path) -> Path:
     desired_dev = _get_device(near)
-    user_cache = Path(appdirs.user_cache_dir("advice-animal", "ick"))
+    user_cache = Path(appdirs.user_cache_dir("ick", "advice-animal"))
     user_cache.mkdir(exist_ok=True, parents=True)
     if _get_device(user_cache) == desired_dev and _access_ok(user_cache):
         return user_cache

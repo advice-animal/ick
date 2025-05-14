@@ -56,7 +56,7 @@ def find_projects(ctx, v, verbose, vmodule, trace, target):
 @click.pass_context
 def list_rules(ctx, v, verbose, vmodule, trace, target):
     """
-    Lists projects in the current repo, using current settings
+    Lists rules in the current repo, using current settings
     """
     verbose_init(v, verbose, vmodule)
     ctx.with_resource(keke.TraceOutput(file=trace))

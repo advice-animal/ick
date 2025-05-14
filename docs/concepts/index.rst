@@ -6,7 +6,7 @@ Concepts
    :hidden:
    :maxdepth: 2
 
-   hooks
+   rules
    collections
    scope
    order
