@@ -11,7 +11,7 @@ class Language(BaseRule):
         super().__init__(rule_config, repo_config)
         # TODO validate path / rule.name ".py" exists
         venv_key = rule_config.qualname
-        venv_path = Path(appdirs.user_cache_dir("advice-animal", "ick"), "envs", venv_key)
+        venv_path = Path(appdirs.user_cache_dir("ick", "advice-animal"), "envs", venv_key)
         self.venv = PythonEnv(venv_path, self.rule_config.deps)
 
     def prepare(self):

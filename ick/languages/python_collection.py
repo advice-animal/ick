@@ -17,7 +17,7 @@ class Language(BaseCollection):
         self.repo_config = repo_config
 
         venv_key = "todo"  # collection_config.qualname
-        venv_path = Path(appdirs.user_cache_dir("advice-animal", "ick"), "envs", venv_key)
+        venv_path = Path(appdirs.user_cache_dir("ick", "advice-animal"), "envs", venv_key)
         self.venv = PythonEnv(venv_path, self.collection_config.deps)
 
     def list(self) -> ListResponse:
