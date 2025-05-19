@@ -189,6 +189,7 @@ class Runner:
             for v in d[u]:
                 print(f"* {v}")
 
+
 def pl(noun: str, count: int) -> str:
     if count == 1:
         return noun
