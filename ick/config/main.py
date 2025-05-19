@@ -102,7 +102,7 @@ class ToolConfig(Struct):
 def load_main_config(cur: Path, isolated_repo: bool = False) -> MainConfig:
     conf = MainConfig()
     repo_root = find_repo_root(cur)
-    config_dir = appdirs.user_config_dir("advice-animal", "ick")
+    config_dir = appdirs.user_config_dir("ick", "advice-animal")
     paths: List[Path] = []
     if cur.resolve() != repo_root.resolve():
         paths.extend(

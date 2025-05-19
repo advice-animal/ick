@@ -9,7 +9,7 @@ protocol to report results where the additional input is mentioned.
 {
     "t": "M",
     "filename": "demo/api.pyi",
-    "additional_inputs": ["demo/api.py"]
+    "additional_inputs": ["demo/api.py"],
     "new_bytes": null,
     "diffstat": null,
     "diff": null,
@@ -27,7 +27,7 @@ protocol to report results where the additional input is mentioned.
 The default way things are run operates on copies, so is pretty similar to a
 dry run.  The big exception is if something relies on *changing* external
 state; these should be protected with `external_state = true` which requires
-either specifying one hook exactly by name, or passing the `--yolo` flag which
-is appended to the hook command.
+either specifying one rule exactly by name, or passing the `--yolo` flag which
+is appended to the rule command.
 
 

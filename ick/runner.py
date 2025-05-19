@@ -175,7 +175,8 @@ class Runner:
         for impl in self.iter_rule_impl():
             impl.prepare()
             for rule in impl.list().rule_names:
-                d.setdefault(impl.rule_config.urgency, []).append(f"{rule} ({impl.rule_config.hours} {pl('hour', impl.rule_config.hours)})")
+                # TODO: this had impl.rule_config.hours, but there is no such field.
+                d.setdefault(impl.rule_config.urgency, []).append(f"{rule}")
 
         first = True
         for u in sorted(d.keys()):

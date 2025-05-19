@@ -2,8 +2,15 @@
 
 The full config is read and inherited from many locations, including
 
-* `$XDG_CONFIG_DIR/advice-animal/ick/ick.toml`
-* `$XDG_CONFIG_DIR/advice-animal/ick/ick.toml.local`
+<!--
+TODO: On Mac, XDG_CONFIG_DIR is ignored, but also, the path seems different
+than the appdirs code?  The appdirs code looks like it will go to
+`~/Library/Preferences`, but it's actually `~/Library/Application Support`,
+which is appdirs.user_data_dir.
+-->
+
+* `$XDG_CONFIG_DIR/ick/ick.toml`
+* `$XDG_CONFIG_DIR/ick/ick.toml.local`
 * `$REPO/ick.toml`
 * `$REPO/pyproject.toml`
 
@@ -42,7 +49,7 @@ prefix = "hh/"
 The `.local` one is in case the preceding one is provided by your employer, and
 you want to add to it to flag more things with your own (personal) checks.
 
-## Why just toml?
+## Why just TOML?
 
 Because the repos I interact with already have a `pyproject.toml` which is a
 place for putting multiple tools' config without cluttering the root with more
