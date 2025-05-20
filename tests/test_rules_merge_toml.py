@@ -1,7 +1,7 @@
 import subprocess
 
 from ick.config import RuleConfig
-from ick.languages.merge_toml import Rule
+from ick.rules.merge_toml import Rule
 from ick_protocol import Finished, Modified
 
 

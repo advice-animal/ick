@@ -112,7 +112,7 @@ def load_regular(p: Path, data: bytes) -> RuleRepoConfig:
 
 @ktrace("rule.language")
 def get_impl(rule: RuleConfig | CollectionConfig) -> Type[BaseCollection]:
-    name = f"ick.languages.{rule.language}"
+    name = f"ick.rules.{rule.language}"
     if isinstance(rule, CollectionConfig):
         name += "_collection"
     name = name.replace("-", "_")

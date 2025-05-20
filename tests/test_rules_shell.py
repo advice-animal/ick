@@ -3,7 +3,7 @@ import subprocess
 from contextlib import contextmanager
 
 from ick.config import RuleConfig
-from ick.languages.shell import Rule
+from ick.rules.shell import Rule
 from ick_protocol import Finished, Modified
 
 
