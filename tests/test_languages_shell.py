@@ -3,7 +3,7 @@ import subprocess
 from contextlib import contextmanager
 
 from ick.config import RuleConfig
-from ick.languages.shell import Language
+from ick.languages.shell import Rule
 from ick_protocol import Finished, Modified
 
 
@@ -19,8 +19,8 @@ def test_smoke_single_file(tmp_path):
         language="shell",
         command="sed -i -e 's/hello/HELLO/'",
     )
-    lang = Language(conf, None)
-    with lang.work_on_project(tmp_path) as work:
+    rule = Rule(conf, None)
+    with rule.work_on_project(tmp_path) as work:
         resp = list(work.run("hello", ["README.md"]))
 
     assert len(resp) == 2
@@ -44,8 +44,8 @@ def test_smoke_not_found(tmp_path):
         language="shell",
         command="/bin/zzyzx",
     )
-    lang = Language(conf, None)
-    with lang.work_on_project(tmp_path) as work:
+    rule = Rule(conf, None)
+    with rule.work_on_project(tmp_path) as work:
         resp = list(work.run("hello", ["README.md"]))
 
     assert len(resp) == 1
@@ -66,8 +66,8 @@ def test_smoke_failure(tmp_path):
         language="shell",
         command="/bin/sh -c 'exit 1'",
     )
-    lang = Language(conf, None)
-    with lang.work_on_project(tmp_path) as work:
+    rule = Rule(conf, None)
+    with rule.work_on_project(tmp_path) as work:
         resp = list(work.run("hello", ["README.md"]))
 
     assert len(resp) == 1
@@ -89,8 +89,8 @@ def test_smoke_repo(tmp_path):
         scope="repo",
         command="sed -i -e 's/hello/HELLO/' README.md",
     )
-    lang = Language(conf, None)
-    with lang.work_on_project(tmp_path) as work:
+    rule = Rule(conf, None)
+    with rule.work_on_project(tmp_path) as work:
         resp = list(work.run("hello", ["README.md"]))
 
     assert len(resp) == 2

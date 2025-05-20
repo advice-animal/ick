@@ -6,11 +6,11 @@ import appdirs
 
 from ick_protocol import ListResponse
 
-from ..base_language import BaseCollection
+from ..base_rule import BaseCollection
 from ..venv import PythonEnv
 
 
-class Language(BaseCollection):
+class Rule(BaseCollection):
     def __init__(self, collection_config, repo_config):
         # TODO super?
         self.collection_config = collection_config

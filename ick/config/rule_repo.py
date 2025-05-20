@@ -13,7 +13,7 @@ from msgspec.json import encode as encode_json
 from msgspec.toml import decode as decode_toml
 from vmodule import VLOG_1, VLOG_2
 
-from ..base_language import BaseCollection
+from ..base_rule import BaseCollection
 from ..git import update_local_cache
 from . import CollectionConfig, Mount, PyprojectRulesConfig, RuleConfig, RuleRepoConfig, RuntimeConfig
 
@@ -117,5 +117,5 @@ def get_impl(rule: RuleConfig | CollectionConfig) -> Type[BaseCollection]:
         name += "_collection"
     name = name.replace("-", "_")
     __import__(name)
-    impl: Type[BaseCollection] = sys.modules[name].Language  # type: ignore[assignment]
+    impl: Type[BaseCollection] = sys.modules[name].Rule  # type: ignore[assignment]
     return impl

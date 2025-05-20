@@ -1,12 +1,12 @@
 import subprocess
 
 from ick.config import RuleConfig
-from ick.languages.ast_grep import Language
+from ick.languages.ast_grep import Rule
 from ick_protocol import Finished, Modified
 
 
-def test_pygrep_works(tmp_path):
-    ast_grep = Language(
+def test_ast_grep_works(tmp_path):
+    ast_grep = Rule(
         RuleConfig(
             name="foo",
             language="ast-grep",

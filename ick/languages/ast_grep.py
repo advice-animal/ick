@@ -5,11 +5,11 @@ import appdirs
 
 from ick_protocol import Success
 
-from ..base_language import BaseRule, ExecWork
+from ..base_rule import BaseRule, ExecWork
 from ..venv import PythonEnv
 
 
-class Language(BaseRule):
+class Rule(BaseRule):
     work_cls = ExecWork
 
     def __init__(self, rule_config, repo_config):

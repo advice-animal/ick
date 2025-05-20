@@ -5,10 +5,10 @@ import shlex
 
 from ick_protocol import Scope
 
-from ..base_language import BaseRule, ExecWork
+from ..base_rule import BaseRule, ExecWork
 
 
-class Language(BaseRule):
+class Rule(BaseRule):
     work_cls = ExecWork
 
     def __init__(self, rule_config, repo_config):

@@ -2,11 +2,11 @@ from pathlib import Path
 
 import appdirs
 
-from ..base_language import BaseRule
+from ..base_rule import BaseRule
 from ..venv import PythonEnv
 
 
-class Language(BaseRule):
+class Rule(BaseRule):
     def __init__(self, rule_config, repo_config):
         super().__init__(rule_config, repo_config)
         # TODO validate path / rule.name ".py" exists

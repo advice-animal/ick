@@ -1,12 +1,12 @@
 import subprocess
 
 from ick.config import RuleConfig
-from ick.languages.merge_toml import Language
+from ick.languages.merge_toml import Rule
 from ick_protocol import Finished, Modified
 
 
-def test_pygrep_works(tmp_path):
-    pygrep = Language(
+def test_merge_toml_works(tmp_path):
+    merge_toml = Rule(
         RuleConfig(
             name="foo",
             language="merge_toml",
@@ -22,7 +22,7 @@ baz = 99
     subprocess.check_call(["git", "add", "-N", "."], cwd=tmp_path)
     subprocess.check_call(["git", "commit", "-a", "-msync"], cwd=tmp_path)
 
-    with pygrep.work_on_project(tmp_path) as work:
+    with merge_toml.work_on_project(tmp_path) as work:
         resp = list(work.run("merge_toml", ["foo.toml"]))
 
     assert len(resp) == 2

@@ -8,7 +8,7 @@ import tomlkit
 from msgspec.json import decode as json_decode
 from msgspec.json import encode as json_encode
 
-from ..base_language import BaseRule, ExecWork
+from ..base_rule import BaseRule, ExecWork
 
 
 def default(x):
@@ -48,7 +48,7 @@ def merge(d1, d2):
             d1[k] = d2[k]
 
 
-class Language(BaseRule):
+class Rule(BaseRule):
     work_cls = ExecWork
 
     def __init__(self, conf, repo_config) -> None:
