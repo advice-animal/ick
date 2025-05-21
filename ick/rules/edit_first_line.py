@@ -1,9 +1,9 @@
 import sys
 
-from ..base_language import BaseRule
+from ..base_rule import BaseRule
 
 
-class Language(BaseRule):
+class Rule(BaseRule):
     """
     Implementation of a simple rule that can edit the first line of a file.
     """

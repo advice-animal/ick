@@ -1,12 +1,12 @@
 import subprocess
 
 from ick.config import RuleConfig
-from ick.languages.pygrep import Language
+from ick.rules.pygrep import Rule
 from ick_protocol import Finished, Modified
 
 
 def test_pygrep_works(tmp_path):
-    pygrep = Language(
+    pygrep = Rule(
         RuleConfig(
             name="foo",
             language="pygrep",

@@ -1,43 +1,43 @@
 import subprocess
 
 from ick.config import RuleConfig
-from ick.languages.ast_grep import Language
+from ick.rules.merge_toml import Rule
 from ick_protocol import Finished, Modified
 
 
-def test_pygrep_works(tmp_path):
-    ast_grep = Language(
+def test_merge_toml_works(tmp_path):
+    merge_toml = Rule(
         RuleConfig(
             name="foo",
-            language="ast-grep",
-            search="F($$$X)",
-            replace="G($$$X)",
+            language="merge_toml",
+            data="""\
+[foo]
+baz = 99
+""",
         ),
         None,
     )
-    ast_grep.prepare()
-
     subprocess.check_call(["git", "init"], cwd=tmp_path)
-    (tmp_path / "foo.py").write_text("A(1,2,3)\nF(4,5,6)\n")
+    (tmp_path / "foo.toml").write_text("# doc comment\n[foo]\nbar = 0\nbaz = 1\nfloof = 2\n")
     subprocess.check_call(["git", "add", "-N", "."], cwd=tmp_path)
     subprocess.check_call(["git", "commit", "-a", "-msync"], cwd=tmp_path)
 
-    with ast_grep.work_on_project(tmp_path) as work:
-        resp = list(work.run("ast-grep", ["foo.py"]))
+    with merge_toml.work_on_project(tmp_path) as work:
+        resp = list(work.run("merge_toml", ["foo.toml"]))
 
     assert len(resp) == 2
     resp[0].diff = "X"
     assert resp[0] == Modified(
-        rule_name="ast-grep",
-        filename="foo.py",
-        new_bytes=b"A(1,2,3)\nG(4,5,6)\n",
+        rule_name="merge_toml",
+        filename="foo.toml",
+        new_bytes=b"# doc comment\n[foo]\nbar = 0\nbaz = 99\nfloof = 2\n",
         additional_input_filenames=(),
         diffstat="+1-1",
         diff="X",
     )
 
     assert resp[1] == Finished(
-        rule_name="ast-grep",
+        rule_name="merge_toml",
         error=False,
-        message="ast-grep",
+        message="merge_toml",
     )

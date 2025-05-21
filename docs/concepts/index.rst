@@ -11,4 +11,4 @@ Concepts
    scope
    order
    projects
-   languages
+   rules
