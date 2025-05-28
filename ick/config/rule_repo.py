@@ -82,8 +82,10 @@ def load_rule_repo(mount: Mount) -> RuleRepoConfig:
             rule.qualname = base + rule.name
             if (p.parent / rule.name).exists():
                 rule.test_path = repo_path / base / rule.name / "tests"
+                rule.script_path = repo_path / base / rule.name / rule.name
             else:
                 rule.test_path = repo_path / base / "tests" / rule.name
+                rule.script_path = repo_path / base / rule.name
         for collection in c.collection:
             collection.collection_path = p.parent
 
