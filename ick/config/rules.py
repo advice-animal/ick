@@ -155,6 +155,9 @@ def load_rules_config(cur: Path) -> RulesConfig:
                 mount.base_path = p.parent
 
             # TODO finalize mount paths so relative works
-            conf.inherit(c)
+            try:
+                conf.inherit(c)
+            except Exception as e:
+                raise Exception(f"While merging {p}: {e!r}")
 
     return conf
