@@ -30,17 +30,18 @@ def main():
 @click.option("--verbose", type=int, help="Log verbosity (unset = WARNING, 0 = INFO, 1 = VLOG_1, ..., 10 = DEBUG)")
 @click.option("--vmodule", help="comma-separated logger:level values, same scheme as --verbose")
 @click.option("--trace", type=click.File(mode="w"), help="Trace output filename")
+@click.option("--isolated-repo", is_flag=True, help="Isolate from user-level config")
 @click.option("--target", default=".", help="Directory to modify")  # TODO path, existing
 @click.pass_context
-def find_projects(ctx, v, verbose, vmodule, trace, target):
+def find_projects(ctx, v, verbose, vmodule, trace, isolated_repo: bool, target: str):
     """
-    Lists projects in the current repo, using current settings
+    Lists projects found in the current repo
     """
     verbose_init(v, verbose, vmodule)
     ctx.with_resource(keke.TraceOutput(file=trace))
 
     cur = Path(target)
-    conf = load_main_config(cur)
+    conf = load_main_config(cur, isolated_repo=isolated_repo)
     repo_path = find_repo_root(cur)
     repo = Repo(repo_path)
     for proj in find_projects_fn(repo, repo.zfiles, conf):
@@ -52,20 +53,21 @@ def find_projects(ctx, v, verbose, vmodule, trace, target):
 @click.option("--verbose", type=int, help="Log verbosity (unset = WARNING, 0 = INFO, 1 = VLOG_1, ..., 10 = DEBUG)")
 @click.option("--vmodule", help="comma-separated logger:level values, same scheme as --verbose")
 @click.option("--trace", type=click.File(mode="w"), help="Trace output filename")
+@click.option("--isolated-repo", is_flag=True, help="Isolate from user-level config")
 @click.option("--target", default=".", help="Directory to modify")  # TODO path, existing
 @click.pass_context
-def list_rules(ctx, v, verbose, vmodule, trace, target):
+def list_rules(ctx, v, verbose, vmodule, trace, isolated_repo: bool, target: str):
     """
-    Lists rules in the current repo, using current settings
+    Lists rules applicable to the current repo
     """
     verbose_init(v, verbose, vmodule)
     ctx.with_resource(keke.TraceOutput(file=trace))
 
     # This takes a target because rules can be defined in the target repo too
     cur = Path(target)
-    conf = load_main_config(cur)
-    hc = load_rules_config(cur)
-    ctx.obj = RuntimeConfig(conf, hc, Settings())
+    conf = load_main_config(cur, isolated_repo=isolated_repo)
+    hc = load_rules_config(cur, isolated_repo=isolated_repo)
+    ctx.obj = RuntimeConfig(conf, hc, Settings(isolated_repo=isolated_repo))
     repo_path = find_repo_root(cur)
     repo = Repo(repo_path)
 
@@ -78,18 +80,21 @@ def list_rules(ctx, v, verbose, vmodule, trace, target):
 @click.option("--verbose", type=int, help="Log verbosity (unset = WARNING, 0 = INFO, 1 = VLOG_1, ..., 10 = DEBUG)")
 @click.option("--vmodule", help="comma-separated logger:level values, same scheme as --verbose")
 @click.option("--trace", type=click.File(mode="w"), help="Trace output filename")
+@click.option("--isolated-repo", is_flag=True, help="Isolate from user-level config")
 @click.option("--target", default=".", help="Directory to modify")  # TODO path, existing
 @click.pass_context
-def test_rules(ctx, v, verbose, vmodule, trace, target):
-    """ """
+def test_rules(ctx, v, verbose, vmodule, trace, isolated_repo: bool, target: str):
+    """
+    Run self-tests against all rules
+    """
     verbose_init(v, verbose, vmodule)
     ctx.with_resource(keke.TraceOutput(file=trace))
 
     # This takes a target because rules can be defined in the target repo too
     cur = Path(target)
-    conf = load_main_config(cur)
-    hc = load_rules_config(cur)
-    ctx.obj = RuntimeConfig(conf, hc, Settings())
+    conf = load_main_config(cur, isolated_repo=isolated_repo)
+    hc = load_rules_config(cur, isolated_repo=isolated_repo)
+    ctx.obj = RuntimeConfig(conf, hc, Settings(isolated_repo=isolated_repo))
     repo_path = find_repo_root(cur)
     repo = Repo(repo_path)
 
@@ -104,15 +109,17 @@ def test_rules(ctx, v, verbose, vmodule, trace, target):
 @click.option("--verbose", type=int, help="Log verbosity (unset = WARNING, 0 = INFO, 1 = VLOG_1, ..., 10 = DEBUG)")
 @click.option("--vmodule", help="comma-separated logger:level values, same scheme as --verbose")
 @click.option("--trace", type=click.File(mode="w"), help="Trace output filename")
+@click.option("--isolated-repo", is_flag=True, help="Isolate from user-level config")
 @click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, on by default sometimes")
 @click.option("--yolo", is_flag=True, help="Yolo mode enables modifying external state")
 @click.option("--target", default=".", help="Directory to modify")  # TODO path, existing
 @click.argument("filters", nargs=-1)
 @click.pass_context
-def run(ctx, v, verbose, vmodule, trace, dry_run: bool, yolo: bool, filters: list[str], target: str):
+def run(ctx, v, verbose, vmodule, trace, isolated_repo: bool, dry_run: bool, yolo: bool, filters: list[str], target: str):
     """
-    Run all (or explicitly specified) rules, by default in a medium-dry-run
-    mode, in their defined order.
+    Run the applicable rules to the target repo/path
+
+    If you don't provide filters, the default is a dry-run style mode for all rules.
 
     Otherwise, pass either a rule name, rule prefix, or an urgency string like
     "now" to apply all necessary, successful ones in order.
@@ -121,12 +128,12 @@ def run(ctx, v, verbose, vmodule, trace, dry_run: bool, yolo: bool, filters: lis
     ctx.with_resource(keke.TraceOutput(file=trace))
 
     cur = Path(target)
-    conf = load_main_config(cur)
+    conf = load_main_config(cur, isolated_repo=isolated_repo)
     repo_path = find_repo_root(cur)
     repo = Repo(repo_path)
 
-    hc = load_rules_config(cur)
-    ctx.obj = RuntimeConfig(conf, hc, Settings())
+    hc = load_rules_config(cur, isolated_repo=isolated_repo)
+    ctx.obj = RuntimeConfig(conf, hc, Settings(isolated_repo=isolated_repo))
     ctx.obj.settings.dry_run = dry_run
     ctx.obj.settings.yolo = yolo
 
