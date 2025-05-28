@@ -33,6 +33,9 @@ def test_env_happy_path(tmp_path):
     p.prepare()
     assert p.health_check()
 
+    # cover one last line where prepare is a no-op
+    p.prepare()
+
 
 def test_env_with_deps(tmp_path):
     p = PythonEnv(tmp_path, ["ast-grep-cli"])
