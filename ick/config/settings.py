@@ -20,6 +20,8 @@ class Settings(Struct):
     dry_run: bool = True
     #: Intended to be explicitly set based on flags
     yolo: bool = False
+    #: Intended to be explicitly set based on flags
+    isolated_repo: bool = False
 
 
 class FilterConfig(Struct):

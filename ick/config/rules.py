@@ -109,10 +109,9 @@ class CollectionConfig(Struct):
 
 
 @ktrace()
-def load_rules_config(cur: Path) -> RulesConfig:
+def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:
     conf = RulesConfig()
     repo_root = find_repo_root(cur)
-    config_dir = appdirs.user_config_dir("ick", "advice-animal")
     paths = []
     # TODO revisit whether defining rules in pyproject.toml is a good idea
     if cur.resolve() != repo_root.resolve():
@@ -126,10 +125,16 @@ def load_rules_config(cur: Path) -> RulesConfig:
         [
             Path(repo_root, "ick.toml"),
             Path(repo_root, "pyproject.toml"),
-            Path(config_dir, "ick.toml.local"),
-            Path(config_dir, "ick.toml"),
         ]
     )
+    if not isolated_repo:
+        config_dir = appdirs.user_config_dir("ick", "advice-animal")
+        paths.extend(
+            [
+                Path(config_dir, "ick.toml.local"),
+                Path(config_dir, "ick.toml"),
+            ]
+        )
 
     LOG.log(VLOG_1, "Loading workspace config near %s", cur)
 
