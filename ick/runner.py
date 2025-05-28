@@ -164,9 +164,9 @@ class Runner:
                         if rule_instance.rule_config.inputs:
                             filenames = [f for f in filenames if any(fnmatch(f, x) for x in rule_instance.rule_config.inputs)]
 
-                        resp.extend(work.run("ZZZ", filenames))
+                        resp.extend(work.run(rule_instance.rule_config.qualname, filenames))
         except Exception as e:
-            resp = [Finished("ZZZ", error=True, message=repr(e))]
+            resp = [Finished(rule_instance.rule_config.qualname, error=True, message=repr(e))]
         return resp
 
     @ktrace()
@@ -176,7 +176,7 @@ class Runner:
             impl.prepare()
             for rule in impl.list().rule_names:
                 # TODO: this had impl.rule_config.hours, but there is no such field.
-                d.setdefault(impl.rule_config.urgency, []).append(f"{rule}")
+                d.setdefault(impl.rule_config.urgency, []).append(f"{rule.rule_config.qualname}")
 
         first = True
         for u in sorted(d.keys()):

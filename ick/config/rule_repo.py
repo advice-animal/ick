@@ -79,7 +79,7 @@ def load_rule_repo(mount: Mount) -> RuleRepoConfig:
         if base:
             base += "/"
         for rule in c.rule:
-            rule.qualname = base + rule.name
+            rule.qualname = mount.path.rstrip("/") + "/" + base + rule.name
             if (p.parent / rule.name).exists():
                 rule.test_path = repo_path / base / rule.name / "tests"
             else:
