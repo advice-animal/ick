@@ -6,7 +6,34 @@ Let's say you know of a bunch of repos that might need updating.
 
 Not like "format my code" updating, but things that reduce tech debt like
 moving from pinned urllib3 1.x to urllib3 2.x.  That'd be good, right?  But
-maybe not for everyone.
+maybe not for everyone.  And certainly not *right* now, to block landing PRs.
+
+The traditional dev loop generally looks like this:
+
+```
+    /----------------\  push  /----------------\
+    |  code          |------->|  integrate     |
+    |      build     |        |      test      |
+    |          test  |        |        deploy  |
+    \----------------/        \----------------/
+
+       inner loop                 outer loop
+```
+
+but that discounts the big-picture software maintenance stuff that healthy
+projects ought to do, and commonly forget (or accomplish with one-off scripts)
+on a longer term basis.  For that we really ought to keep track of things
+that aren't "right now" and aren't "today" but are "important, yet not urgent".
+
+```
+    /----------------\  push  /----------------\ stable  /==================\
+    |  code          |------->|  integrate     |-------->| tech debt week   |
+    |      build     |        |      test      |         |  quantified proj |
+    |          test  |        |        deploy  |         |   bootcamp tasks |
+    \----------------/        \----------------/         |     deprecations |
+                                                         \==================/
+       inner loop                 outer loop               planning cycle
+```
 
 ## Elevator Pitch
 
@@ -16,8 +43,8 @@ friend, or they might be ones you maintain yourself (like my hobbyhorse, "text
 files must end with a newline" -- I'm looking at you, default vscode config).
 
 If you're ever tempted to make a one-off shell script and put it in your
-`~/.local/bin` directory, or put a `scripts/` directory in a repo that's not
-run by CI, then this is probably the loose automation framework you're looking
+`~/.local/bin` directory, or put a `scripts/release-check.sh` that you run once
+in a while, then this is probably the loose automation framework you're looking
 for that makes that easier to scale past a couple of repos.
 
 ## For Whom Is It?
@@ -31,6 +58,20 @@ for that makes that easier to scale past a couple of repos.
   (see [inspiration](docs/inspiration.md) for some of the giants' shoulders)
 * Individuals with [hobby horses](https://wiki.c2.com/?HobbyHorse), who are
   stricter about things others don't (yet) care about.
+
+## Don't Reinvent the Wheel
+
+This is going to sound a little like a "what we are not" section, but in short,
+the goal is to be able to compose existing tools to produce a greater whole.
+
+* This isn't designed to run in your IDE.
+* This isn't designed for every rule to mutate every file every time.
+* This isn't designed for a multi-gigabyte repo.
+* This isn't designed to run on a Pi 1.
+
+It *is* designed to automate the kind of things that people either put in shell
+scripts, or don't write because the one-off effort of making a shell script
+doesn't seem rewarding, and provide a way for language-agnostic discovery.
 
 ## More Details
 
