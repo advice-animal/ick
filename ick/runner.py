@@ -11,6 +11,7 @@ from typing import Any
 
 import moreorless
 from keke import ktrace
+from moreorless.combined import combined_diff
 from rich.progress import Progress
 
 from ick_protocol import Finished, Modified
@@ -83,13 +84,18 @@ class Runner:
             repo = Repo(tp)
 
             project = Project(tp, "", "python", "invalid.bin")
+            ap = test_path / "a"
             bp = test_path / "b"
             files_to_check = set(glob("*", root_dir=bp, recursive=True))
 
             response = self._run_one(rule_instance, repo, project)
             assert isinstance(response[-1], Finished), "Last response is finished"
             if response[-1].error:
-                expected = (test_path / "b" / "output.txt").read_text()
+                expected_path = bp / "output.txt"
+                if not expected_path.exists():
+                    assert False, response[-1].message
+
+                expected = expected_path.read_text()
                 if expected != response[-1].message:
                     print(moreorless.unified_diff(expected, response[-1].message, "output.txt"))
                     assert False, response[-1].message
@@ -105,7 +111,14 @@ class Runner:
                     assert r.filename in files_to_check
                     if (bp / r.filename).read_bytes() != r.new_bytes:
                         print(rule_instance.rule_config.name, "fail")
-                        print(r.diff)
+                        print(
+                            combined_diff(
+                                [(ap / r.filename).read_text()],
+                                [(bp / r.filename).read_text(), r.new_bytes.decode()],
+                                from_filenames=["original"],
+                                to_filenames=["expected", "actual"],
+                            )
+                        )
                         assert False, f"{r.filename} (modified) differs"
                     files_to_check.remove(r.filename)
 
