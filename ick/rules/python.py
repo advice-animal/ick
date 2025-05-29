@@ -17,9 +17,9 @@ class Rule(BaseRule):
         self.venv = PythonEnv(venv_path, self.rule_config.deps)
         if rule_config.data:
             # We could write this to a temp path if necessary, maybe even within the venv dir, during prepare.
-            self.command_parts = ["xargs", "-n1", "-0", self.venv.bin("python"), "-c", rule_config.data]
+            self.command_parts = ["xargs", "-n1", "-P6", "-0", self.venv.bin("python"), "-c", rule_config.data]
         else:
-            self.command_parts = ["xargs", "-n1", "-0", self.venv.bin("python"), rule_config.script_path.with_suffix(".py")]
+            self.command_parts = ["xargs", "-n1", "-P6", "-0", self.venv.bin("python"), rule_config.script_path.with_suffix(".py")]
         self.command_env = {}
 
     def prepare(self):

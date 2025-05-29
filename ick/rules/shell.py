@@ -15,13 +15,14 @@ class Rule(BaseRule):
         super().__init__(rule_config, repo_config)
         if rule_config.command:
             parts = shlex.split(rule_config.command)
-            if rule_config.scope == Scope.SINGLE_FILE:
-                self.command_parts = ["xargs", "-n1", "-0"] + parts
-            else:
-                self.command_parts = parts
         else:
             assert rule_config.data
-            self.command_parts = ["/bin/bash", "-c", rule_config.data.strip()]
+            parts = ["/bin/bash", "-c", rule_config.data.strip(), "placeholder"]
+
+        if rule_config.scope == Scope.SINGLE_FILE:
+            self.command_parts = ["xargs", "-n1", "-0"] + parts
+        else:
+            self.command_parts = parts
 
         # TODO
         self.command_env = os.environ.copy()

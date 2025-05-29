@@ -12,13 +12,13 @@ from typing import Any
 
 import moreorless
 from keke import ktrace
+from moreorless.click import echo_color_precomputed_diff
 from moreorless.combined import combined_diff
 from rich.progress import Progress
 
 from ick_protocol import Finished, Modified
 
 from .clone_aside import CloneAside
-from .config import RuleConfig
 from .config.rule_repo import discover_rules, get_impl
 from .project_finder import find_projects
 from .sh import run_cmd
@@ -56,21 +56,22 @@ class Runner:
                 rule_instance.prepare()
                 progress.update(prepare_key)
                 if not names:
-                    progress.console.print("no tests under", rule_instance.rule_config.test_path)
+                    progress.console.print("no tests for", rule_instance.rule_config.qualname, "under", rule_instance.rule_config.test_path)
                 else:
                     key = progress.add_task(rule_instance.rule_config.qualname, total=len(names))
                     for n in names:
-                        outstanding[tpe.submit(self._perform_test, rule_instance, n)] = key
+                        outstanding[tpe.submit(self._perform_test, rule_instance, n)] = (key, rule_instance.rule_config.qualname)
 
             progress.update(prepare_key, completed=True)
             # breakpoint()
 
             for fut in as_completed(outstanding.keys()):
-                progress_key = outstanding[fut]
+                progress_key, desc = outstanding[fut]
                 try:
                     fut.result()
                 except Exception as e:
-                    progress.console.print(repr(e))
+                    progress.console.print(desc)
+                    progress.console.print("  " + repr(e))
                 else:
                     progress.console.print(progress_key, "ok")
                 progress.update(progress_key, advance=1)
@@ -99,6 +100,7 @@ class Runner:
 
                 expected = expected_path.read_text()
                 if expected != response[-1].message:
+                    print("Testing", test_path)
                     print(moreorless.unified_diff(expected, response[-1].message, "output.txt"))
                     assert False, response[-1].message
                 return
@@ -155,6 +157,7 @@ class Runner:
                 for r in responses:
                     if isinstance(r, Modified):
                         print("    ", r.filename, r.diffstat)
+                        echo_color_precomputed_diff(r.diff)
                     elif isinstance(r, Finished) and r.error:
                         for line in r.message.splitlines():
                             print("    ", line)
@@ -186,9 +189,12 @@ class Runner:
         d = {}
         for impl in self.iter_rule_impl():
             impl.prepare()
+            duration = ""
+            # if impl.rule_config.hours != 1:
+            #     duration = f" ({impl.rule_config.hours} {pl('hour', impl.rule_config.hours)})"
+
             for rule in impl.list().rule_names:
-                # TODO: this had impl.rule_config.hours, but there is no such field.
-                d.setdefault(impl.rule_config.urgency, []).append(f"{rule}")
+                d.setdefault(impl.rule_config.urgency, []).append(f"{impl.rule_config.qualname}{duration}")
 
         first = True
         for u in sorted(d.keys()):
