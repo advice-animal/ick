@@ -15,7 +15,7 @@ from keke import ktrace
 from msgspec import Struct, ValidationError, field
 from msgspec.structs import replace as replace
 from msgspec.toml import decode as decode_toml
-from vmodule import VLOG_1
+from vmodule import VLOG_1, VLOG_2
 
 from ..git import find_repo_root
 from ..util import merge
@@ -127,12 +127,12 @@ def load_main_config(cur: Path, isolated_repo: bool = False) -> MainConfig:
     for p in paths:
         LOG.debug("Looking for config at %s", p)
         if p.exists():
-            LOG.info("Config found at %s", p)
+            LOG.log(VLOG_1, "Config found at %s", p)
             if p.name == "pyproject.toml":
                 c = load_pyproject(p, p.read_bytes())
             else:
                 c = load_regular(p, p.read_bytes())
-            LOG.log(VLOG_1, "Loaded %s of %r", p, c)
+            LOG.log(VLOG_2, "Loaded %s of %r", p, c)
             conf.inherit(c)
 
     conf.inherit(MainConfig.DEFAULT)
