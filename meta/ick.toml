@@ -1,4 +1,4 @@
-[[hook]]
+[[rule]]
 name = "pyproject"
 language = "merge-toml"
 inputs = ["pyproject.toml"]
@@ -10,7 +10,7 @@ data = """
 hello = 1
 """
 
-# [[hook]]
+# [[rule]]
 # name = "edit-shebang"
 # language = "edit-first-line"
 # files = ["scripts/*.py"]
@@ -20,7 +20,7 @@ hello = 1
 # search = "#!"
 # replace = "#!/usr/bin/env python"
 
-[[hook]]
+[[rule]]
 name = "no-fixme-in-readme"
 language = "pygrep"
 inputs = ["README", "README.md"]
@@ -30,7 +30,7 @@ inputs = ["README", "README.md"]
 search = "FIXME"
 urgency = "now"
 
-[[hook]]
+[[rule]]
 name = "uppercase-the-word-all"
 language = "python"
 inputs = ["*.md"]
@@ -38,14 +38,16 @@ inputs = ["*.md"]
 # priority=50
 # external_state=False
 search = "all"
-# this gets run with 'path' var
 data = """
+import sys, pathlib
+path = pathlib.Path(sys.argv[1])
+
 text = path.read_text()
 text = text.replace("all", "ALL")
 path.write_text(text)
 """
 
-[[hook]]
+[[rule]]
 name = "long-form-grep"
 language = "shell"
 inputs = ["*.md"]
@@ -53,8 +55,7 @@ inputs = ["*.md"]
 priority = 90
 # external_state=False
 data = """
-die() { echo "$1"; exit 99 }
-grep -q ALL "$@" || die "No shouting!"
+grep -q ALL "$@" && exit 2
 """
 
 [[collection]]
@@ -70,7 +71,7 @@ subdir = "p1"
 priority = 1
 deps = ["attrs"]
 
-[[hook]]
+[[rule]]
 name = "no-prints"
 language = "ast-grep"
 search = "print($$$)"
