@@ -4,5 +4,5 @@
 #
 # to ignore your user config and parse just these hooks.
 
-[[mount]]
+[[ruleset]]
 path = "meta/"

@@ -14,7 +14,7 @@ which is appdirs.user_data_dir.
 * `$REPO/ick.toml`
 * `$REPO/pyproject.toml`
 
-Any of these can define a `[[mount]]`, as detailed below.
+Any of these can define one or more `[[ruleset]]` sections, as detailed below.
 
 Additionally, project-level configs are read for `do_not_want` and not much
 else.
@@ -23,17 +23,17 @@ else.
 * `$PROJECT/pyproject.toml`
 
 
-## Mounts
+## Rulesets
 
-A mount is a reference to a dir or repo url that contains more `ick.toml` files
-that define hooks or collections, and can contain arbitrary other files that we
+A ruleset is a directory or repo url that contains more `ick.toml` files
+that define hooks and can contain arbitrary other files that we
 want to exist on the filesystem (for example, compiled Go binaries).
 
 The syntax with the doubled square brackets is called an [Array of
 Tables](https://toml.io/en/v1.0.0#array-of-tables).
 
 ```toml
-[[mount]]
+[[ruleset]]
 url = "https://github.com/thatch/hobbyhorse"
 prefix = "hh/"
 ```
@@ -41,7 +41,7 @@ prefix = "hh/"
 (or in `pyproject.toml`)
 
 ```toml
-[[tool.ick.mount]]
+[[tool.ick.ruleset]]
 url = "https://github.com/thatch/hobbyhorse"
 prefix = "hh/"
 ```

@@ -7,7 +7,7 @@ incrementally from individual files into one big file, like `isort.ini` ->
 First, decide what language your rule is going to be written in.  I happen to
 know that you could do this in Python, but maybe you've got something else.
 
-## Setting up a local development mount
+## Setting up a local development ruleset
 
 To avoid getting into the weeds on the many ways to configure it, let's assume
 you have an empty directory `/tmp/foo` (adjust command lines as needed) that you
@@ -16,7 +16,7 @@ want to put your rule in.
 First you'll need to create a user/repo-type config in `ick.toml` in your Python project's root:
 
 ```toml
-[[mount]]
+[[ruleset]]
 
 path = "."
 ```
