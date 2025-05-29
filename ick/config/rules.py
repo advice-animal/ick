@@ -52,12 +52,10 @@ class PyprojectToolConfig(Struct):
 
 class RuleRepoConfig(Struct):
     rule: list[RuleConfig] = field(default_factory=list)
-    collection: list[CollectionConfig] = field(default_factory=list)
     repo_path: Optional[Path] = None
 
     def inherit(self, less_specific_defaults):
         self.rule = merge(self.rule, less_specific_defaults.rule)
-        self.collection = merge(self.collection, less_specific_defaults.collection)
 
 
 class RuleConfig(Struct):
@@ -91,22 +89,6 @@ class RuleConfig(Struct):
     inputs: Optional[Sequence[str]] = None
     outputs: Optional[Sequence[str]] = None
     extra_inputs: Optional[Sequence[str]] = None
-
-
-class CollectionConfig(Struct):
-    """
-    Configuration for a collection (single process implementing multiple rules)
-    """
-
-    language: str
-    name: str
-
-    scope: Scope = Scope.SINGLE_FILE
-    order: int = 50
-    subdir: str = "."
-
-    deps: Optional[list[str]] = None
-    collection_path: Optional[Path] = None  # set later, test dir is under this
 
 
 @ktrace()

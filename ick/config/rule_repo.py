@@ -13,22 +13,22 @@ from msgspec.json import encode as encode_json
 from msgspec.toml import decode as decode_toml
 from vmodule import VLOG_1, VLOG_2
 
-from ..base_rule import BaseCollection
+from ..base_rule import BaseRule
 from ..git import update_local_cache
-from . import CollectionConfig, Mount, PyprojectRulesConfig, RuleConfig, RuleRepoConfig, RuntimeConfig
+from . import Mount, PyprojectRulesConfig, RuleConfig, RuleRepoConfig, RuntimeConfig
 
 LOG = getLogger(__name__)
 
 
 @ktrace()
-def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig | CollectionConfig]:
+def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
     """
     Returns list of rules in the order that they would be applied.
 
     It is the responsibility of the caller to filter and handle things like
     project-level ignores.
     """
-    rules: list[RuleConfig | CollectionConfig] = []
+    rules: list[RuleConfig] = []
 
     mounts = {}
     for mount in rtc.rules_config.mount:
@@ -37,9 +37,7 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig | CollectionConfig
         mounts[mount.prefix] = load_rule_repo(mount)
 
     for k, v in mounts.items():
-        # TODO handle mount prefix
         rules.extend(v.rule)
-        rules.extend(v.collection)
 
     rules.sort(key=lambda h: (h.order, h.name))
 
@@ -71,7 +69,7 @@ def load_rule_repo(mount: Mount) -> RuleRepoConfig:
         else:
             c = load_regular(p, p.read_bytes())
 
-        if not c.rule and not c.collection:
+        if not c.rule:
             continue
 
         LOG.log(VLOG_2, "Loaded %s", encode_json(c).decode("utf-8"))
@@ -86,8 +84,6 @@ def load_rule_repo(mount: Mount) -> RuleRepoConfig:
             else:
                 rule.test_path = repo_path / base / "tests" / rule.name
                 rule.script_path = repo_path / base / rule.name
-        for collection in c.collection:
-            collection.collection_path = p.parent
 
         rc.inherit(c)
 
@@ -113,11 +109,10 @@ def load_regular(p: Path, data: bytes) -> RuleRepoConfig:
 
 
 @ktrace("rule.language")
-def get_impl(rule: RuleConfig | CollectionConfig) -> Type[BaseCollection]:
+def get_impl(rule: RuleConfig) -> Type[BaseRule]:
     name = f"ick.rules.{rule.language}"
-    if isinstance(rule, CollectionConfig):
-        name += "_collection"
     name = name.replace("-", "_")
     __import__(name)
-    impl: Type[BaseCollection] = sys.modules[name].Rule  # type: ignore[assignment]
+    impl: Type[BaseRule] = sys.modules[name].Rule  # type: ignore[assignment]
+    assert issubclass(impl, BaseRule)
     return impl
