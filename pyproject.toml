@@ -4,3 +4,5 @@ extend-exclude = ["demo"]
 
 [tool.ruff.lint]
 extend-select = ["I"]
+
+[tool.setuptools_scm]
