@@ -5,9 +5,9 @@ from typing import Optional
 
 import click
 import keke
+from moreorless.click import echo_color_precomputed_diff
 from rich import print
 from vmodule import vmodule_init
-from moreorless.click import echo_color_precomputed_diff
 
 from ick_protocol import Urgency
 
