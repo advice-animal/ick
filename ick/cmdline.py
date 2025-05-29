@@ -7,6 +7,7 @@ import click
 import keke
 from rich import print
 from vmodule import vmodule_init
+from moreorless.click import echo_color_precomputed_diff
 
 from ick_protocol import Urgency
 
@@ -111,7 +112,7 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, filters: list[str]):
         print(f"-> [bold]{result.rule}[/bold] on {result.project}", end="")
         if result.finished.error:
             print("[red]ERROR[/red]")
-            for line in r.message.splitlines():
+            for line in result.finished.message.splitlines():
                 print("    ", line)
         else:
             print("[green]OK[/green]")
@@ -123,7 +124,7 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, filters: list[str]):
             for mod in result.modifications:
                 print("    ", mod.filename, mod.diffstat)
         else:
-            for mod in result.modified:
+            for mod in result.modifications:
                 if mod.new_bytes is None:
                     # TODO remove filename
                     pass
