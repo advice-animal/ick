@@ -3,6 +3,7 @@ name = "hello"
 language = "shell"
 command = "echo hi"
 scope = "repo"
+urgency = "now"
 
 [[rule]]
 name = "shouty"
@@ -16,3 +17,9 @@ command = '''
 perl -i -pe 's/(.*)/\U\1/g if $.==1'
 '''
 order = 75
+
+[[ruleset]]
+path = "."
+
+[[mount]]
+path = "."
