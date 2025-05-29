@@ -39,6 +39,6 @@ def test_get_impl():
 
 def test_discover():
     m = Mount(base_path=Path.cwd(), path="tests/fixture_rules")
-    h = RulesConfig(mount=[m])
+    h = RulesConfig(ruleset=[m])
     rules = discover_rules(rtc=RuntimeConfig(main_config=MainConfig(), rules_config=h, settings=Settings()))
     assert len(rules) == 3

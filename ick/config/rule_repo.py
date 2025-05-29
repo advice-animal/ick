@@ -31,7 +31,7 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
     rules: list[RuleConfig] = []
 
     mounts = {}
-    for mount in rtc.rules_config.mount:
+    for mount in rtc.rules_config.ruleset:
         LOG.log(VLOG_1, "Processing %s", mount)
         # Prefixes should be unique; they override here
         mounts[mount.prefix] = load_rule_repo(mount)

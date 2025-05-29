@@ -26,10 +26,10 @@ LOG = getLogger(__name__)
 class RulesConfig(Struct):
     """ """
 
-    mount: Sequence[Mount] = ()
+    ruleset: Sequence[Mount] = ()
 
     def inherit(self, less_specific_defaults):
-        self.mount = merge(self.mount, less_specific_defaults.mount)
+        self.ruleset = merge(self.ruleset, less_specific_defaults.ruleset)
 
 
 class Mount(Struct):
@@ -144,7 +144,7 @@ def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:
             else:
                 c = decode_toml(p.read_bytes(), type=RulesConfig)
 
-            for mount in c.mount:
+            for mount in c.ruleset:
                 mount.base_path = p.parent
 
             # TODO finalize mount paths so relative works
