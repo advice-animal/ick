@@ -2,17 +2,17 @@ from __future__ import annotations
 
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
 from fnmatch import fnmatch
 from glob import glob
 from logging import getLogger
 from pathlib import Path
 from shutil import copytree
 from tempfile import TemporaryDirectory
-from typing import Any
+from typing import Any, Iterable
 
 import moreorless
 from keke import ktrace
-from moreorless.click import echo_color_precomputed_diff
 from moreorless.combined import combined_diff
 from rich.progress import Progress
 
@@ -25,6 +25,15 @@ from .sh import run_cmd
 from .types_project import Project, Repo
 
 LOG = getLogger(__name__)
+
+
+# TODO temporary; this should go in protocol and be better typed...
+@dataclass
+class HighLevelResult:
+    rule: Any
+    project: Any
+    modifications: Any
+    finished: Any
 
 
 class Runner:
@@ -147,23 +156,16 @@ class Runner:
                 # Multiple tests have an additional level of directories
                 yield impl, tuple(test_path.glob("*/"))
 
-    def run(self) -> Any:
+    def run(self) -> Iterable[HighLevelResult]:
         for impl in self.iter_rule_impl():
             qualname = impl.rule_config.qualname
 
             impl.prepare()
             for p in self.projects:
                 responses = self._run_one(impl, self.repo, p)
-                print("  ", qualname, impl, p.subdir)
-                for r in responses:
-                    if isinstance(r, Modified):
-                        print("    ", r.filename, r.diffstat)
-                        echo_color_precomputed_diff(r.diff)
-                    elif isinstance(r, Finished) and r.error:
-                        for line in r.message.splitlines():
-                            print("    ", line)
-                    else:
-                        print("    ", r)
+                mod = [m for m in responses if isinstance(m, Modified)]
+                assert isinstance(responses[-1], Finished)
+                yield HighLevelResult(qualname, p.subdir, mod, responses[-1])
 
     def _run_one(self, rule_instance, repo, project):
         try:

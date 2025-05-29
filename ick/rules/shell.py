@@ -20,7 +20,7 @@ class Rule(BaseRule):
             parts = ["/bin/bash", "-c", rule_config.data.strip(), "placeholder"]
 
         if rule_config.scope == Scope.SINGLE_FILE:
-            self.command_parts = ["xargs", "-n1", "-0"] + parts
+            self.command_parts = ["xargs", "-n10", "-P6", "-0"] + parts
         else:
             self.command_parts = parts
 

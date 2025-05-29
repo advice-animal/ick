@@ -5,6 +5,7 @@ from typing import Optional
 
 import click
 import keke
+from rich import print
 from vmodule import vmodule_init
 
 from ick_protocol import Urgency
@@ -78,10 +79,11 @@ def test_rules(ctx):
 
 @main.command()
 @click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, on by default sometimes")
+@click.option("-p", "--patch", is_flag=True, help="Show patch instead of applying")
 @click.option("--yolo", is_flag=True, help="Yolo mode enables modifying external state")
 @click.argument("filters", nargs=-1)
 @click.pass_context
-def run(ctx, dry_run: bool, yolo: bool, filters: list[str]):
+def run(ctx, dry_run: bool, patch: bool, yolo: bool, filters: list[str]):
     """
     Run the applicable rules to the current repo/path
 
@@ -105,9 +107,29 @@ def run(ctx, dry_run: bool, yolo: bool, filters: list[str]):
     # DO THE NEEDFUL
 
     r = Runner(ctx.obj, ctx.obj.repo, explicit_project=None)
-    r.run()
+    for result in r.run():
+        print(f"-> [bold]{result.rule}[/bold] on {result.project}", end="")
+        if result.finished.error:
+            print("[red]ERROR[/red]")
+            for line in r.message.splitlines():
+                print("    ", line)
+        else:
+            print("[green]OK[/green]")
 
-    # PRINT THE OUTPUT
+        if patch:
+            for mod in result.modifications:
+                echo_color_precomputed_diff(mod.diff)
+        elif ctx.obj.settings.dry_run:
+            for mod in result.modifications:
+                print("    ", mod.filename, mod.diffstat)
+        else:
+            for mod in result.modified:
+                if mod.new_bytes is None:
+                    # TODO remove filename
+                    pass
+                else:
+                    # TODO makedirs(exist_ok)
+                    mod.filename.write_bytes(mod.new_bytes)
 
 
 def verbose_init(v: int, verbose: Optional[int], vmodule: Optional[str]) -> None:
