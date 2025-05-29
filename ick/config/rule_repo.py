@@ -39,7 +39,7 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
     for k, v in mounts.items():
         rules.extend(v.rule)
 
-    rules.sort(key=lambda h: (h.order, h.name))
+    rules.sort(key=lambda h: (h.order, h.qualname))
 
     return rules
 
@@ -77,7 +77,7 @@ def load_rule_repo(mount: Mount) -> RuleRepoConfig:
         if base:
             base += "/"
         for rule in c.rule:
-            rule.qualname = base + rule.name
+            rule.qualname = mount.prefix + "/" + base + rule.name
             if (p.parent / rule.name).exists():
                 rule.test_path = repo_path / base / rule.name / "tests"
                 rule.script_path = repo_path / base / rule.name / rule.name

@@ -99,7 +99,7 @@ class ToolConfig(Struct):
 
 
 @ktrace()
-def load_main_config(cur: Path, isolated_repo: bool = False) -> MainConfig:
+def load_main_config(cur: Path, isolated_repo: bool) -> MainConfig:
     conf = MainConfig()
     repo_root = find_repo_root(cur)
     config_dir = appdirs.user_config_dir("ick", "advice-animal")
@@ -167,6 +167,7 @@ class RuntimeConfig(Struct):
     rules_config: Any  # Avoiding possible circular reference
     settings: Settings
     filter_config: FilterConfig = field(default_factory=FilterConfig)
+    repo: Any = None
 
 
 __all__ = ["load_main_config", "MainConfig", "RuntimeConfig"]

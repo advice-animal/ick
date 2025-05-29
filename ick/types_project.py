@@ -22,3 +22,8 @@ class Repo(Struct):
 
     def __post_init__(self):
         self.zfiles = subprocess.check_output(["git", "ls-files", "-z"], encoding="utf-8", cwd=self.root)
+
+
+class NullRepo(Struct):
+    projects: Sequence[Project] = ()
+    zfiles: str = ""

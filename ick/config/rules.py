@@ -41,6 +41,10 @@ class Mount(Struct):
 
     repo: Optional[RuleRepoConfig] = None
 
+    def __post_init__(self):
+        if self.prefix is None:
+            self.prefix = (self.url or self.path).rstrip("/").split("/")[-1]
+
 
 class PyprojectRulesConfig(Struct):
     tool: PyprojectToolConfig

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from fnmatch import fnmatch
 from glob import glob
@@ -32,17 +33,18 @@ class Runner:
         self.rules = discover_rules(rtc)
         self.repo = repo
         # TODO there's a var on repo to store this...
-        self.projects = find_projects(repo, repo.zfiles, self.rtc.main_config)
+        self.projects: list[Project] = find_projects(repo, repo.zfiles, self.rtc.main_config)
         assert explicit_project is None
         self.explicit_project = explicit_project
 
     def iter_rule_impl(self):
+        name_filter = re.compile(self.rtc.filter_config.name_filter_re).fullmatch
         for rule in self.rules:
-            # TODO the isinstance is here because of handling collections,
-            # which may be overcomplicating things this early...
-            if isinstance(rule, RuleConfig):
-                if rule.urgency < self.rtc.filter_config.min_urgency:
-                    continue
+            if rule.urgency < self.rtc.filter_config.min_urgency:
+                continue
+            if not name_filter(rule.qualname):
+                continue
+
             i = get_impl(rule)(rule, self.rtc)
             yield i
 
@@ -144,15 +146,12 @@ class Runner:
 
     def run(self) -> Any:
         for impl in self.iter_rule_impl():
-            if hasattr(impl, "rule_config"):
-                name = impl.rule_config.name
-            else:
-                name = repr(impl)
+            qualname = impl.rule_config.qualname
 
             impl.prepare()
             for p in self.projects:
                 responses = self._run_one(impl, self.repo, p)
-                print("  ", name, impl, p.subdir)
+                print("  ", qualname, impl, p.subdir)
                 for r in responses:
                     if isinstance(r, Modified):
                         print("    ", r.filename, r.diffstat)
@@ -177,9 +176,9 @@ class Runner:
                         if rule_instance.rule_config.inputs:
                             filenames = [f for f in filenames if any(fnmatch(f, x) for x in rule_instance.rule_config.inputs)]
 
-                        resp.extend(work.run("ZZZ", filenames))
+                        resp.extend(work.run(rule_instance.rule_config.qualname, filenames))
         except Exception as e:
-            resp = [Finished("ZZZ", error=True, message=repr(e))]
+            resp = [Finished(rule_instance.rule_config.qualname, error=True, message=repr(e))]
         return resp
 
     @ktrace()
