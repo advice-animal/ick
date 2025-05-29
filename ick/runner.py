@@ -90,13 +90,14 @@ class Runner:
             ap = test_path / "a"
             bp = test_path / "b"
             files_to_check = set(glob("*", root_dir=bp, recursive=True))
+            files_to_check.update(glob(".github/*/*", root_dir=bp, recursive=True))
 
             response = self._run_one(rule_instance, repo, project)
             assert isinstance(response[-1], Finished), "Last response is finished"
             if response[-1].error:
                 expected_path = bp / "output.txt"
                 if not expected_path.exists():
-                    assert False, response[-1].message
+                    assert False, f"missing output: {response[-1].message}"
 
                 expected = expected_path.read_text()
                 if expected != response[-1].message:
@@ -105,14 +106,14 @@ class Runner:
                     assert False, response[-1].message
                 return
 
-            assert not response[-1].error, response[-1].message
+            assert not response[-1].error, f"error: {response[-1].message}"
 
             for r in response[:-1]:
                 assert isinstance(r, Modified)
                 if r.new_bytes is None:
-                    assert r.filename not in files_to_check
+                    assert r.filename not in files_to_check, "missing removal"
                 else:
-                    assert r.filename in files_to_check
+                    assert r.filename in files_to_check, "missing edit"
                     if (bp / r.filename).read_bytes() != r.new_bytes:
                         print(rule_instance.rule_config.name, "fail")
                         print(
