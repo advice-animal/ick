@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import re
 import shlex
+import subprocess
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -21,13 +22,24 @@ GIT_VERSION_RE = re.compile(r"(\d+\.)\d+(?:\.\d+)?(?:\.dev\d+\S+)?")
 
 @pytest.mark.parametrize("filename", SCENARIOS)
 def test_scenario(filename, monkeypatch):
-    monkeypatch.setenv("ADVICE_DIR", str(Path(__file__).parent / "advice"))
+    monkeypatch.setenv("ICK_CONFIG", str(Path(__file__).parent / "fixture_rules" / "ick.toml"))
 
     path = SCENARIO_DIR / filename
     runner = CliRunner()
     command, output = load_scenario(path)
 
     with runner.isolated_filesystem():
+        subprocess.check_call(["git", "init"])
+        Path("a").mkdir()
+        Path("b/c").mkdir(parents=True)
+        Path("a/pyproject.toml").touch()
+        Path("b/c/build.gradle").touch()
+        # TODO the commit here is necessary; project finding only works based
+        # on files that are present in the original repo, and this doesn't work
+        # with NullRepo either. Oops.
+        subprocess.check_call(["git", "add", "-N", "."])
+        subprocess.check_call(["git", "commit", "-a", "-m", "foo"])
+        # TODO handle options
         result = runner.invoke(main, command, catch_exceptions=False)
 
     cleaned_output = LOG_LINE_TIMESTAMP_RE.sub("", result.output)

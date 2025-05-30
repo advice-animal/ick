@@ -1,1 +1,9 @@
-$ ick --isolated-repo list-rules
+$ ick list-rules
+LATER
+=====
+* ./goodbye
+* ./shouty
+
+NOW
+===
+* ./hello

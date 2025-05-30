@@ -4,9 +4,10 @@ Rule definitions, merged from repo config and user config.
 
 from __future__ import annotations
 
+import os
 from logging import getLogger
 from pathlib import Path
-from typing import Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union
 
 import appdirs
 from keke import ktrace
@@ -99,32 +100,35 @@ class RuleConfig(Struct):
 @ktrace()
 def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:
     conf = RulesConfig()
-    repo_root = find_repo_root(cur)
-    paths = []
-    # TODO revisit whether defining rules in pyproject.toml is a good idea
-    if cur.resolve() != repo_root.resolve():
+    paths: List[Path] = []
+    if os.environ.get("ICK_CONFIG"):
+        paths.append(Path(os.environ.get("ICK_CONFIG")))
+    else:
+        repo_root = find_repo_root(cur)
+        # TODO revisit whether defining rules in pyproject.toml is a good idea
+        if cur.resolve() != repo_root.resolve():
+            paths.extend(
+                [
+                    Path(cur, "ick.toml"),
+                    Path(cur, "pyproject.toml"),
+                ]
+            )
         paths.extend(
             [
-                Path(cur, "ick.toml"),
-                Path(cur, "pyproject.toml"),
+                Path(repo_root, "ick.toml"),
+                Path(repo_root, "pyproject.toml"),
             ]
         )
-    paths.extend(
-        [
-            Path(repo_root, "ick.toml"),
-            Path(repo_root, "pyproject.toml"),
-        ]
-    )
-    if not isolated_repo:
-        config_dir = appdirs.user_config_dir("ick", "advice-animal")
-        paths.extend(
-            [
-                Path(config_dir, "ick.toml.local"),
-                Path(config_dir, "ick.toml"),
-            ]
-        )
+        if not isolated_repo:
+            config_dir = appdirs.user_config_dir("ick", "advice-animal")
+            paths.extend(
+                [
+                    Path(config_dir, "ick.toml.local"),
+                    Path(config_dir, "ick.toml"),
+                ]
+            )
 
-    LOG.log(VLOG_1, "Loading workspace config near %s", cur)
+        LOG.log(VLOG_1, "Loading workspace config near %s", cur)
 
     for p in paths:
         if p.exists():

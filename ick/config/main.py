@@ -6,6 +6,7 @@ This controls where we look for rules and how we find projects.
 
 from __future__ import annotations
 
+import os
 from logging import getLogger
 from pathlib import Path
 from typing import Any, List, Optional
@@ -101,28 +102,34 @@ class ToolConfig(Struct):
 @ktrace()
 def load_main_config(cur: Path, isolated_repo: bool) -> MainConfig:
     conf = MainConfig()
-    repo_root = find_repo_root(cur)
-    config_dir = appdirs.user_config_dir("ick", "advice-animal")
     paths: List[Path] = []
-    if cur.resolve() != repo_root.resolve():
+    if os.environ.get("ICK_CONFIG"):
+        # This isn't well documented because it's only intended for testing --
+        # I don't have a reason people would want to ignore both repo and user
+        # config.
+        paths.append(Path(os.environ.get("ICK_CONFIG")))
+    else:
+        repo_root = find_repo_root(cur)
+        config_dir = appdirs.user_config_dir("ick", "advice-animal")
+        if cur.resolve() != repo_root.resolve():
+            paths.extend(
+                [
+                    Path(cur, "ick.toml"),
+                    Path(cur, "pyproject.toml"),
+                ]
+            )
         paths.extend(
             [
-                Path(cur, "ick.toml"),
-                Path(cur, "pyproject.toml"),
+                Path(repo_root, "ick.toml"),
+                Path(repo_root, "pyproject.toml"),
             ]
         )
-    paths.extend(
-        [
-            Path(repo_root, "ick.toml"),
-            Path(repo_root, "pyproject.toml"),
-        ]
-    )
-    if not isolated_repo:
-        paths.append(
-            Path(config_dir, "ick.toml"),
-        )
+        if not isolated_repo:
+            paths.append(
+                Path(config_dir, "ick.toml"),
+            )
 
-    LOG.log(VLOG_1, "Loading main config near %s", cur)
+        LOG.log(VLOG_1, "Loading main config near %s", cur)
 
     for p in paths:
         LOG.debug("Looking for config at %s", p)

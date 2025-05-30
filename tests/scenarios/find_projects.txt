@@ -1,0 +1,3 @@
+$ ick find-projects
+'a/'                 (python)
+'b/c/'               (java)
