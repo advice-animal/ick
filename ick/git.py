@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import posixpath
-import subprocess
 from hashlib import sha256
 from logging import getLogger
 from pathlib import Path
 from urllib.parse import urlparse
 
 from click import ClickException
+
+from .sh import run_cmd
 
 LOG = getLogger(__name__)
 
@@ -31,10 +32,10 @@ def update_local_cache(url: str, skip_update: bool, freeze: bool = False) -> Pat
     local_checkout = cache_dir / _get_local_cache_name(url)
     freeze_name = local_checkout / ".git" / "freeze"
     if not local_checkout.exists():
-        subprocess.check_output(["git", "clone", url, local_checkout])
+        run_cmd(["git", "clone", url, local_checkout])
     elif not skip_update:
         if not freeze_name.exists():
-            subprocess.check_output(["git", "pull"], cwd=local_checkout)
+            run_cmd(["git", "pull"], cwd=local_checkout)
     if freeze:
         freeze_name.touch()
     return local_checkout

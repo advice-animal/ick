@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 from typing import Optional, Sequence
 
 from msgspec import Struct
+
+from .sh import run_cmd
 
 
 class Project(Struct):
@@ -21,7 +22,7 @@ class Repo(Struct):
     zfiles: Optional[str] = None
 
     def __post_init__(self):
-        self.zfiles = subprocess.check_output(["git", "ls-files", "-z"], encoding="utf-8", cwd=self.root)
+        self.zfiles, _ = run_cmd(["git", "ls-files", "-z"], cwd=self.root)
 
 
 class NullRepo(Struct):
