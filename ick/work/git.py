@@ -3,6 +3,7 @@ from contextlib import ExitStack
 from pathlib import Path
 
 from ..device_tmpdir import find_tmpdir
+from ..sh import run_cmd
 
 
 class GitWorkdirFactory:
@@ -29,8 +30,8 @@ class GitWorkdir:
     def __enter__(self):
         # come up with a temp name in clones_dir
         this_dir = self._clones_dir / "abc"
-        subprocess.check_call(["git", "apply", "--index", self._wc_patch], cwd=this_dir)
+        run_cmd(["git", "apply", "--index", self._wc_patch], cwd=this_dir)
 
-        subprocess.check_call(["git", "clone", self._parent, self._clone_dir])
+        run_cmd(["git", "clone", self._parent, self._clone_dir])
         ...
-        subprocess.check_call(["git", "diff", "--binary"], cwd=self._parent)
+        run_cmd(["git", "diff", "--binary"], cwd=self._parent)
