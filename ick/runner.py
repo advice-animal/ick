@@ -99,7 +99,7 @@ class Runner:
             ap = test_path / "a"
             bp = test_path / "b"
             files_to_check = set(glob("*", root_dir=bp, recursive=True))
-            files_to_check.update(glob(".github/*/*", root_dir=bp, recursive=True))
+            files_to_check.update(glob(".github/**", root_dir=bp, recursive=True))
 
             response = self._run_one(rule_instance, repo, project)
             assert isinstance(response[-1], Finished), "Last response is finished"
