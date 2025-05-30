@@ -1,11 +1,12 @@
 import json
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 from typing import List
 
 from filelock import FileLock
+
+from .sh import run_cmd
 
 
 def find_uv() -> Path:
@@ -36,10 +37,10 @@ class PythonEnv:
         if not py.exists():
             return False
         try:
-            subprocess.check_output([py, "--version"])
-        except subprocess.CalledProcessError:
-            return False
+            _, returncode = run_cmd([py, "--version"], check=False)
         except PermissionError:
+            return False
+        if returncode != 0:
             return False
 
         # Eek, this could happen outside the lock, so be defensive against
@@ -59,7 +60,12 @@ class PythonEnv:
 
             if self.env_path.exists():
                 shutil.rmtree(self.env_path)
-            subprocess.check_output([uv, "venv", self.env_path], env={"UV_PYTHON_PREFERENCE": "system"}, stderr=subprocess.STDOUT)
+            # TODO: should a rule be able to specify the version of Python it needs?
+            python_exe = sys.executable
+            run_cmd(
+                [uv, "venv", "--python", python_exe, self.env_path],
+                env={"UV_PYTHON_PREFERENCE": "system"},
+            )
 
             # A bit silly to create a venv with no deps, but handle it gracefully
             #
@@ -67,5 +73,8 @@ class PythonEnv:
             # reasonable error during prepare if it's not present/downloadable
             # on the system.
             if self.deps:
-                subprocess.check_output([uv, "pip", "install", *self.deps], env={"VIRTUAL_ENV": self.env_path}, stderr=subprocess.STDOUT)
+                run_cmd(
+                    [uv, "pip", "install", *self.deps], 
+                    env={"VIRTUAL_ENV": self.env_path},
+                )
             self._deps_path().write_text(json.dumps(self.deps))
