@@ -56,7 +56,7 @@ class ExecWork(Work):
                 yield Finished(
                     rule_name,
                     error=True,
-                    message=(e.stdout or e.stderr or f"{self.collection.command_parts[0]} returned non-zero exit status {e.returncode}"),
+                    message=((e.stdout + e.stderr) or f"{self.collection.command_parts[0]} returned non-zero exit status {e.returncode}"),
                 )
             else:
                 yield Finished(rule_name, error=True, message=str(e) + "\n" + e.stderr)
