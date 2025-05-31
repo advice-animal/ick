@@ -131,8 +131,8 @@ print("files in the root of your repo.  See http://go/unified-config")
 
 If you don't modify files, and exit 0, anything you print is ignored.
 
-However if you change the verb to `run`, it will fail trying to import those
-dependencies:
+The `ick run` command will run the rule. But if we try it now it will fail
+trying to import those third-party dependencies:
 
 ```shell
 $ ick run
@@ -143,7 +143,7 @@ $ ick run
      ModuleNotFoundError: No module named 'imperfect'
 ```
 
-We need to tell `ick` about the dependencies your rule needs.
+We need to tell `ick` about the dependencies the rule needs.
 
 
 ## Configuring dependencies
@@ -168,7 +168,7 @@ $ ick run
 -> ./move_isort_cfg on OK
 ```
 
-But the rule did nothing because there was no `isort.cfg` file in `/tmp/foo`.
+But the rule did nothing because there is no `isort.cfg` file in `/tmp/foo`.
 Create one:
 
 ```ini
@@ -190,7 +190,7 @@ Passing the `--patch` option displays the full patch of the changes that would
 be made:
 
 ```shell
-% ick run --patch
+$ ick run --patch
 -> ./move_isort_cfg on OK
 diff --git isort.cfg isort.cfg
 deleted file mode 100644
