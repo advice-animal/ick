@@ -1,13 +1,13 @@
 # Tutorial
 
-Ick coordinates running automated rules on your code and other files.  Rules can
-check for conformance, or can transform your files to apply needed
+Ick coordinates the running of automated rules on your code and other files.
+Rules can check for conformance, or can transform your files to apply needed
 modifications.
 
-Rules can be written in any language and using any tooling you want.  Rules can
-live in your code's repo, in a rules repo of your own, or in a rules repo
-provided by someone else.  Ick lets you use rules from a number of sources at
-once.
+Rules can be written in any language and use any tooling you want.  Rules can be
+sourced from many places: your code's repo, a rules repo of your own, a rules
+repo provided by someone else, or even a local directory.  Ick lets you use rules
+from a number of sources at once.
 
 ## Setting up a local development ruleset
 
@@ -35,7 +35,7 @@ directory has rules:
 path = "."
 ```
 
-If you run `ick list-rules`, it shouldn't find any:
+If you run `ick list-rules`, it won't find any yet:
 
 ```shell
 $ ick list-rules
@@ -60,8 +60,8 @@ project_types = ["python"]
 ```
 
 The `language` setting means we will implement the rule with Python code.
-Setting `scope` to `project` means that the rule will be invoked on the project
-directory instead of on individual files (but that doesn't work yet, so it's
+Setting `scope` to `project` means the rule will be invoked at the project
+level instead of on individual files (but that doesn't work yet, so it's
 commented out).
 
 Ick can look for projects of certain types.  Setting `project_types` here means
@@ -85,7 +85,7 @@ LATER
 To implement the rule, create a subdirectory matching the rule name with a
 file in it also matching the rule name:
 
-```py
+```python
 # This file is /tmp/foo/move_isort_cfg/move_isort_cfg.py
 
 from pathlib import Path
@@ -124,7 +124,7 @@ real working tree.
 If you want to provide more context for why this change is useful, simply
 `print(...)` it to stdout.
 
-```
+```python
 print("You can move the isort config into pyproject.toml to have fewer")
 print("files in the root of your repo.  See http://go/unified-config")
 ```
@@ -168,7 +168,8 @@ $ ick run
 -> ./move_isort_cfg on OK
 ```
 
-But the rule did nothing because we had no `isort.cfg` file.  Create one:
+But the rule did nothing because there was no `isort.cfg` file in `/tmp/foo`.
+Create one:
 
 ```ini
 [settings]
@@ -247,9 +248,9 @@ Prepare ━━━━━━━━━━━━━━━━━━━━━━━━
 In your `move_isort_cfg` rule directory, create a `tests` subdirectory.  There
 each directory will be a test.  Create a `move_isort_cfg/tests/no_isort`
 directory.  In there, the `a` directory will be the "before" state of the files,
-and the `b` directory will be the "after" state of the files.  Running the test
-checks that the files in `a` are transformed to match the files in `b` when the
-rule runs.
+and the `b` directory will be the expected "after" state of the files.  Running
+the test checks that the files in `a` are transformed to match the files in `b`
+when the rule runs.
 
 Create two files `a/pyproject.toml` and `b/pyproject.toml` with the same
 contents:
