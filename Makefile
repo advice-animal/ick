@@ -18,7 +18,7 @@ endif
 
 .PHONY: setup
 setup: .venv
-	source $(ACTIVATE) && $(PIP) install -Ue .[dev,test]
+	source $(ACTIVATE) && $(PIP) install -Ue .[dev,test,docs]
 
 .PHONY: html
 html: .venv README.md docs/*.rst docs/conf.py
