@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import re
 import shlex
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Optional, Tuple
@@ -13,7 +14,7 @@ from click.testing import CliRunner
 from ick.cmdline import main
 
 SCENARIO_DIR = Path(__file__).parent / "scenarios"
-SCENARIOS = sorted(SCENARIO_DIR.glob("*.txt"))
+SCENARIOS = sorted(str(f.relative_to(SCENARIO_DIR)) for f in SCENARIO_DIR.glob("**/*.txt"))
 
 LOG_LINE_TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} ", re.M)
 LOG_LINE_NUMERIC_LINE_RE = re.compile(r"^([A-Z]+\s+[a-z_.]+:)\d+(?= )", re.M)
@@ -29,16 +30,15 @@ def test_scenario(filename, monkeypatch):
     command, output = load_scenario(path)
 
     with runner.isolated_filesystem():
-        subprocess.check_call(["git", "init"])
-        Path("a").mkdir()
-        Path("b/c").mkdir(parents=True)
-        Path("a/pyproject.toml").touch()
-        Path("b/c/build.gradle").touch()
-        # TODO the commit here is necessary; project finding only works based
-        # on files that are present in the original repo, and this doesn't work
-        # with NullRepo either. Oops.
-        subprocess.check_call(["git", "add", "-N", "."])
-        subprocess.check_call(["git", "commit", "-a", "-m", "foo"])
+        repo_data = path.parent / "repo"
+        if repo_data.exists():
+            shutil.copytree(repo_data, ".", dirs_exist_ok=True)
+            # TODO the commit here is necessary; project finding only works based
+            # on files that are present in the original repo, and this doesn't work
+            # with NullRepo either. Oops.
+            subprocess.check_call(["git", "init"])
+            subprocess.check_call(["git", "add", "-N", "."])
+            subprocess.check_call(["git", "commit", "-a", "-m", "foo"])
         # TODO handle options
         result = runner.invoke(main, command, catch_exceptions=False)
 
