@@ -168,13 +168,6 @@ trying to import those third-party dependencies:
 <!-- [[[cog show_cmd("ick run") ]]] -->
 ```shell
 $ ick run
-2025-06-02 11:55:03,198 WARNING  ick.sh:21 Ran ['xargs', '-n10', '-P6', '-0', PosixPath('/Users/nbatchelder/Library/Caches/ick/envs/move_isort_cfg/bin/python'), PosixPath('/tmp/foo/move_isort_cfg/move_isort_cfg.py')] -> 1
-2025-06-02 11:55:03,198 WARNING  ick.sh:25 Stderr:
-Traceback (most recent call last):
-  File "/tmp/foo/move_isort_cfg/move_isort_cfg.py", line 5, in <module>
-    import imperfect
-ModuleNotFoundError: No module named 'imperfect'
-
 -> ./move_isort_cfg on ERROR
      Traceback (most recent call last):
        File "/tmp/foo/move_isort_cfg/move_isort_cfg.py", line 5, in <module>
