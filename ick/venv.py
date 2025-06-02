@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -61,10 +62,24 @@ class PythonEnv:
             if self.env_path.exists():
                 shutil.rmtree(self.env_path)
             # TODO: should a rule be able to specify the version of Python it needs?
+            # If it's not on the system should it download?
             python_exe = sys.executable
+
+            # Important: env is intended to inherit some stuff from the system
+            # here, like $HOME to find your uv.toml configuring mirrors, or
+            # other vars including $UV_NATIVE_TLS.
+            #
+            # Setting UV_SYSTEM_PYTHON=1 without setting PATH causes
+            # hard-to-debug failures, so only inherit a couple for now.
+            env = {}
+            for k, v in os.environ.items():
+                if k in ("HOME", "UV_CACHE_DIR", "UV_NATIVE_TLS") or k.startswith("XDG_"):
+                    print(k, v)
+                    env[k] = v
+
             run_cmd(
                 [uv, "venv", "--python", python_exe, self.env_path],
-                env={"UV_PYTHON_PREFERENCE": "system"},
+                env=env,
             )
 
             # A bit silly to create a venv with no deps, but handle it gracefully
@@ -73,8 +88,9 @@ class PythonEnv:
             # reasonable error during prepare if it's not present/downloadable
             # on the system.
             if self.deps:
+                env["VIRTUAL_ENV"] = self.env_path
                 run_cmd(
-                    [uv, "pip", "install", *self.deps], 
-                    env={"VIRTUAL_ENV": self.env_path},
+                    [uv, "pip", "install", *self.deps],
+                    env=env,
                 )
             self._deps_path().write_text(json.dumps(self.deps))
