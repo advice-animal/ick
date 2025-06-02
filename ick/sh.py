@@ -18,11 +18,11 @@ def run_cmd(cmd: list[Union[str, Path]], check: bool = True, cwd: Optional[Union
     try:
         proc = subprocess.run(cmd, encoding="utf-8", capture_output=True, check=check, cwd=cwd, **kwargs)
     except subprocess.CalledProcessError as e:
-        LOG.warning("Ran %s -> %s", cmd, e.returncode)
+        LOG.info("Ran %s -> %s", cmd, e.returncode)
         if e.stdout:
-            LOG.warning("Stdout:\n%s", e.stdout)
+            LOG.info("Stdout:\n%s", e.stdout)
         if e.stderr:
-            LOG.warning("Stderr:\n%s", e.stderr)
+            LOG.info("Stderr:\n%s", e.stderr)
         raise
     LOG.debug("Ran %s -> %s", cmd, proc.returncode)
     LOG.debug("Stdout:\n%s", proc.stdout)

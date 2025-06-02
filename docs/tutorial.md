@@ -1,3 +1,12 @@
+<!--
+    [[[cog
+        from cog_helpers import *
+        set_source_root("docs/data/tutorial")
+        cd_temp(pretend="/tmp/foo")
+    ]]]
+    [[[end]]]
+-->
+
 # Tutorial
 
 Ick coordinates the running of automated rules on your code and other files.
@@ -22,6 +31,16 @@ path or an existing git repo, just adjust the path examples here.
 To make the directory realistic enough for ick to run, create an empty
 `pyproject.toml` file and commit it to git.
 
+<!-- [[[cog
+    run_cmd("""
+        git init
+        touch pyproject.toml
+        git add pyproject.toml
+        git commit -m 'first'
+    """)
+]]] -->
+<!-- [[[end]]] -->
+
 [BTW: it seems odd that this directory has to be a git repo. Why can't ick
 work in a plain-old directory?]
 
@@ -29,18 +48,21 @@ Ick reads `ick.toml` files to find rules.  A ruleset is a location to find
 rules.  In `/tmp/foo` create an `ick.toml` file to say that the current
 directory has rules:
 
+<!-- [[[cog copy_file("ick.toml", show=True) ]]] -->
 ```toml
 [[ruleset]]
-
 path = "."
 ```
+<!-- [[[end]]] -->
 
 If you run `ick list-rules`, it won't find any yet:
 
+<!-- [[[cog show_cmd("ick list-rules") ]]] -->
 ```shell
 $ ick list-rules
-$
 ```
+<!-- [[[end]]] -->
+
 
 ## Creating a rule definition
 
@@ -50,14 +72,18 @@ default that always applies.]
 
 Next, we can append to `ick.toml` to define a rule:
 
+<!-- [[[cog copy_file("ick2.toml", "ick.toml", show=True) ]]] -->
 ```toml
-[[rule]]
+[[ruleset]]
+path = "."
 
+[[rule]]
 language = "python"
 name = "move_isort_cfg"
 # scope = "project"
 project_types = ["python"]
 ```
+<!-- [[[end]]] -->
 
 The `language` setting means we will implement the rule with Python code.
 Setting `scope` to `project` means the rule will be invoked at the project
@@ -73,18 +99,22 @@ but indicate that the code is missing.]
 
 If you run `list-rules` again, the rule appears:
 
+<!-- [[[cog show_cmd("ick list-rules") ]]] -->
 ```shell
 $ ick list-rules
 LATER
 =====
 * ./move_isort_cfg
 ```
+<!-- [[[end]]] -->
+
 
 ## Implementing the rule
 
 To implement the rule, create a subdirectory matching the rule name with a
 file in it also matching the rule name:
 
+<!-- [[[cog copy_file("move_isort_cfg/move_isort_cfg.py", show=True) ]]] -->
 ```python
 # This file is /tmp/foo/move_isort_cfg/move_isort_cfg.py
 
@@ -107,6 +137,7 @@ if __name__ == "__main__":
         toml.write_text(tomlkit.dumps(toml_data))
         cfg.unlink()
 ```
+<!-- [[[end]]] -->
 
 The details of this implementation aren't important.  The key thing to note is
 this is Python code that uses third-party packages to read the `isort.cfg` file
@@ -134,14 +165,16 @@ If you don't modify files, and exit 0, anything you print is ignored.
 The `ick run` command will run the rule. But if we try it now it will fail
 trying to import those third-party dependencies:
 
+<!-- [[[cog show_cmd("ick run") ]]] -->
 ```shell
 $ ick run
 -> ./move_isort_cfg on ERROR
      Traceback (most recent call last):
-       File "/tmp/foo/move_isort_cfg/move_isort_cfg.py", line 5 in <module>
+       File "/tmp/foo/move_isort_cfg/move_isort_cfg.py", line 5, in <module>
          import imperfect
      ModuleNotFoundError: No module named 'imperfect'
 ```
+<!-- [[[end]]] -->
 
 We need to tell `ick` about the dependencies the rule needs.
 
@@ -151,44 +184,55 @@ We need to tell `ick` about the dependencies the rule needs.
 Python rules can declare the dependencies they need.  Ick will create a
 virtualenv for each rule and install the dependencies automatically.
 
-You can declare those in the `ick.toml` config file. Update it like this:
+You can declare those in the `ick.toml` config file. Update it with a `deps`
+line like this:
 
+<!-- [[[cog show_file("ick3.toml", start=r"\[\[rule\]\]", end="deps") ]]] -->
 ```toml
 [[rule]]
-
 language = "python"
 deps = ["imperfect", "tomlkit"]
-# ...
 ```
+<!-- [[[end]]] -->
+<!-- [[[cog copy_file("ick3.toml", "ick.toml") ]]] -->
+<!-- [[[end]]] -->
+
 
 Now `ick run` shows that the rule ran:
 
+<!-- [[[cog show_cmd("ick run") ]]] -->
 ```shell
 $ ick run
 -> ./move_isort_cfg on OK
 ```
+<!-- [[[end]]] -->
 
 But the rule did nothing because there is no `isort.cfg` file in `/tmp/foo`.
 Create one:
 
+<!-- [[[cog copy_file("isort.cfg", show=True) ]]] -->
 ```ini
 [settings]
 line_length = 88
 multi_line_output = 3
 ```
+<!-- [[[end]]] -->
 
 Now `ick run` shows a dry-run summary of the changes that would be made:
 
+<!-- [[[cog show_cmd("ick run") ]]] -->
 ```shell
 $ ick run
 -> ./move_isort_cfg on OK
      isort.cfg +0-3
-     pyproject.toml +4-0
+     pyproject.toml +3-0
 ```
+<!-- [[[end]]] -->
 
 Passing the `--patch` option displays the full patch of the changes that would
 be made:
 
+<!-- [[[cog show_cmd("ick run --patch") ]]] -->
 ```shell
 $ ick run --patch
 -> ./move_isort_cfg on OK
@@ -202,17 +246,16 @@ index fbab120..0000000
 -line_length = 88
 -multi_line_output = 3
 diff --git pyproject.toml pyproject.toml
-index ae155e2..19e4a4a 100644
+index e69de29..089c824 100644
 --- pyproject.toml
 +++ pyproject.toml
-@@ -1,2 +1,6 @@
- [project]
- name = "foo"
-+
+@@ -0,0 +1,3 @@
 +[tool.isort]
 +line_length = "88"
 +multi_line_output = "3"
 ```
+<!-- [[[end]]] -->
+
 
 ## Reducing execution
 
@@ -239,11 +282,13 @@ a rule are files showing the before and after states expected.
 The `ick test-rules` command will run tests for your rules.  We haven't written
 any tests yet, so it has nothing to do:
 
+<!-- [[[cog show_cmd("ick test-rules") ]]] -->
 ```shell
 $ ick test-rules
-no tests for ./move_isort_cfg under /private/tmp/foo/move_isort_cfg/tests
-Prepare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+no tests for ./move_isort_cfg under /tmp/foo/move_isort_cfg/tests
+Prepare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   
 ```
+<!-- [[[end]]] -->
 
 In your `move_isort_cfg` rule directory, create a `tests` subdirectory.  There
 each directory will be a test.  Create a `move_isort_cfg/tests/no_isort`
@@ -255,14 +300,21 @@ when the rule runs.
 Create two files `a/pyproject.toml` and `b/pyproject.toml` with the same
 contents:
 
+<!-- [[[cog show_file("move_isort_cfg/tests/no_isort/a/pyproject.toml") ]]] -->
 ```toml
 [project]
 name = "foo"
 ```
+<!-- [[[end]]] -->
+
+
+<!-- [[[cog copy_tree("move_isort_cfg/tests/no_isort") ]]] -->
+<!-- [[[end]]] -->
 
 Your directory structure should look like this:
 
-```
+<!-- [[[cog show_cmd("tree --dirsfirst") ]]] -->
+```shell
 $ tree --dirsfirst
 .
 ├── move_isort_cfg
@@ -276,35 +328,45 @@ $ tree --dirsfirst
 ├── ick.toml
 ├── isort.cfg
 └── pyproject.toml
+
+6 directories, 6 files
 ```
+<!-- [[[end]]] -->
 
 This is a simple test that checks that if there is no `isort.cfg` file, the
 `pyproject.toml` file will be unchanged.  Run `ick test-rules`:
 
+<!-- [[[cog show_cmd("ick test-rules") ]]] -->
 ```shell
 $ ick test-rules
 1 ok
-Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━             
 ./move_isort_cfg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
 ```
+<!-- [[[end]]] -->
 
 Now make a more realistic test. Create a `change_made`
 directory in the `tests` directory. Create these files:
 
 `change_made/a/isort.cfg`:
+<!-- [[[cog show_file("move_isort_cfg/tests/change_made/a/isort.cfg") ]]] -->
 ```ini
 [settings]
 line_length = 88
 multi_line_output = 3
 ```
+<!-- [[[end]]] -->
 
 `change_made/a/pyproject.toml`:
+<!-- [[[cog show_file("move_isort_cfg/tests/change_made/a/pyproject.toml") ]]] -->
 ```toml
 [project]
 name = "foo"
 ```
+<!-- [[[end]]] -->
 
 `change_made/b/pyproject.toml`:
+<!-- [[[cog show_file("move_isort_cfg/tests/change_made/b/pyproject.toml") ]]] -->
 ```toml
 [project]
 name = "foo"
@@ -313,13 +375,23 @@ name = "foo"
 line_length = "88"
 multi_line_output = "3"
 ```
+<!-- [[[end]]] -->
+
+<!-- [[[cog copy_tree("move_isort_cfg/tests/change_made") ]]] -->
+<!-- [[[end]]] -->
 
 Now `ick test-rules` shows two tests passing:
 
+<!-- [[[cog show_cmd("ick test-rules") ]]] -->
 ```shell
 $ ick test-rules
 1 ok
 1 ok
-Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━             
 ./move_isort_cfg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
 ```
+<!-- [[[end]]] -->
+
+
+<!-- [[[cog clean_up() ]]] -->
+<!-- [[[end]]]  -->

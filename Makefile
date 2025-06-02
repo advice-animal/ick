@@ -18,10 +18,14 @@ endif
 
 .PHONY: setup
 setup: .venv
-	source $(ACTIVATE) && $(PIP) install -Ue .[dev,test]
+	source $(ACTIVATE) && $(PIP) install -Ue .[dev,test,docs]
+
+.PHONY: prepdocs
+prepdocs: .venv
+	source $(ACTIVATE) && python -m cogapp -rP docs/tutorial.md
 
 .PHONY: html
-html: .venv README.md docs/*.rst docs/conf.py
+html: prepdocs .venv README.md docs/*.rst docs/conf.py
 	source $(ACTIVATE) && sphinx-build -ab html docs html
 
 .PHONY: format
