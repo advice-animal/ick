@@ -55,9 +55,9 @@ def show_file(fname, *, start=None, end=None):
     print("```")
 
 
-def cd_temp(*, delete=True, pretend=None):
+def cd_temp(*, pretend=None):
     global CUR_TEMP_DIR, PRETEND_DIR
-    CUR_TEMP_DIR = tempfile.TemporaryDirectory(prefix="ickdoc_", delete=delete)
+    CUR_TEMP_DIR = tempfile.TemporaryDirectory(prefix="ickdoc_")
     os.chdir(CUR_TEMP_DIR.name)
     if pretend:
         PRETEND_DIR = pretend
