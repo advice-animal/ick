@@ -16,11 +16,16 @@ class Rule(BaseRule):
         venv_key = rule_config.qualname
         venv_path = Path(appdirs.user_cache_dir("ick", "advice-animal"), "envs", venv_key)
         self.venv = PythonEnv(venv_path, self.rule_config.deps)
+
+        self.command_parts = [self.venv.bin("python")]
+
         if rule_config.data:
-            # We could write this to a temp path if necessary, maybe even within the venv dir, during prepare.
-            self.command_parts = ["xargs", "-n10", "-P6", "-0", self.venv.bin("python"), "-c", rule_config.data]
+            self.command_parts.extend(["-c", rule_config.data])
         else:
-            self.command_parts = ["xargs", "-n10", "-P6", "-0", self.venv.bin("python"), rule_config.script_path.with_suffix(".py")]
+            py_script = rule_config.script_path.with_suffix(".py")
+            assert py_script.exists()
+            self.command_parts.extend([py_script])
+
         self.command_env = os.environ.copy()
 
     def prepare(self):
