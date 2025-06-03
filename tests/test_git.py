@@ -14,9 +14,12 @@ def test_find_repo_root():
 
 # This only works on some linux
 def test_update_local_cache(tmp_path, mocker):
-    mocker.patch("subprocess.check_output", lambda *_, **__: None)
+    mock_run_cmd = mocker.patch("ick.git.run_cmd", autospec=True)
+
     rv = update_local_cache("https://github.com/thatch/hobbyhorse", skip_update=False, freeze=False)
     assert rv in (
         Path("~/.cache/ick/hobbyhorse-7f3c0b13").expanduser(),
         Path("~/Library/Caches/ick/hobbyhorse-7f3c0b13").expanduser(),
     )
+
+    mock_run_cmd.assert_called()
