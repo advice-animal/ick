@@ -18,9 +18,11 @@ PRETEND_DIR = ""
 def dbgout(msg, **kwargs):
     print(msg, file=sys.stderr, flush=True, **kwargs)
 
+
 def set_source_root(dirname):
     global ROOT
     ROOT = Path(dirname).resolve()
+
 
 FILETYPES = {
     "py": "python",
@@ -36,19 +38,11 @@ def show_file(fname, *, start=None, end=None):
         lines = f.read().splitlines(keepends=True)
 
     if start:
-        lineno = next(
-            num 
-            for num, line in enumerate(lines)
-            if re.search(start, line)
-        )
+        lineno = next(num for num, line in enumerate(lines) if re.search(start, line))
         lines = lines[lineno:]
     if end:
-        lineno = next(
-            num 
-            for num, line in enumerate(lines)
-            if re.search(end, line)
-        )
-        lines = lines[:lineno + 1]
+        lineno = next(num for num, line in enumerate(lines) if re.search(end, line))
+        lines = lines[: lineno + 1]
 
     print(f"```{file_type}")
     print("".join(lines), end="")
@@ -74,6 +68,7 @@ def run_cmd(cmds, **kwargs) -> None:
             stderr=subprocess.STDOUT,
             **kwargs,
         )
+
 
 def show_cmd(cmd, **kwargs) -> None:
     proc = subprocess.run(
@@ -117,6 +112,7 @@ def pause(msg=""):
         dbgout(msg)
     dbgout("waiting > ", end="")
     input()
+
 
 def clean_up():
     global CUR_DIR
