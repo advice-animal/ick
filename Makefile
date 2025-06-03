@@ -41,4 +41,4 @@ lint:
 
 .PHONY: test
 test:
-	pytest --cov=ick
+	pytest --cov=ick --cov-report=term-missing --cov-report=html
