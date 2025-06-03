@@ -74,7 +74,6 @@ class PythonEnv:
             env = {}
             for k, v in os.environ.items():
                 if k in ("HOME", "UV_CACHE_DIR", "UV_NATIVE_TLS") or k.startswith("XDG_"):
-                    print(k, v)
                     env[k] = v
 
             run_cmd(
