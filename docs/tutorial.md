@@ -4,7 +4,7 @@
         set_source_root("docs/data/tutorial")
         cd_temp(pretend="/tmp/foo")
     ]]]
-    [[[end]]]
+    [[[end]]] (checksum: d41d8cd98f00b204e9800998ecf8427e)
 -->
 
 # Tutorial
@@ -39,7 +39,7 @@ To make the directory realistic enough for ick to run, create an empty
         git commit -m 'first'
     """)
 ]]] -->
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: d41d8cd98f00b204e9800998ecf8427e) -->
 
 [BTW: it seems odd that this directory has to be a git repo. Why can't ick
 work in a plain-old directory?]
@@ -53,7 +53,7 @@ directory has rules:
 [[ruleset]]
 path = "."
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: e8ed4a8fe0dda845941b2a7e70a8e41c) -->
 
 If you run `ick list-rules`, it won't find any yet:
 
@@ -61,7 +61,7 @@ If you run `ick list-rules`, it won't find any yet:
 ```shell
 $ ick list-rules
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: f4e9c50a6e9985c8275f2e105e87dad3) -->
 
 
 ## Creating a rule definition
@@ -83,7 +83,7 @@ name = "move_isort_cfg"
 # scope = "project"
 project_types = ["python"]
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: 20e0d0d05c8c49ec3569b91ee6f03fd4) -->
 
 The `language` setting means we will implement the rule with Python code.
 Setting `scope` to `project` means the rule will be invoked at the project
@@ -106,7 +106,7 @@ LATER
 =====
 * ./move_isort_cfg
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: 66e4d4a87e650110014fc2f510e329ad) -->
 
 
 ## Implementing the rule
@@ -137,7 +137,7 @@ if __name__ == "__main__":
         toml.write_text(tomlkit.dumps(toml_data))
         cfg.unlink()
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: 9293512e1981951c901b816d77d4255d) -->
 
 The details of this implementation aren't important.  The key thing to note is
 this is Python code that uses third-party packages to read the `isort.cfg` file
@@ -174,7 +174,7 @@ $ ick run
          import imperfect
      ModuleNotFoundError: No module named 'imperfect'
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: 202173ea4de50fe9c7c15418c3519450) -->
 
 We need to tell `ick` about the dependencies the rule needs.
 
@@ -193,9 +193,9 @@ line like this:
 language = "python"
 deps = ["imperfect", "tomlkit"]
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: 6677de2516065642c3ae47f685978cbd) -->
 <!-- [[[cog copy_file("ick3.toml", "ick.toml") ]]] -->
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: d41d8cd98f00b204e9800998ecf8427e) -->
 
 
 Now `ick run` shows that the rule ran:
@@ -205,7 +205,7 @@ Now `ick run` shows that the rule ran:
 $ ick run
 -> ./move_isort_cfg on OK
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: b509eddb44fc4f79c0f0a54eac8eb037) -->
 
 But the rule did nothing because there is no `isort.cfg` file in `/tmp/foo`.
 Create one:
@@ -216,7 +216,7 @@ Create one:
 line_length = 88
 multi_line_output = 3
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: 097732dace74177fbdc2df187860767b) -->
 
 Now `ick run` shows a dry-run summary of the changes that would be made:
 
@@ -227,7 +227,7 @@ $ ick run
      isort.cfg +0-3
      pyproject.toml +3-0
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: b82d0ccb3c366f6459ba77fb82d36b49) -->
 
 Passing the `--patch` option displays the full patch of the changes that would
 be made:
@@ -254,7 +254,7 @@ index e69de29..089c824 100644
 +line_length = "88"
 +multi_line_output = "3"
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: ad9a68f3f3ddea38eb1632c996cdd281) -->
 
 
 ## Reducing execution
@@ -288,7 +288,7 @@ $ ick test-rules
 no tests for ./move_isort_cfg under /tmp/foo/move_isort_cfg/tests
 Prepare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: 2924021064994618a602e3a178ab0f67) -->
 
 In your `move_isort_cfg` rule directory, create a `tests` subdirectory.  There
 each directory will be a test.  Create a `move_isort_cfg/tests/no_isort`
@@ -305,11 +305,11 @@ contents:
 [project]
 name = "foo"
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: 725d4b4c2a2485cae7690a21c0a6754b) -->
 
 
 <!-- [[[cog copy_tree("move_isort_cfg/tests/no_isort") ]]] -->
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: d41d8cd98f00b204e9800998ecf8427e) -->
 
 Your directory structure should look like this:
 
@@ -331,7 +331,7 @@ $ tree --dirsfirst
 
 6 directories, 6 files
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: fc1c69238f7367682fd6316dc5c2d30a) -->
 
 This is a simple test that checks that if there is no `isort.cfg` file, the
 `pyproject.toml` file will be unchanged.  Run `ick test-rules`:
@@ -343,7 +343,7 @@ $ ick test-rules
 Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━             
 ./move_isort_cfg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: a23216b8a388c7d962fb19964730368e) -->
 
 Now make a more realistic test. Create a `change_made`
 directory in the `tests` directory. Create these files:
@@ -355,7 +355,7 @@ directory in the `tests` directory. Create these files:
 line_length = 88
 multi_line_output = 3
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: 097732dace74177fbdc2df187860767b) -->
 
 `change_made/a/pyproject.toml`:
 <!-- [[[cog show_file("move_isort_cfg/tests/change_made/a/pyproject.toml") ]]] -->
@@ -363,7 +363,7 @@ multi_line_output = 3
 [project]
 name = "foo"
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: 725d4b4c2a2485cae7690a21c0a6754b) -->
 
 `change_made/b/pyproject.toml`:
 <!-- [[[cog show_file("move_isort_cfg/tests/change_made/b/pyproject.toml") ]]] -->
@@ -375,10 +375,10 @@ name = "foo"
 line_length = "88"
 multi_line_output = "3"
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: 6b1a7bd48bbc6cfc34c39b9e720b7d80) -->
 
 <!-- [[[cog copy_tree("move_isort_cfg/tests/change_made") ]]] -->
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: d41d8cd98f00b204e9800998ecf8427e) -->
 
 Now `ick test-rules` shows two tests passing:
 
@@ -390,8 +390,8 @@ $ ick test-rules
 Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━             
 ./move_isort_cfg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (checksum: cea09823b30e560d213d92946a915ef5) -->
 
 
 <!-- [[[cog clean_up() ]]] -->
-<!-- [[[end]]]  -->
+<!-- [[[end]]] (checksum: d41d8cd98f00b204e9800998ecf8427e)  -->
