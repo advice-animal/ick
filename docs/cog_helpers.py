@@ -81,6 +81,7 @@ def show_cmd(cmd, **kwargs) -> None:
         **kwargs,
     )
     output = proc.stdout
+    output = re.sub(pattern=r"(?m) +$", repl="", string=output)
     if PRETEND_DIR:
         actual_temp = Path(CUR_TEMP_DIR.name).resolve()
         output = output.replace(str(actual_temp), PRETEND_DIR)

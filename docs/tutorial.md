@@ -1,4 +1,7 @@
 <!--
+    This file has embedded Python code that must be run to keep it up-to-date.
+    Use `make prepdocs` to run it.
+
     [[[cog
         from cog_helpers import *
         set_source_root("docs/data/tutorial")
@@ -93,18 +96,15 @@ commented out).
 Ick can look for projects of certain types.  Setting `project_types` here means
 the rule will be invoked on projects that ick determines are Python projects.
 
-[TODO: list-rules doesn't error here as the tutorial used to claim: it shows the
-name of the rule. Do we want it to error? It could be helpful to list the rule,
-but indicate that the code is missing.]
-
-If you run `list-rules` again, the rule appears:
+If you run `list-rules` again, the rule appears, but with an indication that
+there's no implementation:
 
 <!-- [[[cog show_cmd("ick list-rules") ]]] -->
 ```shell
 $ ick list-rules
 LATER
 =====
-* ./move_isort_cfg
+* ./move_isort_cfg  *** Couldn't find implementation /tmp/foo/move_isort_cfg.py
 ```
 <!-- [[[end]]] -->
 
@@ -286,7 +286,7 @@ any tests yet, so it has nothing to do:
 ```shell
 $ ick test-rules
 no tests for ./move_isort_cfg under /tmp/foo/move_isort_cfg/tests
-Prepare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   
+Prepare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 <!-- [[[end]]] -->
 
@@ -340,7 +340,7 @@ This is a simple test that checks that if there is no `isort.cfg` file, the
 ```shell
 $ ick test-rules
 1 ok
-Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━             
+Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ./move_isort_cfg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
 ```
 <!-- [[[end]]] -->
@@ -387,7 +387,7 @@ Now `ick test-rules` shows two tests passing:
 $ ick test-rules
 1 ok
 1 ok
-Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━             
+Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ./move_isort_cfg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
 ```
 <!-- [[[end]]] -->
