@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import collections
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
@@ -18,6 +19,7 @@ from rich.progress import Progress
 
 from ick_protocol import Finished, Modified
 
+from .base_rule import BaseRule
 from .clone_aside import CloneAside
 from .config.rule_repo import discover_rules, get_impl
 from .project_finder import find_projects
@@ -46,7 +48,7 @@ class Runner:
         assert explicit_project is None
         self.explicit_project = explicit_project
 
-    def iter_rule_impl(self):
+    def iter_rule_impl(self) -> Iterable[BaseRule]:
         name_filter = re.compile(self.rtc.filter_config.name_filter_re).fullmatch
         for rule in self.rules:
             if rule.urgency < self.rtc.filter_config.min_urgency:
@@ -57,7 +59,7 @@ class Runner:
             i = get_impl(rule)(rule, self.rtc)
             yield i
 
-    def test_rules(self) -> Any:
+    def test_rules(self) -> None:
         with ThreadPoolExecutor() as tpe, Progress() as progress:
             outstanding = {}
             prepare_key = progress.add_task("Prepare", total=None)
@@ -85,7 +87,7 @@ class Runner:
                     progress.console.print(progress_key, "ok")
                 progress.update(progress_key, advance=1)
 
-    def _perform_test(self, rule_instance, test_path) -> bool:
+    def _perform_test(self, rule_instance, test_path) -> None:
         with TemporaryDirectory() as td:
             tp = Path(td)
             copytree(test_path / "a", tp, dirs_exist_ok=True)
@@ -189,18 +191,21 @@ class Runner:
 
     @ktrace()
     def echo_rules(self) -> None:
-        d = {}
+        rules_by_urgency = collections.defaultdict(list)
         for impl in self.iter_rule_impl():
             impl.prepare()
             duration = ""
             # if impl.rule_config.hours != 1:
             #     duration = f" ({impl.rule_config.hours} {pl('hour', impl.rule_config.hours)})"
 
+            msg = f"{impl.rule_config.qualname}{duration}"
+            if not impl.runnable:
+                msg += f"  *** {impl.status}"
             for rule in impl.list().rule_names:
-                d.setdefault(impl.rule_config.urgency, []).append(f"{impl.rule_config.qualname}{duration}")
+                rules_by_urgency[impl.rule_config.urgency].append(msg)
 
         first = True
-        for u in sorted(d.keys()):
+        for u, rules in sorted(rules_by_urgency.items()):
             if not first:
                 print()
             else:
@@ -208,7 +213,7 @@ class Runner:
 
             print(u.name)
             print("=" * len(str(u.name)))
-            for v in d[u]:
+            for v in rules:
                 print(f"* {v}")
 
 

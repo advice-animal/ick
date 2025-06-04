@@ -23,7 +23,9 @@ class Rule(BaseRule):
             self.command_parts.extend(["-c", rule_config.data])
         else:
             py_script = rule_config.script_path.with_suffix(".py")
-            assert py_script.exists()
+            if not py_script.exists():
+                self.runnable = False
+                self.status = f"Couldn't find implementation {py_script}"
             self.command_parts.extend([py_script])
 
         self.command_env = os.environ.copy()

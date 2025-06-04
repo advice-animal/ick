@@ -114,6 +114,8 @@ class BaseRule(BaseCollection):
     def __init__(self, rule_config, repo_config):
         self.rule_config = rule_config
         self.repo_config = repo_config
+        self.runnable = True
+        self.status = ""
 
     def list(self) -> ListResponse:
         return ListResponse(
