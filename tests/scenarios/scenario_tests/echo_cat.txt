@@ -1,0 +1,8 @@
+# This tests that scenarios can have multiple commands and run real shells.
+$ echo Hello > text.txt
+$ echo Line 2 >> text.txt
+# Did we get the data?
+$ cat text.txt
+Hello
+Line 2
+# We did!
