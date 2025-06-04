@@ -1,0 +1,4 @@
+$ ick run
+-> ./move_isort_cfg on OK
+     isort.cfg +0-3
+     pyproject.toml +3-0

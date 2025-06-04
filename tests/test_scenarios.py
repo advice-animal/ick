@@ -23,8 +23,6 @@ GIT_VERSION_RE = re.compile(r"(\d+\.)\d+(?:\.\d+)?(?:\.dev\d+\S+)?")
 
 @pytest.mark.parametrize("filename", SCENARIOS)
 def test_scenario(filename, monkeypatch):
-    monkeypatch.setenv("ICK_CONFIG", str(Path(__file__).parent / "fixture_rules" / "ick.toml"))
-
     path = SCENARIO_DIR / filename
     runner = CliRunner()
     command, output = load_scenario(path)
@@ -45,6 +43,7 @@ def test_scenario(filename, monkeypatch):
     cleaned_output = LOG_LINE_TIMESTAMP_RE.sub("", result.output)
     cleaned_output = LOG_LINE_NUMERIC_LINE_RE.sub(lambda m: (m.group(1) + "<n>"), cleaned_output)
     cleaned_output = GIT_VERSION_RE.sub(lambda m: (m.group(1) + "<stuff>"), cleaned_output)
+    cleaned_output = re.sub(r"(?m) +$", "", cleaned_output)
 
     if os.getenv("UPDATE_SCENARIOS"):
         save_scenario(path, cleaned_output)

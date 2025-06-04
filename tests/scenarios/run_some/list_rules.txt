@@ -1,0 +1,4 @@
+$ ick list-rules
+LATER
+=====
+* ./move_isort_cfg
