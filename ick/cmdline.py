@@ -99,7 +99,10 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, filters: list[str]):
 
     if len(filters) == 0:
         ctx.obj.settings.dry_run = True  # force it
-    elif len(filters) == 1 and filters[0].upper() in Urgency:
+    elif len(filters) == 1 and getattr(Urgency, filters[0].upper(), None):
+        # python 3.11 doesn't support __contains__ on enum, but also doesn't
+        # support .get and the choices are [] catching the exception or getattr
+        # which is what I can fit on one line.
         urgency = Urgency[filters[0].upper()]
         ctx.obj.filter_config.urgency_filter = urgency
     else:
@@ -125,12 +128,12 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, filters: list[str]):
                 print("    ", mod.filename, mod.diffstat)
         else:
             for mod in result.modifications:
+                path = Path(mod.filename)
                 if mod.new_bytes is None:
-                    # TODO remove filename
-                    pass
+                    path.unlink()
                 else:
-                    # TODO makedirs(exist_ok)
-                    mod.filename.write_bytes(mod.new_bytes)
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes(mod.new_bytes)
 
 
 def verbose_init(v: int, verbose: Optional[int], vmodule: Optional[str]) -> None:
