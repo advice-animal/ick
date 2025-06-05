@@ -52,14 +52,11 @@ class ExecWork(Work):
             yield Finished(rule_name, error=True, message=str(e))
             return
         except subprocess.CalledProcessError as e:
-            if e.returncode == 1:
-                yield Finished(
-                    rule_name,
-                    error=True,
-                    message=((e.stdout + e.stderr) or f"{self.collection.command_parts[0]} returned non-zero exit status {e.returncode}"),
-                )
-            else:
-                yield Finished(rule_name, error=True, message=str(e) + "\n" + e.stderr)
+            yield Finished(
+                rule_name,
+                error=True,
+                message=((e.stdout + e.stderr) or f"{self.collection.command_parts[0]} returned non-zero exit status {e.returncode}"),
+            )
             return
 
         if self.collection.rule_config.success == Success.NO_OUTPUT:
