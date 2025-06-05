@@ -7,7 +7,7 @@
         set_source_root("docs/data/tutorial")
         cd_temp(pretend="/tmp/foo")
     ]]]
-    [[[end]]]
+    [[[end]]] (sum: 1B2M2Y8Asg)
 -->
 
 # Tutorial
@@ -42,7 +42,7 @@ To make the directory realistic enough for ick to run, create an empty
         git commit -m 'first'
     """)
 ]]] -->
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: 1B2M2Y8Asg) -->
 
 [BTW: it seems odd that this directory has to be a git repo. Why can't ick
 work in a plain-old directory?]
@@ -56,7 +56,7 @@ directory has rules:
 [[ruleset]]
 path = "."
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: 6O1Kj+DdqE) -->
 
 If you run `ick list-rules`, it won't find any yet:
 
@@ -64,7 +64,7 @@ If you run `ick list-rules`, it won't find any yet:
 ```shell
 $ ick list-rules
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: 9OnFCm6Zhc) -->
 
 
 ## Creating a rule definition
@@ -86,7 +86,7 @@ name = "move_isort_cfg"
 # scope = "project"
 project_types = ["python"]
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: IODQ0FyMSe) -->
 
 The `language` setting means we will implement the rule with Python code.
 Setting `scope` to `project` means the rule will be invoked at the project
@@ -106,7 +106,7 @@ LATER
 =====
 * ./move_isort_cfg  *** Couldn't find implementation /tmp/foo/move_isort_cfg.py
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: Yyc8zk56gm) -->
 
 
 ## Implementing the rule
@@ -137,7 +137,7 @@ if __name__ == "__main__":
         toml.write_text(tomlkit.dumps(toml_data))
         cfg.unlink()
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: kpNRLhmBlR) -->
 
 The details of this implementation aren't important.  The key thing to note is
 this is Python code that uses third-party packages to read the `isort.cfg` file
@@ -165,7 +165,7 @@ If you don't modify files, and exit 0, anything you print is ignored.
 The `ick run` command will run the rule. But if we try it now it will fail
 trying to import those third-party dependencies:
 
-<!-- [[[cog show_cmd("ick run") ]]] -->
+<!-- [[[cog show_cmd("ick run", columns=999) ]]] -->
 ```shell
 $ ick run
 -> ./move_isort_cfg on ERROR
@@ -174,7 +174,7 @@ $ ick run
          import imperfect
      ModuleNotFoundError: No module named 'imperfect'
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: ICFz6k3lD+) -->
 
 We need to tell `ick` about the dependencies the rule needs.
 
@@ -193,9 +193,9 @@ line like this:
 language = "python"
 deps = ["imperfect", "tomlkit"]
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: ZnfeJRYGVk) -->
 <!-- [[[cog copy_file("ick3.toml", "ick.toml") ]]] -->
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: 1B2M2Y8Asg) -->
 
 
 Now `ick run` shows that the rule ran:
@@ -205,7 +205,7 @@ Now `ick run` shows that the rule ran:
 $ ick run
 -> ./move_isort_cfg on OK
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: tQnt20T8T3) -->
 
 But the rule did nothing because there is no `isort.cfg` file in `/tmp/foo`.
 Create one:
@@ -216,7 +216,7 @@ Create one:
 line_length = 88
 multi_line_output = 3
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: CXcy2s50F3) -->
 
 Now `ick run` shows a dry-run summary of the changes that would be made:
 
@@ -227,7 +227,7 @@ $ ick run
      isort.cfg +0-3
      pyproject.toml +3-0
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: uC0Myzw2b2) -->
 
 Passing the `--patch` option displays the full patch of the changes that would
 be made:
@@ -254,7 +254,7 @@ index e69de29..089c824 100644
 +line_length = "88"
 +multi_line_output = "3"
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: rZpo8/Pd6j) -->
 
 
 ## Reducing execution
@@ -282,13 +282,13 @@ a rule are files showing the before and after states expected.
 The `ick test-rules` command will run tests for your rules.  We haven't written
 any tests yet, so it has nothing to do:
 
-<!-- [[[cog show_cmd("ick test-rules") ]]] -->
+<!-- [[[cog show_cmd("ick test-rules", columns=999) ]]] -->
 ```shell
 $ ick test-rules
 no tests for ./move_isort_cfg under /tmp/foo/move_isort_cfg/tests
 Prepare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: 1Cbae9GdeU) -->
 
 In your `move_isort_cfg` rule directory, create a `tests` subdirectory.  There
 each directory will be a test.  Create a `move_isort_cfg/tests/no_isort`
@@ -305,33 +305,30 @@ contents:
 [project]
 name = "foo"
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: cl1LTCokhc) -->
 
 
 <!-- [[[cog copy_tree("move_isort_cfg/tests/no_isort") ]]] -->
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: 1B2M2Y8Asg) -->
 
 Your directory structure should look like this:
 
-<!-- [[[cog show_cmd("tree --dirsfirst") ]]] -->
+<!-- [[[cog show_cmd("find . -print | grep -v '\\.git' | sort | sed -e 's;[^/]*/;|-- ;g;s;-- |;   |;g;'", hide_command=True) ]]] -->
 ```shell
-$ tree --dirsfirst
 .
-├── move_isort_cfg
-│   ├── tests
-│   │   └── no_isort
-│   │       ├── a
-│   │       │   └── pyproject.toml
-│   │       └── b
-│   │           └── pyproject.toml
-│   └── move_isort_cfg.py
-├── ick.toml
-├── isort.cfg
-└── pyproject.toml
-
-6 directories, 6 files
+|-- ick.toml
+|-- isort.cfg
+|-- move_isort_cfg
+|   |-- move_isort_cfg.py
+|   |-- tests
+|   |   |-- no_isort
+|   |   |   |-- a
+|   |   |   |   |-- pyproject.toml
+|   |   |   |-- b
+|   |   |   |   |-- pyproject.toml
+|-- pyproject.toml
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: /K9GxUkPCU) -->
 
 This is a simple test that checks that if there is no `isort.cfg` file, the
 `pyproject.toml` file will be unchanged.  Run `ick test-rules`:
@@ -343,7 +340,7 @@ $ ick test-rules
 Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ./move_isort_cfg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: HXGRqdSY1X) -->
 
 Now make a more realistic test. Create a `change_made`
 directory in the `tests` directory. Create these files:
@@ -355,7 +352,7 @@ directory in the `tests` directory. Create these files:
 line_length = 88
 multi_line_output = 3
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: CXcy2s50F3) -->
 
 `change_made/a/pyproject.toml`:
 <!-- [[[cog show_file("move_isort_cfg/tests/change_made/a/pyproject.toml") ]]] -->
@@ -363,7 +360,7 @@ multi_line_output = 3
 [project]
 name = "foo"
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: cl1LTCokhc) -->
 
 `change_made/b/pyproject.toml`:
 <!-- [[[cog show_file("move_isort_cfg/tests/change_made/b/pyproject.toml") ]]] -->
@@ -375,10 +372,10 @@ name = "foo"
 line_length = "88"
 multi_line_output = "3"
 ```
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: axp71Iu8bP) -->
 
 <!-- [[[cog copy_tree("move_isort_cfg/tests/change_made") ]]] -->
-<!-- [[[end]]] -->
+<!-- [[[end]]] (sum: 1B2M2Y8Asg) -->
 
 Now `ick test-rules` shows two tests passing:
 
@@ -390,8 +387,4 @@ $ ick test-rules
 Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ./move_isort_cfg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
 ```
-<!-- [[[end]]] -->
-
-
-<!-- [[[cog clean_up() ]]] -->
-<!-- [[[end]]]  -->
+<!-- [[[end]]] (sum: 6lHyiNHy6X) -->

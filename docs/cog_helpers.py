@@ -70,12 +70,16 @@ def run_cmd(cmds, **kwargs) -> None:
         )
 
 
-def show_cmd(cmd, **kwargs) -> None:
+def show_cmd(cmd, hide_command=False, columns=None, **kwargs) -> None:
+    env = dict(os.environ)
+    if columns is not None:
+        env["COLUMNS"] = str(columns)
     proc = subprocess.run(
         cmd,
         encoding="utf-8",
         shell=True,
         check=False,
+        env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         **kwargs,
@@ -86,7 +90,8 @@ def show_cmd(cmd, **kwargs) -> None:
         actual_temp = Path(CUR_TEMP_DIR.name).resolve()
         output = output.replace(str(actual_temp), PRETEND_DIR)
     print("```shell")
-    print(f"$ {cmd}")
+    if not hide_command:
+        print(f"$ {cmd}")
     print(output, end="")
     if proc.returncode != 0:
         print(f"(exited with {proc.returncode})")
@@ -113,9 +118,3 @@ def pause(msg=""):
         dbgout(msg)
     dbgout("waiting > ", end="")
     input()
-
-
-def clean_up():
-    global CUR_DIR
-    CUR_DIR = None
-    os.chdir(ORIGINAL_DIR)
