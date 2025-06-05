@@ -22,7 +22,7 @@ setup: .venv
 
 .PHONY: prepdocs
 prepdocs: .venv
-	source $(ACTIVATE) && python -m cogapp -rP docs/tutorial.md
+	source $(ACTIVATE) && python -m cogapp -rcP docs/tutorial.md
 
 .PHONY: html
 html: prepdocs .venv README.md docs/*.rst docs/conf.py
@@ -37,6 +37,7 @@ format:
 lint:
 	ruff check
 	python -m checkdeps --allow-names ick,ick_protocol ick
+	python -m cogapp -cP --check --diff docs/tutorial.md
 	#mypy --strict --install-types --non-interactive advice_animal
 
 .PHONY: test
