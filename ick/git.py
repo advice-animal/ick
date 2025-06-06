@@ -48,6 +48,8 @@ def find_repo_root(path: Path) -> Path:
 
     Looks through all parent paths until either the root is reached, or a directory
     is found that contains any of :attr:`ROOT_MARKERS`.
+
+    If one is not found, return the original path.
     """
     real_path = path.resolve()
 
