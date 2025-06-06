@@ -285,10 +285,15 @@ any tests yet, so it has nothing to do:
 <!-- [[[cog show_cmd("ick test-rules") ]]] -->
 ```shell
 $ ick test-rules
-no tests for ./move_isort_cfg under /tmp/foo/move_isort_cfg/tests
-Prepare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+testing...
+  ./move_isort_cfg: <no-test> PASS
+
+FAILS
+
+./move_isort_cfg: no tests in /tmp/foo/move_isort_cfg/tests
+(exited with 1)
 ```
-<!-- [[[end]]] (sum: 1Cbae9GdeU) -->
+<!-- [[[end]]] (sum: wgvHHru5xr) -->
 
 In your `move_isort_cfg` rule directory, create a `tests` subdirectory.  There
 each directory will be a test.  Create a `move_isort_cfg/tests/no_isort`
@@ -336,11 +341,10 @@ This is a simple test that checks that if there is no `isort.cfg` file, the
 <!-- [[[cog show_cmd("ick test-rules") ]]] -->
 ```shell
 $ ick test-rules
-1 ok
-Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-./move_isort_cfg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+testing...
+  ./move_isort_cfg: . PASS
 ```
-<!-- [[[end]]] (sum: HXGRqdSY1X) -->
+<!-- [[[end]]] (sum: aPmBG+QcQb) -->
 
 Now make a more realistic test. Create a `change_made`
 directory in the `tests` directory. Create these files:
@@ -382,9 +386,7 @@ Now `ick test-rules` shows two tests passing:
 <!-- [[[cog show_cmd("ick test-rules") ]]] -->
 ```shell
 $ ick test-rules
-1 ok
-1 ok
-Prepare          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-./move_isort_cfg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+testing...
+  ./move_isort_cfg: .. PASS
 ```
-<!-- [[[end]]] (sum: 6lHyiNHy6X) -->
+<!-- [[[end]]] (sum: Q8fKoyhhcW) -->
