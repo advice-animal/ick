@@ -72,8 +72,7 @@ def run_cmd(cmds, **kwargs) -> None:
 
 def show_cmd(cmd, hide_command=False, columns=None, **kwargs) -> None:
     env = dict(os.environ)
-    if columns is not None:
-        env["COLUMNS"] = str(columns)
+    env["COLUMNS"] = str(columns or 999)
     proc = subprocess.run(
         cmd,
         encoding="utf-8",
