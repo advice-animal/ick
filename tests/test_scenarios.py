@@ -34,6 +34,10 @@ def clean_output(output: str) -> str:
 
 @pytest.mark.parametrize("filename", SCENARIOS)
 def test_scenario(filename, monkeypatch):
+
+    # An easy way to avoid user-level config affecting tests
+    monkeypatch.setenv("XDG_CONFIG_HOME", "/")
+
     path = SCENARIO_DIR / filename
     commands = load_scenario(path)
     update = bool(int(os.getenv("UPDATE_SCENARIOS", "0")))
