@@ -165,7 +165,7 @@ If you don't modify files, and exit 0, anything you print is ignored.
 The `ick run` command will run the rule. But if we try it now it will fail
 trying to import those third-party dependencies:
 
-<!-- [[[cog show_cmd("ick run", columns=999) ]]] -->
+<!-- [[[cog show_cmd("ick run") ]]] -->
 ```shell
 $ ick run
 -> ./move_isort_cfg on ERROR
@@ -282,7 +282,7 @@ a rule are files showing the before and after states expected.
 The `ick test-rules` command will run tests for your rules.  We haven't written
 any tests yet, so it has nothing to do:
 
-<!-- [[[cog show_cmd("ick test-rules", columns=999) ]]] -->
+<!-- [[[cog show_cmd("ick test-rules") ]]] -->
 ```shell
 $ ick test-rules
 no tests for ./move_isort_cfg under /tmp/foo/move_isort_cfg/tests
