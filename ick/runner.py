@@ -6,6 +6,7 @@ import re
 import sys
 import traceback
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import ExitStack
 from dataclasses import dataclass
 from fnmatch import fnmatch
 from glob import glob
@@ -26,8 +27,7 @@ from .base_rule import BaseRule
 from .clone_aside import CloneAside
 from .config.rule_repo import discover_rules, get_impl
 from .project_finder import find_projects
-from .sh import run_cmd
-from .types_project import Project, Repo
+from .types_project import Project, maybe_repo
 
 LOG = getLogger(__name__)
 
@@ -127,16 +127,13 @@ class Runner:
             return 0
 
     def _perform_test(self, rule_instance, test_path) -> None:
-        with TemporaryDirectory() as td:
+        with TemporaryDirectory() as td, ExitStack() as stack:
             tp = Path(td)
             copytree(test_path / "a", tp, dirs_exist_ok=True)
-            run_cmd(["git", "init"], cwd=tp)
-            run_cmd(["git", "add", "-N", "."], cwd=tp)
-            run_cmd(["git", "commit", "-a", "-m", "init"], cwd=tp)
 
-            repo = Repo(tp)
+            repo = maybe_repo(tp, stack.enter_context)
 
-            project = Project(tp, "", "python", "invalid.bin")
+            project = Project(repo.root, "", "python", "invalid.bin")
             ap = test_path / "a"
             bp = test_path / "b"
             files_to_check = set(glob("*", root_dir=bp, recursive=True))
