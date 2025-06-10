@@ -82,9 +82,10 @@ def test_rules(ctx):
 @click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, on by default sometimes")
 @click.option("-p", "--patch", is_flag=True, help="Show patch instead of applying")
 @click.option("--yolo", is_flag=True, help="Yolo mode enables modifying external state")
+@click.option("--json", is_flag=True, help="Outputs json indicating if a rule caused modifications")
 @click.argument("filters", nargs=-1)
 @click.pass_context
-def run(ctx, dry_run: bool, patch: bool, yolo: bool, filters: list[str]):
+def run(ctx, dry_run: bool, patch: bool, yolo: bool, json: bool, filters: list[str]):
     """
     Run the applicable rules to the current repo/path
 
@@ -110,17 +111,26 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, filters: list[str]):
 
     # DO THE NEEDFUL
 
+    rule_modified = {}
+
     r = Runner(ctx.obj, ctx.obj.repo, explicit_project=None)
     for result in r.run():
-        print(f"-> [bold]{result.rule}[/bold] on {result.project}", end="")
-        if result.finished.error:
+        if not json:
+            print(f"-> [bold]{result.rule}[/bold] on {result.project}", end="")
+        if result.finished.error and not json:
             print("[red]ERROR[/red]")
             for line in result.finished.message.splitlines():
                 print("    ", line)
         else:
-            print("[green]OK[/green]")
+            if not json:
+                print("[green]OK[/green]")
 
-        if patch:
+        if json:
+            ok_status = not result.finished.error
+            modified = rule_modified.get(result.rule, False) or len(result.modifications) > 0
+            rule_modified[result.rule] = {"ok_status": ok_status, "modified": modified}
+
+        elif patch:
             for mod in result.modifications:
                 echo_color_precomputed_diff(mod.diff)
         elif ctx.obj.settings.dry_run:
@@ -134,6 +144,9 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, filters: list[str]):
                 else:
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.write_bytes(mod.new_bytes)
+
+    if json:
+        print(rule_modified)
 
 
 def verbose_init(v: int, verbose: Optional[int], vmodule: Optional[str]) -> None:
