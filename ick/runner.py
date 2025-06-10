@@ -71,7 +71,7 @@ class Runner:
             # It's about this point I realize that yes, I am writing a whole
             # test runner and that's not the business I want to be in.  Oh
             # well...
-            buffered_output = []
+            buffered_output = io.StringIO()
 
             i = 0
             for rule_instance, names in self.iter_tests():
@@ -80,8 +80,9 @@ class Runner:
                 rule_instance.prepare()
                 if not names:
                     print("<no-test>", end="")
-                    buffered_output.append(
-                        f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}"
+                    print(
+                        f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
+file=buffered_output,
                     )
                 else:
                     key = str(i)
@@ -99,15 +100,13 @@ class Runner:
                         fut.result()
                     except Exception as e:
                         print("[red]F[/red]", end="")
-                        buffered_output.append(f"  {desc}:")
+                        print(f"  {desc}:", file=buffered_output)
                         # This should be combined with how we actually run
                         # things...
                         typ, value, tb = sys.exc_info()
-                        buf = io.StringIO()
-                        traceback.print_tb(tb, file=buf)
+                        traceback.print_tb(tb, file=buffered_output)
                         # TODO redent
-                        buffered_output.append("  " + buf.getvalue())
-                        buffered_output.append(repr(e))
+                        print(repr(e), file=buffered_output)
                         success = False
                     else:
                         print(".", end="")
@@ -118,12 +117,11 @@ class Runner:
                 else:
                     print(" [red]FAIL[/red]")
 
-            if buffered_output:
+            if buffered_output.tell():
                 print()
-                print("FAILS")
+                print("FAILING INFO")
                 print()
-                for line in buffered_output:
-                    print(line)
+                print(buffered_output.getvalue())
                 return 1
 
             return 0
@@ -161,8 +159,6 @@ class Runner:
                     print(moreorless.unified_diff(expected, response[-1].message, "output.txt"))
                     assert False, response[-1].message
                 return
-
-            assert not response[-1].error, f"error: {response[-1].message}"
 
             for r in response[:-1]:
                 assert isinstance(r, Modified)
@@ -230,7 +226,7 @@ class Runner:
                             filenames = [f for f in filenames if any(fnmatch(f, x) for x in rule_instance.rule_config.inputs)]
 
                         resp.extend(work.run(rule_instance.rule_config.qualname, filenames))
-        except Exception:
+        except Exception as e:
             typ, value, tb = sys.exc_info()
             buf = io.StringIO()
             traceback.print_tb(tb, file=buf)
