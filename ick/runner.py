@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import collections
+import io
 import re
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import sys
+import traceback
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from fnmatch import fnmatch
 from glob import glob
@@ -15,7 +18,7 @@ from typing import Any, Iterable
 import moreorless
 from keke import ktrace
 from moreorless.combined import combined_diff
-from rich.progress import Progress
+from rich import print
 
 from ick_protocol import Finished, Modified
 
@@ -59,33 +62,69 @@ class Runner:
             i = get_impl(rule)(rule, self.rtc)
             yield i
 
-    def test_rules(self) -> None:
-        with ThreadPoolExecutor() as tpe, Progress() as progress:
-            outstanding = {}
-            prepare_key = progress.add_task("Prepare", total=None)
+    def test_rules(self) -> int:
+        """
+        Returns an exit code (0 on success)
+        """
+        with ThreadPoolExecutor() as tpe:
+            print("[dim]testing...[/dim]")
+            # It's about this point I realize that yes, I am writing a whole
+            # test runner and that's not the business I want to be in.  Oh
+            # well...
+            buffered_output = io.StringIO()
+
+            i = 0
             for rule_instance, names in self.iter_tests():
+                outstanding = {}
+                print(f"  [bold]{rule_instance.rule_config.qualname}[/bold]: ", end="")
                 rule_instance.prepare()
-                progress.update(prepare_key)
                 if not names:
-                    progress.console.print("no tests for", rule_instance.rule_config.qualname, "under", rule_instance.rule_config.test_path)
+                    print("<no-test>", end="")
+                    print(
+                        f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
+file=buffered_output,
+                    )
                 else:
-                    key = progress.add_task(rule_instance.rule_config.qualname, total=len(names))
+                    key = str(i)
+                    i += 1
                     for n in names:
-                        outstanding[tpe.submit(self._perform_test, rule_instance, n)] = (key, rule_instance.rule_config.qualname)
+                        outstanding[tpe.submit(self._perform_test, rule_instance, n)] = (
+                            key,
+                            f"{rule_instance.rule_config.qualname} on {n}",
+                        )
 
-            progress.update(prepare_key, completed=True)
-            # breakpoint()
+                success = True
+                for fut in outstanding.keys():
+                    progress_key, desc = outstanding[fut]
+                    try:
+                        fut.result()
+                    except Exception as e:
+                        print("[red]F[/red]", end="")
+                        print(f"  {desc}:", file=buffered_output)
+                        # This should be combined with how we actually run
+                        # things...
+                        typ, value, tb = sys.exc_info()
+                        traceback.print_tb(tb, file=buffered_output)
+                        # TODO redent
+                        print(repr(e), file=buffered_output)
+                        success = False
+                    else:
+                        print(".", end="")
 
-            for fut in as_completed(outstanding.keys()):
-                progress_key, desc = outstanding[fut]
-                try:
-                    fut.result()
-                except Exception as e:
-                    progress.console.print(desc)
-                    progress.console.print("  " + repr(e))
+                # TODO try to line these up
+                if success:
+                    print(" [green]PASS[/green]")
                 else:
-                    progress.console.print(progress_key, "ok")
-                progress.update(progress_key, advance=1)
+                    print(" [red]FAIL[/red]")
+
+            if buffered_output.tell():
+                print()
+                print("FAILING INFO")
+                print()
+                print(buffered_output.getvalue())
+                return 1
+
+            return 0
 
     def _perform_test(self, rule_instance, test_path) -> None:
         with TemporaryDirectory() as td:
@@ -102,13 +141,17 @@ class Runner:
             bp = test_path / "b"
             files_to_check = set(glob("*", root_dir=bp, recursive=True))
             files_to_check.update(glob(".github/**", root_dir=bp, recursive=True))
+            files_to_check = {f for f in files_to_check if (bp / f).is_file()}
 
             response = self._run_one(rule_instance, repo, project)
-            assert isinstance(response[-1], Finished), "Last response is finished"
+            if not isinstance(response[-1], Finished):
+                raise AssertionError(f"Last response is not Finished: {response[-1].__class__.__name__}")
             if response[-1].error:
                 expected_path = bp / "output.txt"
                 if not expected_path.exists():
-                    assert False, f"missing output: {response[-1].message}"
+                    raise AssertionError(
+                        f"Test crashed, but {expected_path} doesn't exist so that seems unintended:\n" + response[-1].message
+                    )
 
                 expected = expected_path.read_text()
                 if expected != response[-1].message:
@@ -116,8 +159,6 @@ class Runner:
                     print(moreorless.unified_diff(expected, response[-1].message, "output.txt"))
                     assert False, response[-1].message
                 return
-
-            assert not response[-1].error, f"error: {response[-1].message}"
 
             for r in response[:-1]:
                 assert isinstance(r, Modified)
@@ -186,7 +227,11 @@ class Runner:
 
                         resp.extend(work.run(rule_instance.rule_config.qualname, filenames))
         except Exception as e:
-            resp = [Finished(rule_instance.rule_config.qualname, error=True, message=repr(e))]
+            typ, value, tb = sys.exc_info()
+            buf = io.StringIO()
+            traceback.print_tb(tb, file=buf)
+            print(repr(e), file=buf)
+            resp = [Finished(rule_instance.rule_config.qualname, error=True, message=buf.getvalue())]
         return resp
 
     @ktrace()
