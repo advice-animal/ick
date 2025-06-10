@@ -226,7 +226,7 @@ class Runner:
                             filenames = [f for f in filenames if any(fnmatch(f, x) for x in rule_instance.rule_config.inputs)]
 
                         resp.extend(work.run(rule_instance.rule_config.qualname, filenames))
-        except Exception:
+        except Exception as e:
             typ, value, tb = sys.exc_info()
             buf = io.StringIO()
             traceback.print_tb(tb, file=buf)
