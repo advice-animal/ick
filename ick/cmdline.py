@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -75,7 +76,7 @@ def test_rules(ctx):
     Run self-tests against all rules.
     """
     r = Runner(ctx.obj, ctx.obj.repo)
-    r.test_rules()
+    sys.exit(r.test_rules())
 
 
 @main.command()
