@@ -9,7 +9,7 @@ def test_ast_grep_works(tmp_path):
     ast_grep = Rule(
         RuleConfig(
             name="foo",
-            language="ast-grep",
+            impl="ast-grep",
             search="F($$$X)",
             replace="G($$$X)",
         ),

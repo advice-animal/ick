@@ -2,7 +2,7 @@
 path = "."
 
 [[rule]]
-language = "python"
+impl = "python"
 name = "move_isort_cfg"
 # scope = "project"
 project_types = ["python"]

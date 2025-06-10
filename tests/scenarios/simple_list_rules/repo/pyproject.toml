@@ -1,4 +1,4 @@
 [[tool.ick.rule]]
 name = "goodbye"
-language = "shell"
+impl = "shell"
 command = "exit 1"

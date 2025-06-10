@@ -109,9 +109,9 @@ def load_regular(p: Path, data: bytes) -> RuleRepoConfig:
     return decode_toml(data, type=RuleRepoConfig)
 
 
-@ktrace("rule.language")
+@ktrace("rule.impl")
 def get_impl(rule: RuleConfig) -> Type[BaseRule]:
-    name = f"ick.rules.{rule.language}"
+    name = f"ick.rules.{rule.impl}"
     name = name.replace("-", "_")
     __import__(name)
     impl: Type[BaseRule] = sys.modules[name].Rule  # type: ignore[assignment]

@@ -81,12 +81,12 @@ Next, we can append to `ick.toml` to define a rule:
 path = "."
 
 [[rule]]
-language = "python"
+impl = "python"
 name = "move_isort_cfg"
 # scope = "project"
 project_types = ["python"]
 ```
-<!-- [[[end]]] (sum: IODQ0FyMSe) -->
+<!-- [[[end]]] (sum: oNIFtGdtuN) -->
 
 The `language` setting means we will implement the rule with Python code.
 Setting `scope` to `project` means the rule will be invoked at the project
@@ -190,10 +190,10 @@ line like this:
 <!-- [[[cog show_file("ick3.toml", start=r"\[\[rule\]\]", end="deps") ]]] -->
 ```toml
 [[rule]]
-language = "python"
+impl = "python"
 deps = ["imperfect", "tomlkit"]
 ```
-<!-- [[[end]]] (sum: ZnfeJRYGVk) -->
+<!-- [[[end]]] (sum: 8A2PIE+z09) -->
 <!-- [[[cog copy_file("ick3.toml", "ick.toml") ]]] -->
 <!-- [[[end]]] (sum: 1B2M2Y8Asg) -->
 

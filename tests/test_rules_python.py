@@ -9,7 +9,7 @@ def test_python_works(tmp_path):
     pyrule = Rule(
         RuleConfig(
             name="foo",
-            language="python",
+            impl="python",
             inputs=["*.py"],
             data="""\
 import sys

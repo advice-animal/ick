@@ -68,8 +68,8 @@ class RuleConfig(Struct):
     Configuration for a single rule
     """
 
-    language: str
     name: str
+    impl: str
 
     scope: Scope = Scope.SINGLE_FILE
     command: Optional[Union[str, list[str]]] = None

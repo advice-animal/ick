@@ -1,6 +1,6 @@
 [[rule]]
 name = "pyproject"
-language = "merge-toml"
+impl = "merge-toml"
 inputs = ["pyproject.toml"]
 # scope=single-file
 # priority=50
@@ -12,7 +12,7 @@ hello = 1
 
 # [[rule]]
 # name = "edit-shebang"
-# language = "edit-first-line"
+# impl = "edit-first-line"
 # files = ["scripts/*.py"]
 # # scope=single-file
 # # priority=50
@@ -22,7 +22,7 @@ hello = 1
 
 [[rule]]
 name = "no-fixme-in-readme"
-language = "pygrep"
+impl = "pygrep"
 inputs = ["README", "README.md"]
 # scope=single-file
 # priority=50
@@ -32,7 +32,7 @@ urgency = "now"
 
 [[rule]]
 name = "uppercase-the-word-all"
-language = "python"
+impl = "python"
 inputs = ["*.md"]
 # scope=single-file
 # priority=50
@@ -49,7 +49,7 @@ path.write_text(text)
 
 [[rule]]
 name = "long-form-grep"
-language = "shell"
+impl = "shell"
 inputs = ["*.md"]
 # scope=single-file
 priority = 90
@@ -60,20 +60,20 @@ grep -q ALL "$@" && exit 2
 
 [[collection]]
 name = "collection"
-language = "python"
+impl = "python"
 # files = ["*"]
 subdir = "." # could be the default?
 
 [[collection]]
 name = "alternate-collection"
-language = "python"
+impl = "python"
 subdir = "p1"
 priority = 1
 deps = ["attrs"]
 
 [[rule]]
 name = "no-prints"
-language = "ast-grep"
+impl = "ast-grep"
 search = "print($$$)"
 replace = ""
 inputs = ["*.py"]
