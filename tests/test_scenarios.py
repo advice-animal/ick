@@ -34,6 +34,11 @@ def clean_output(output: str) -> str:
 
 @pytest.mark.parametrize("filename", SCENARIOS)
 def test_scenario(filename, monkeypatch):
+
+    # Avoid reading user-level config in tests, as they probably would change
+    # the available rules
+    monkeypatch.setenv("XDG_CONFIG_HOME", "/")
+
     path = SCENARIO_DIR / filename
     commands = load_scenario(path)
     update = bool(int(os.getenv("UPDATE_SCENARIOS", "0")))
@@ -41,6 +46,14 @@ def test_scenario(filename, monkeypatch):
     runner = CliRunner()
     with runner.isolated_filesystem():
         repo_data = path.parent / "repo"
+        Path(".gitconfig").write_text(textwrap.dedent(
+            """
+            [user]
+            name = Tests
+            email = test@example.com
+            """
+        ))
+        monkeypatch.setenv("HOME", os.getcwd())
         if repo_data.exists():
             shutil.copytree(repo_data, ".", dirs_exist_ok=True)
             # TODO the commit here is necessary; project finding only works based
