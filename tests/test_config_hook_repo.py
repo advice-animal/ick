@@ -11,7 +11,7 @@ def test_load_rule_repo():
     assert len(rc.rule) == 3
 
     assert rc.rule[0].name == "hello"
-    assert rc.rule[0].language == "shell"
+    assert rc.rule[0].impl == "shell"
     assert rc.rule[0].scope == Scope.REPO
     assert rc.rule[0].command == "echo hi"
     assert rc.rule[0].test_path == Path("tests/fixture_rules/tests/hello").resolve()
@@ -20,7 +20,7 @@ def test_load_rule_repo():
     assert rc.rule[1].name == "shouty"
 
     assert rc.rule[2].name == "goodbye"
-    assert rc.rule[2].language == "shell"
+    assert rc.rule[2].impl == "shell"
     assert rc.rule[2].command == "exit 1"
     assert rc.rule[2].scope == Scope.SINGLE_FILE
     assert rc.rule[2].test_path == Path("tests/fixture_rules/tests/goodbye").resolve()
@@ -34,7 +34,7 @@ def test_load_pyproject_errors():
 
 
 def test_get_impl():
-    assert get_impl(RuleConfig(name="foo", language="shell"))
+    assert get_impl(RuleConfig(name="foo", impl="shell"))
 
 
 def test_discover():
