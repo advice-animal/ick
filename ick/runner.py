@@ -82,7 +82,7 @@ class Runner:
                     print("<no-test>", end="")
                     print(
                         f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
-file=buffered_output,
+                        file=buffered_output,
                     )
                 else:
                     key = str(i)

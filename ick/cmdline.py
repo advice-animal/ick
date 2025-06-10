@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from typing import Optional
 
 import click
 import keke
-import json
 from moreorless.click import echo_color_precomputed_diff
 from rich import print
 from vmodule import vmodule_init
@@ -84,7 +84,7 @@ def test_rules(ctx):
 @click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, on by default sometimes")
 @click.option("-p", "--patch", is_flag=True, help="Show patch instead of applying")
 @click.option("--yolo", is_flag=True, help="Yolo mode enables modifying external state")
-@click.option("--json", 'json_flag', is_flag=True, help="Outputs json indicating if a rule caused modifications")
+@click.option("--json", "json_flag", is_flag=True, help="Outputs json indicating if a rule caused modifications")
 @click.argument("filters", nargs=-1)
 @click.pass_context
 def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: list[str]):
@@ -130,9 +130,9 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: l
         if json_flag:
             modifications = []
             for mod in result.modifications:
-                modifications.append({'file_name': mod.filename, 'diff_stat': mod.diffstat})
+                modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
             ok_status = not result.finished.error
-            error_message = result.finished.message if result.finished.error else 'None'
+            error_message = result.finished.message if result.finished.error else "None"
             project = result.project
             modified = modifications
             output = {"project_name": project, "ok_status": ok_status, "modified": modified, "error_message": error_message}
