@@ -130,7 +130,7 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: l
         if json_flag:
             modifications = []
             for mod in result.modifications:
-                modifications.append({'file_name': mod.filename, 'diffstat': mod.diffstat})
+                modifications.append({'file_name': mod.filename, 'diff_stat': mod.diffstat})
             ok_status = not result.finished.error
             error_message = result.finished.message if result.finished.error else 'None'
             project = result.project
