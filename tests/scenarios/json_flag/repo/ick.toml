@@ -1,0 +1,26 @@
+[[ruleset]]
+path = "."
+
+
+[[rule]]
+language = "python"
+deps = ["imperfect", "tomlkit"]
+name = "move_a"
+# scope = "project"
+project_types = ["python"]
+inputs = ["pyproject.toml", "isort.cfg"]
+outputs = ["pyproject.toml", "isort.cfg"]
+
+
+[[rule]]
+language = "python"
+name = "do_nothing"
+# scope = "project"
+project_types = ["python"]
+
+
+[[rule]]
+language = "python"
+name = "fail"
+# scope = "project"
+project_types = ["python"]
