@@ -9,7 +9,7 @@ def test_merge_toml_works(tmp_path):
     merge_toml = Rule(
         RuleConfig(
             name="foo",
-            language="merge_toml",
+            impl="merge_toml",
             data="""\
 [foo]
 baz = 99

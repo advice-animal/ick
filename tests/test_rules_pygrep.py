@@ -9,7 +9,7 @@ def test_pygrep_works(tmp_path):
     pygrep = Rule(
         RuleConfig(
             name="foo",
-            language="pygrep",
+            impl="pygrep",
             search="hello",
             replace="bar",
         ),

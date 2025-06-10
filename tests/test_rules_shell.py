@@ -16,7 +16,7 @@ def test_smoke_single_file(tmp_path):
 
     conf = RuleConfig(
         name="hello",
-        language="shell",
+        impl="shell",
         command="sed -i -e 's/hello/HELLO/'",
     )
     rule = Rule(conf, None)
@@ -41,7 +41,7 @@ def test_smoke_not_found(tmp_path):
 
     conf = RuleConfig(
         name="hello",
-        language="shell",
+        impl="shell",
         command="/bin/zzyzx",
     )
     rule = Rule(conf, None)
@@ -63,7 +63,7 @@ def test_smoke_failure(tmp_path):
 
     conf = RuleConfig(
         name="hello",
-        language="shell",
+        impl="shell",
         command="/bin/sh -c 'exit 1'",
     )
     rule = Rule(conf, None)
@@ -85,7 +85,7 @@ def test_smoke_repo(tmp_path):
 
     conf = RuleConfig(
         name="hello",
-        language="shell",
+        impl="shell",
         scope="repo",
         command="sed -i -e 's/hello/HELLO/' README.md",
     )

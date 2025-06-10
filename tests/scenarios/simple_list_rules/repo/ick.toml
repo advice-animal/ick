@@ -1,13 +1,13 @@
 [[rule]]
 name = "hello"
-language = "shell"
+impl = "shell"
 command = "echo hi"
 scope = "repo"
 urgency = "now"
 
 [[rule]]
 name = "shouty"
-language = "shell"
+impl = "shell"
 scope = "single-file"
 inputs = ["*.md"]
 # This is perl-speak for uppercasing only the first line of a file in-place.
