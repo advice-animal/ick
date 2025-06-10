@@ -5,6 +5,7 @@ from typing import Optional
 
 import click
 import keke
+import json
 from moreorless.click import echo_color_precomputed_diff
 from rich import print
 from vmodule import vmodule_init
@@ -82,10 +83,10 @@ def test_rules(ctx):
 @click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, on by default sometimes")
 @click.option("-p", "--patch", is_flag=True, help="Show patch instead of applying")
 @click.option("--yolo", is_flag=True, help="Yolo mode enables modifying external state")
-@click.option("--json", is_flag=True, help="Outputs json indicating if a rule caused modifications")
+@click.option("--json", 'json_flag', is_flag=True, help="Outputs json indicating if a rule caused modifications")
 @click.argument("filters", nargs=-1)
 @click.pass_context
-def run(ctx, dry_run: bool, patch: bool, yolo: bool, json: bool, filters: list[str]):
+def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: list[str]):
     """
     Run the applicable rules to the current repo/path
 
@@ -115,20 +116,21 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json: bool, filters: list[s
 
     r = Runner(ctx.obj, ctx.obj.repo, explicit_project=None)
     for result in r.run():
-        if not json:
+        if not json_flag:
             print(f"-> [bold]{result.rule}[/bold] on {result.project}", end="")
-        if result.finished.error and not json:
+        if result.finished.error and not json_flag:
             print("[red]ERROR[/red]")
             for line in result.finished.message.splitlines():
                 print("    ", line)
         else:
-            if not json:
+            if not json_flag:
                 print("[green]OK[/green]")
 
-        if json:
+        if json_flag:
             ok_status = not result.finished.error
             modified = rule_modified.get(result.rule, False) or len(result.modifications) > 0
-            rule_modified[result.rule] = {"ok_status": ok_status, "modified": modified}
+            error_message = result.finished.message if result.finished.error else 'ok'
+            rule_modified[result.rule] = {"ok_status": ok_status, "modified": modified, "error_message": error_message}
 
         elif patch:
             for mod in result.modifications:
@@ -145,8 +147,8 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json: bool, filters: list[s
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.write_bytes(mod.new_bytes)
 
-    if json:
-        print(rule_modified)
+    if json_flag:
+        print(json.dumps(rule_modified, indent=4))
 
 
 def verbose_init(v: int, verbose: Optional[int], vmodule: Optional[str]) -> None:
