@@ -3,7 +3,7 @@ path = "."
 
 
 [[rule]]
-language = "python"
+impl = "python"
 deps = ["imperfect", "tomlkit"]
 name = "move_a"
 # scope = "project"
@@ -13,14 +13,14 @@ outputs = ["pyproject.toml", "isort.cfg"]
 
 
 [[rule]]
-language = "python"
+impl = "python"
 name = "do_nothing"
 # scope = "project"
 project_types = ["python"]
 
 
 [[rule]]
-language = "python"
+impl = "python"
 name = "fail"
 # scope = "project"
 project_types = ["python"]

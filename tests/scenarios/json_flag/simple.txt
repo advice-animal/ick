@@ -1,18 +1,27 @@
 $ ick run --json
 {
-    "./do_nothing": {
-        "ok_status": true,
-        "modified": false,
-        "error_message": "ok"
-    },
-    "./fail": {
-        "ok_status": false,
-        "modified": false,
-        "error_message": "AssertionError\n"
-    },
-    "./move_a": {
-        "ok_status": true,
-        "modified": true,
-        "error_message": "ok"
-    }
+    "./do_nothing": [
+        {
+            "project_name": "",
+            "ok_status": true,
+            "modified": [],
+            "error_message": "None"
+        }
+    ],
+    "./fail": [
+        {
+            "project_name": "",
+            "ok_status": false,
+            "modified": [],
+            "error_message": "AssertionError\n"
+        }
+    ],
+    "./move_a": [
+        {
+            "project_name": "",
+            "ok_status": true,
+            "modified": [],
+            "error_message": "None"
+        }
+    ]
 }
