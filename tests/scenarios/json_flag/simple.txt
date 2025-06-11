@@ -1,0 +1,38 @@
+$ ick run --json
+{
+    "results": {
+        "./do_nothing": [
+            {
+                "project_name": "",
+                "ok_status": true,
+                "modified": [],
+                "error_message": null
+            }
+        ],
+        "./fail": [
+            {
+                "project_name": "",
+                "ok_status": false,
+                "modified": [],
+                "error_message": "AssertionError\n"
+            }
+        ],
+        "./move_a": [
+            {
+                "project_name": "",
+                "ok_status": true,
+                "modified": [
+                    {
+                        "file_name": "file_a.cfg",
+                        "diff_stat": "+0-3"
+                    },
+                    {
+                        "file_name": "file_b.toml",
+                        "diff_stat": "+3-0"
+                    }
+                ],
+                "error_message": null
+            }
+        ]
+    }
+}

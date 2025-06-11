@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from typing import Optional
@@ -80,9 +81,10 @@ def test_rules(ctx):
 @click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, on by default sometimes")
 @click.option("-p", "--patch", is_flag=True, help="Show patch instead of applying")
 @click.option("--yolo", is_flag=True, help="Yolo mode enables modifying external state")
+@click.option("--json", "json_flag", is_flag=True, help="Outputs json indicating if a rule caused modifications")
 @click.argument("filters", nargs=-1)
 @click.pass_context
-def run(ctx, dry_run: bool, patch: bool, yolo: bool, filters: list[str]):
+def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: list[str]):
     """
     Run the applicable rules to the current repo/path
 
@@ -108,17 +110,35 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, filters: list[str]):
 
     # DO THE NEEDFUL
 
+    results = {}
+
     r = Runner(ctx.obj, ctx.obj.repo, explicit_project=None)
     for result in r.run():
-        print(f"-> [bold]{result.rule}[/bold] on {result.project}", end="")
-        if result.finished.error:
+        if not json_flag:
+            print(f"-> [bold]{result.rule}[/bold] on {result.project}", end="")
+        if result.finished.error and not json_flag:
             print("[red]ERROR[/red]")
             for line in result.finished.message.splitlines():
                 print("    ", line)
         else:
-            print("[green]OK[/green]")
+            if not json_flag:
+                print("[green]OK[/green]")
 
-        if patch:
+        if json_flag:
+            modifications = []
+            for mod in result.modifications:
+                modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
+            ok_status = not result.finished.error
+            error_message = result.finished.message if result.finished.error else None
+            project = result.project
+            modified = modifications
+            output = {"project_name": project, "ok_status": ok_status, "modified": modified, "error_message": error_message}
+            if result.rule not in results:
+                results[result.rule] = [output]
+            else:
+                results[result.rule].append(output)
+
+        elif patch:
             for mod in result.modifications:
                 echo_color_precomputed_diff(mod.diff)
         elif ctx.obj.settings.dry_run:
@@ -132,6 +152,9 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, filters: list[str]):
                 else:
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.write_bytes(mod.new_bytes)
+
+    if json_flag:
+        print(json.dumps({"results": results}, indent=4))
 
 
 def verbose_init(v: int, verbose: Optional[int], vmodule: Optional[str]) -> None:
