@@ -17,7 +17,7 @@ from .config import RuntimeConfig, Settings, load_main_config, load_rules_config
 from .git import find_repo_root
 from .project_finder import find_projects as find_projects_fn
 from .runner import Runner
-from .types_project import NullRepo, Repo
+from .types_project import maybe_repo
 
 
 @click.group()
@@ -41,12 +41,9 @@ def main(ctx, v, verbose, vmodule, trace, isolated_repo, target) -> None:
     conf = load_main_config(cur, isolated_repo=isolated_repo)
     hc = load_rules_config(cur, isolated_repo=isolated_repo)
     ctx.obj = RuntimeConfig(conf, hc, Settings(isolated_repo=isolated_repo))
-    repo_path = find_repo_root(cur)
 
-    if (repo_path / ".git").exists():
-        ctx.obj.repo = Repo(repo_path)
-    else:
-        ctx.obj.repo = NullRepo()
+    repo_path = find_repo_root(cur)
+    ctx.obj.repo = maybe_repo(repo_path, ctx.with_resource)
 
 
 @main.command()

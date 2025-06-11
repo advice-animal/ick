@@ -27,19 +27,18 @@ Let's say you have a situation you want to improve, like moving config
 incrementally from individual files into one big file, like `isort.cfg` ->
 `pyproject.toml`.
 
-To start simply, create an empty git repo at `/tmp/foo`.  This repo will hold
+To start simply, create an empty directory at `/tmp/foo`.  This dir will hold
 the rule and the code the rule is working on.  Of course you can use a different
 path or an existing git repo, just adjust the path examples here.
 
-To make the directory realistic enough for ick to run, create an empty
-`pyproject.toml` file and commit it to git.
+NOTE: If you run this from within an existing git repo, it is possible that your
+tutorial rule will make changes to its contents.  Although it defaults to a
+dry-run mode (sometimes), you should still be careful and not do this in your
+only copy of it.
 
 <!-- [[[cog
     run_cmd("""
-        git init
         touch pyproject.toml
-        git add pyproject.toml
-        git commit -m 'first'
     """)
 ]]] -->
 <!-- [[[end]]] (sum: 1B2M2Y8Asg) -->
@@ -319,7 +318,7 @@ name = "foo"
 
 Your directory structure should look like this:
 
-<!-- [[[cog show_cmd("find . -print | grep -v '\\.git' | sort | sed -e 's;[^/]*/;|-- ;g;s;-- |;   |;g;'", hide_command=True) ]]] -->
+<!-- [[[cog show_cmd("find . -print | sort | sed -e 's;[^/]*/;|-- ;g;s;-- |;   |;g;'", hide_command=True) ]]] -->
 ```shell
 .
 |-- ick.toml

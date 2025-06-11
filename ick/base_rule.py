@@ -37,7 +37,7 @@ class ExecWork(Work):
         try:
             if self.collection.rule_config.scope == Scope.SINGLE_FILE:
                 stdout, rc = run_cmd(
-                    ["xargs", "-P10", "-n10", *self.collection.command_parts],
+                    ["xargs", "-P10", "-n10", "-0", *self.collection.command_parts],
                     env=self.collection.command_env,
                     cwd=self.project_path,
                     input="\0".join(filenames),
