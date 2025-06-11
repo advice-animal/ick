@@ -113,7 +113,7 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: l
 
     # DO THE NEEDFUL
 
-    rule_modified = {}
+    results = {}
 
     r = Runner(ctx.obj, ctx.obj.repo, explicit_project=None)
     for result in r.run():
@@ -132,14 +132,14 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: l
             for mod in result.modifications:
                 modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
             ok_status = not result.finished.error
-            error_message = result.finished.message if result.finished.error else "None"
+            error_message = result.finished.message if result.finished.error else None
             project = result.project
             modified = modifications
             output = {"project_name": project, "ok_status": ok_status, "modified": modified, "error_message": error_message}
-            if result.rule not in rule_modified:
-                rule_modified[result.rule] = [output]
+            if result.rule not in results:
+                results[result.rule] = [output]
             else:
-                rule_modified[result.rule].append(output)
+                results[result.rule].append(output)
 
         elif patch:
             for mod in result.modifications:
@@ -157,7 +157,7 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: l
                     path.write_bytes(mod.new_bytes)
 
     if json_flag:
-        print(json.dumps({"results": rule_modified}, indent=4))
+        print(json.dumps({"results": results}, indent=4))
 
 
 def verbose_init(v: int, verbose: Optional[int], vmodule: Optional[str]) -> None:
