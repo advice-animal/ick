@@ -53,7 +53,7 @@ something like this:
 [[rule]]
 
 name = "stubs-should-match"
-language = "python"
+impl = "python"
 deps = ["./stubchecker"]
 command = ["stubchecker"]
 inputs = ["*.py", "*.pyi"]

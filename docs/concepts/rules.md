@@ -8,13 +8,13 @@ doing nothing:
 ```toml
 [[rule]]
 name = "pass"
-language = "shell"
+impl = "shell"
 scope = "project"
 command = ":"
 ```
 
-Among the configuration options you see there are the `language` (which is what
-the hook is written in), and its `scope` (whether it runs on individual files,
+Among the configuration options you see there are the `impl` (which is what
+the hook is implemented in), and its `scope` (whether it runs on individual files,
 projects, or repos).
 
 
