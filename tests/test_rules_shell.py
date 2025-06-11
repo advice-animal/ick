@@ -1,6 +1,4 @@
-import os
 import subprocess
-from contextlib import contextmanager
 
 from ick.config import RuleConfig
 from ick.rules.shell import Rule
@@ -100,13 +98,3 @@ def test_smoke_repo(tmp_path):
     assert resp[0].diffstat == "+1-1"
 
     assert isinstance(resp[1], Finished)
-
-
-@contextmanager
-def in_dir(d):
-    prev = os.getcwd()
-    try:
-        os.chdir(d)
-        yield
-    finally:
-        os.chdir(prev)
