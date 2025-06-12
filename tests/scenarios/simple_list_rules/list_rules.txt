@@ -1,9 +1,9 @@
 $ ick list-rules
 LATER
 =====
-* ./goodbye
-* ./shouty
+* goodbye
+* shouty
 
 NOW
 ===
-* ./hello
+* hello
