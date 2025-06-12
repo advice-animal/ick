@@ -13,8 +13,8 @@ scope = "project"
 command = ":"
 ```
 
-Among the configuration options you see there are the `impl` (which is what
-the hook is implemented in), and its `scope` (whether it runs on individual files,
+Among the configuration options you see there are `impl` (which is what
+the rule is implemented in), and its `scope` (whether it runs on individual files,
 projects, or repos).
 
 
