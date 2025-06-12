@@ -1,17 +1,17 @@
-[[hook]]
-language = "ast-grep"
+[[rule]]
+impl = "ast-grep"
 name = "my-print"
 search = "print($$$A)"
 replace = "my_print($$$A)"
 
-[[hook]]
-language = "pygrep"
+[[rule]]
+impl = "pygrep"
 name = "speling"
 search = " speling"
 replace = " spelling"
 
-[[hook]]
-language = "shell"
+[[rule]]
+impl = "shell"
 name = "always-fail"
 data = """
 echo 'fail'
