@@ -1,5 +1,5 @@
 $ ick run --patch
--> ./move_isort_cfg on OK
+-> move_isort_cfg on OK
 diff --git isort.cfg isort.cfg
 deleted file mode 100644
 index fbab120..0000000

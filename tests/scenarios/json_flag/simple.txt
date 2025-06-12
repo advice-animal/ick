@@ -1,7 +1,7 @@
 $ ick run --json
 {
     "results": {
-        "./do_nothing": [
+        "do_nothing": [
             {
                 "project_name": "",
                 "ok_status": true,
@@ -9,7 +9,7 @@ $ ick run --json
                 "error_message": null
             }
         ],
-        "./fail": [
+        "fail": [
             {
                 "project_name": "",
                 "ok_status": false,
@@ -17,7 +17,7 @@ $ ick run --json
                 "error_message": "AssertionError\n"
             }
         ],
-        "./move_a": [
+        "move_a": [
             {
                 "project_name": "",
                 "ok_status": true,
