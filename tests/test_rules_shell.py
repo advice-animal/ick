@@ -21,6 +21,7 @@ def test_smoke_single_file(tmp_path):
     with rule.work_on_project(tmp_path) as work:
         resp = list(work.run("hello", ["README.md"]))
 
+    import pprint; pprint.pprint(resp)
     assert len(resp) == 2
     assert isinstance(resp[0], Modified)
     assert resp[0].filename == "README.md"
@@ -91,6 +92,7 @@ def test_smoke_repo(tmp_path):
     with rule.work_on_project(tmp_path) as work:
         resp = list(work.run("hello", ["README.md"]))
 
+    import pprint; pprint.pprint(resp)
     assert len(resp) == 2
     assert isinstance(resp[0], Modified)
     assert resp[0].filename == "README.md"

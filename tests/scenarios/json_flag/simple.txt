@@ -23,10 +23,6 @@ $ ick run --json
                 "ok_status": true,
                 "modified": [
                     {
-                        "file_name": "file_a.cfg",
-                        "diff_stat": "+0-3"
-                    },
-                    {
                         "file_name": "file_b.toml",
                         "diff_stat": "+3-0"
                     }

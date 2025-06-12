@@ -114,6 +114,9 @@ class BaseRule(BaseCollection):
         self.runnable = True
         self.status = ""
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__} name={self.rule_config.name!r}>"
+
     def list(self) -> ListResponse:
         return ListResponse(
             rule_names=[self.rule_config.name],
