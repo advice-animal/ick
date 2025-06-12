@@ -3,9 +3,11 @@
     Use `make prepdocs` to run it.
 
     [[[cog
+        import os
         from cog_helpers import *
         set_source_root("docs/data/tutorial")
         cd_temp(pretend="/tmp/foo")
+        os.environ["ICK_ISOLATED_REPO"] = "1"
     ]]]
     [[[end]]] (sum: 1B2M2Y8Asg)
 -->
@@ -103,9 +105,9 @@ there's no implementation:
 $ ick list-rules
 LATER
 =====
-* ./move_isort_cfg  *** Couldn't find implementation /tmp/foo/move_isort_cfg.py
+* move_isort_cfg  *** Couldn't find implementation /tmp/foo/move_isort_cfg.py
 ```
-<!-- [[[end]]] (sum: Yyc8zk56gm) -->
+<!-- [[[end]]] (sum: sXZGDGbJud) -->
 
 
 ## Implementing the rule
@@ -167,13 +169,13 @@ trying to import those third-party dependencies:
 <!-- [[[cog show_cmd("ick run") ]]] -->
 ```shell
 $ ick run
--> ./move_isort_cfg on ERROR
+-> move_isort_cfg on ERROR
      Traceback (most recent call last):
        File "/tmp/foo/move_isort_cfg/move_isort_cfg.py", line 5, in <module>
          import imperfect
      ModuleNotFoundError: No module named 'imperfect'
 ```
-<!-- [[[end]]] (sum: ICFz6k3lD+) -->
+<!-- [[[end]]] (sum: RM/fZ8kmZF) -->
 
 We need to tell `ick` about the dependencies the rule needs.
 
@@ -202,9 +204,9 @@ Now `ick run` shows that the rule ran:
 <!-- [[[cog show_cmd("ick run") ]]] -->
 ```shell
 $ ick run
--> ./move_isort_cfg on OK
+-> move_isort_cfg on OK
 ```
-<!-- [[[end]]] (sum: tQnt20T8T3) -->
+<!-- [[[end]]] (sum: w1xz1GNcCp) -->
 
 But the rule did nothing because there is no `isort.cfg` file in `/tmp/foo`.
 Create one:
@@ -222,11 +224,11 @@ Now `ick run` shows a dry-run summary of the changes that would be made:
 <!-- [[[cog show_cmd("ick run") ]]] -->
 ```shell
 $ ick run
--> ./move_isort_cfg on OK
+-> move_isort_cfg on OK
      isort.cfg +0-3
      pyproject.toml +3-0
 ```
-<!-- [[[end]]] (sum: uC0Myzw2b2) -->
+<!-- [[[end]]] (sum: xaDXLilG8G) -->
 
 Passing the `--patch` option displays the full patch of the changes that would
 be made:
@@ -234,7 +236,7 @@ be made:
 <!-- [[[cog show_cmd("ick run --patch") ]]] -->
 ```shell
 $ ick run --patch
--> ./move_isort_cfg on OK
+-> move_isort_cfg on OK
 diff --git isort.cfg isort.cfg
 deleted file mode 100644
 index fbab120..0000000
@@ -253,7 +255,7 @@ index e69de29..089c824 100644
 +line_length = "88"
 +multi_line_output = "3"
 ```
-<!-- [[[end]]] (sum: rZpo8/Pd6j) -->
+<!-- [[[end]]] (sum: p2e1vYaCST) -->
 
 
 ## Reducing execution
@@ -285,15 +287,15 @@ any tests yet, so it has nothing to do:
 ```shell
 $ ick test-rules
 testing...
-  ./move_isort_cfg: <no-test> PASS
+  move_isort_cfg: <no-test> PASS
 
 FAILING INFO
 
-./move_isort_cfg: no tests in /tmp/foo/move_isort_cfg/tests
+move_isort_cfg: no tests in /tmp/foo/move_isort_cfg/tests
 
 (exited with 1)
 ```
-<!-- [[[end]]] (sum: 209Eo7TRI+) -->
+<!-- [[[end]]] (sum: F3bsavA9Rc) -->
 
 In your `move_isort_cfg` rule directory, create a `tests` subdirectory.  There
 each directory will be a test.  Create a `move_isort_cfg/tests/no_isort`
@@ -342,9 +344,9 @@ This is a simple test that checks that if there is no `isort.cfg` file, the
 ```shell
 $ ick test-rules
 testing...
-  ./move_isort_cfg: . PASS
+  move_isort_cfg: . PASS
 ```
-<!-- [[[end]]] (sum: aPmBG+QcQb) -->
+<!-- [[[end]]] (sum: UHnmBuZrZ1) -->
 
 Now make a more realistic test. Create a `change_made`
 directory in the `tests` directory. Create these files:
@@ -387,6 +389,6 @@ Now `ick test-rules` shows two tests passing:
 ```shell
 $ ick test-rules
 testing...
-  ./move_isort_cfg: .. PASS
+  move_isort_cfg: .. PASS
 ```
-<!-- [[[end]]] (sum: Q8fKoyhhcW) -->
+<!-- [[[end]]] (sum: WmmtiTDZw7) -->
