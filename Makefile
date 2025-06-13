@@ -22,7 +22,9 @@ setup: .venv
 
 .PHONY: prepdocs
 prepdocs: .venv
-	source $(ACTIVATE) && python -m cogapp -rcP docs/tutorial.md
+	source $(ACTIVATE) && python -m cogapp -rcP docs/whole-tutorial.md
+	perl -ne 'print if 1../splitme/' < docs/whole-tutorial.md > docs/getting-started/tutorial.md
+	perl -ne 'print if /splitme/..1' < docs/whole-tutorial.md > docs/getting-started/testing-tutorial.md
 
 .PHONY: html
 html: prepdocs .venv README.md docs/*.rst docs/conf.py
@@ -37,7 +39,7 @@ format:
 lint:
 	ruff check
 	python -m checkdeps --allow-names ick,ick_protocol ick
-	python -m cogapp -cP --check --diff docs/tutorial.md
+	python -m cogapp -cP --check --diff docs/whole-tutorial.md
 	#mypy --strict --install-types --non-interactive advice_animal
 
 .PHONY: test
