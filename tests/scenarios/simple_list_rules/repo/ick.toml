@@ -4,6 +4,7 @@ impl = "shell"
 command = "echo hi"
 scope = "repo"
 urgency = "now"
+description = "Say hello"
 
 [[rule]]
 name = "shouty"
