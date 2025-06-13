@@ -1,16 +1,4 @@
-<!--
-    This file has embedded Python code that must be run to keep it up-to-date.
-    Use `make prepdocs` to run it.
-
-    [[[cog
-        import os
-        from cog_helpers import *
-        set_source_root("docs/data/tutorial")
-        cd_temp(pretend="/tmp/foo")
-        os.environ["ICK_ISOLATED_REPO"] = "1"
-    ]]]
-    [[[end]]] (sum: 1B2M2Y8Asg)
--->
+<!-- splitme -->
 
 ## Testing Tutorial
 
@@ -132,4 +120,3 @@ testing...
   move_isort_cfg: .. PASS
 ```
 <!-- [[[end]]] (sum: WmmtiTDZw7) -->
-
