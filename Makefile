@@ -22,7 +22,7 @@ setup: .venv
 
 .PHONY: prepdocs
 prepdocs: .venv
-	source $(ACTIVATE) && python -m cogapp -rcP docs/tutorial.md
+	source $(ACTIVATE) && python -m cogapp -rcP docs/getting-started/tutorial.md docs/getting-started/testing-tutorial.md
 
 .PHONY: html
 html: prepdocs .venv README.md docs/*.rst docs/conf.py

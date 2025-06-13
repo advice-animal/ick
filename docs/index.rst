@@ -3,6 +3,6 @@
 .. toctree::
    :hidden:
 
-   tutorial
+   getting-started/index
    concepts/index
    reference/index
