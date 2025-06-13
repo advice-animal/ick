@@ -6,5 +6,5 @@ LATER
 
 NOW
 ===
-* ./hello: Say hello
+* hello: Say hello
 
