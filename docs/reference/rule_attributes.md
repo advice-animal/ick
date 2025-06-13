@@ -1,6 +1,6 @@
 # Rule Configs
 
-A `RuleConfig` defines the configuration for a single rule in the system. Here are all available attributes:
+A `RuleConfig` defines the configuration for a single `\[\[rule\]\]` in the system. Here are all available attributes:
 
 ## Required Attributes
 
@@ -30,7 +30,7 @@ A `RuleConfig` defines the configuration for a single rule in the system. Here a
   - `SOON`: Should be addressed soon
   - `NOW`: Needs immediate attention
   - `NOT_SUPPORTED`: Not supported in the current context
-- `order` (int): The execution order of the rule. Defaults to 50
+- `order` (int): No clue.
 - `hours` (int): An estimate on how many hours of manual work will be required after running this codemod.
 
 ### Content Processing
@@ -40,15 +40,16 @@ A `RuleConfig` defines the configuration for a single rule in the system. Here a
 
 ### Dependencies and Paths
 - `deps` (list[str]): List of dependencies for the rule.
-- `test_path` (Path): Path to the test file for the rule
-- `script_path` (Path): Path to the script file for the rule
+- `test_path` (Path): Path to the test file for the rule.
+- `script_path` (Path): Path to the script file for the rule.
 - `qualname` (str): The name of the rule within its respective repository. 
 
 ### Input/Output
-- `inputs` (Sequence[str]): List of input files/patterns. Follows `.gitignore`-like glob patterns.
-- `outputs` (Sequence[str]): List of output files/patterns. Follows `.gitignore`-like glob patterns.
-- `extra_inputs` (Sequence[str]): Additional input files/patterns
+These all follow `.gitignore`-like glob patterns, like `*.py`.
+- `inputs` (Sequence[str]): List of input files/patterns.
+- `outputs` (Sequence[str]): List of output files/patterns. 
+- `extra_inputs` (Sequence[str]): Additional input files/patterns.
 
 ### Metadata
-- `description` (str): Description of what the rule does
-- `contact` (str): Contact information for the rule maintainer 
+- `description` (str): Description of what the rule does. Will print with `ick list-rules`.
+- `contact` (str): Contact information for the rule maintainer.
