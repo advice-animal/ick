@@ -241,22 +241,24 @@ class Runner:
             #     duration = f" ({impl.rule_config.hours} {pl('hour', impl.rule_config.hours)})"
 
             msg = f"{impl.rule_config.qualname}{duration}"
+            if impl.rule_config.description:
+                msg += f": {impl.rule_config.description}"
             if not impl.runnable:
                 msg += f"  *** {impl.status}"
             for rule in impl.list().rule_names:
                 rules_by_urgency[impl.rule_config.urgency].append(msg)
 
         first = True
-        for u, rules in sorted(rules_by_urgency.items()):
+        for urgency_label, rules in sorted(rules_by_urgency.items()):
             if not first:
                 print()
             else:
                 first = False
 
-            print(u.name)
-            print("=" * len(str(u.name)))
-            for v in rules:
-                print(f"* {v}")
+            print(urgency_label.name)
+            print("=" * len(str(urgency_label.name)))
+            for rule in rules:
+                print(f"* {rule}")
 
 
 def pl(noun: str, count: int) -> str:
