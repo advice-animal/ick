@@ -6,6 +6,8 @@ Concepts
    :hidden:
    :maxdepth: 2
 
+   guiding_principles
+
    rules
    collections
    scope
