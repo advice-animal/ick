@@ -7,6 +7,7 @@ Concepts
    :maxdepth: 2
 
    guiding_principles
+   norms
 
    rules
    collections

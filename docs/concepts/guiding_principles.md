@@ -21,4 +21,22 @@ makes sense, especially on the low end of complexity.  If you haven't wanted to
 write a custom flake8 plugin because it's hard, and resorted to a `grep`
 somewhere, this framework is for you.
 
+## On-Ramps
 
+To make it easier to try or, or for only certain people to use at the
+beginning, it must be possible to use `ick` in an existing repo with the most
+minimal configuration possible.
+
+You should also be able to script `ick`, running it on directories and doing
+your own operations on the output.  `Ick` won't be creating you PRs using the
+GitHub API, but you should be able to build such an automation for yourself or
+your company.
+
+You should be able to run `ick` with point-in-time rules from something like a
+Sourcegraph Batch Change, which means it should be easy to package into a
+Docker image with your own custom rules.
+
+## Off-Ramps
+
+You should be able to stop using `ick` with only things users have explicitly
+done (like suppressions or ignores) left behind.
