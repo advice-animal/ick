@@ -7,8 +7,8 @@ uses, or use _within_ an `ick` rule).
 
 They're all good at something, while `ick` is good at orchestration and tries
 to leave you to your own devices.  See if you agree with
-[guiding_principles.md] and [norms.md] for the remaining limitations that might
-be worth writing an even better tool.
+[Guiding Principles](guiding_principles.html) and [Norms](norms.html) for the
+remaining limitations that might be worth writing an even better tool.
 
 
 ## Multi-file, multi-language
@@ -16,9 +16,12 @@ be worth writing an even better tool.
   * pre-commit: https://github.com/pre-commit/pre-commit/
 
     Firstly, `pre-commit` is the only truly polyglot tool in this list that works
-    without tons of configuration.  The main difference with `ick` is that `ick` is
-    intended for rules that evolve over time and are updated out-of-band, while
-    `pre-commit` is intended for rules that are fully specified by your source code.
+    without tons of configuration.
+
+    We actually drew a lot of inspiration (and some obscure `git` args) from
+    `pre-commit`, but with near opposite goals: as opinions change over time, the
+    recommendations for your code should too.  `pre-commit` is intended for
+    rules that are fully specified by your source code.
 
     This difference is mostly down to whether you want to run it in CI.
     `pre-commit` says "sure!" and `ick` says "please don't."
