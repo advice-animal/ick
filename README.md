@@ -1,6 +1,6 @@
 # Ick
 
-<img align="right" src="_static/ick.png" width="300" height="287">
+<img align="right" src="https://raw.githubusercontent.com/advice-animal/ick/main/_static/ick.png" width="300" height="287">
 
 Let's say you know of a bunch of repos that might need updating.
 
