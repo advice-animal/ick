@@ -37,7 +37,7 @@ format:
 lint:
 	ruff check
 	python -m checkdeps --allow-names ick,ick_protocol ick
-	python -m cogapp -cP --check --diff docs/tutorial.md
+	python -m cogapp -cP --check --diff docs/getting-started/tutorial.md docs/getting-started/testing-tutorial.md
 	#mypy --strict --install-types --non-interactive advice_animal
 
 .PHONY: test
