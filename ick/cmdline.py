@@ -27,7 +27,7 @@ from .types_project import maybe_repo
 @click.option("--verbose", type=int, help="Log verbosity (unset = WARNING, 0 = INFO, 1 = VLOG_1, ..., 10 = DEBUG)")
 @click.option("--vmodule", help="comma-separated logger:level values, same scheme as --verbose")
 @click.option("--trace", type=click.File(mode="w"), help="Trace output filename")
-@click.option("--isolated-repo", is_flag=True, help="Isolate from user-level config")
+@click.option("--isolated-repo", is_flag=True, help="Isolate from user-level config", envvar="ICK_ISOLATED_REPO")
 @click.option("--target", default=".", help="Directory to modify")  # TODO path, existing
 @click.pass_context
 def main(ctx, v, verbose, vmodule, trace, isolated_repo, target) -> None:
