@@ -18,6 +18,9 @@ class Project(Struct):
     typ: str
     marker_filename: str
 
+    def is_matching_type(self, types: Optional[Sequence[str]]) -> bool:
+        return not types or self.typ in types
+
 
 class Repo(Struct):
     root: Path

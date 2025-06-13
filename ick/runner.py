@@ -21,7 +21,7 @@ from keke import ktrace
 from moreorless.combined import combined_diff
 from rich import print
 
-from ick_protocol import Finished, Modified
+from ick_protocol import Finished, Modified, Scope
 
 from .base_rule import BaseRule
 from .clone_aside import CloneAside
@@ -201,7 +201,12 @@ class Runner:
             qualname = impl.rule_config.qualname
 
             impl.prepare()
-            for p in self.projects:
+            if impl.rule_config.scope == Scope.REPO:
+                todo = [(self.repo, None)]
+            else:
+                todo = [(self.repo, p) for p in self.projects if p.is_matching_type(impl.rule_config.project_types)]
+
+            for r, p in todo:
                 responses = self._run_one(impl, self.repo, p)
                 mod = [m for m in responses if isinstance(m, Modified)]
                 assert isinstance(responses[-1], Finished)
