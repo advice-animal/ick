@@ -96,6 +96,9 @@ class RuleConfig(Struct):
     outputs: Optional[Sequence[str]] = None
     extra_inputs: Optional[Sequence[str]] = None
 
+    description: Optional[str] = None
+    contact: Optional[str] = None
+
 
 @ktrace()
 def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:

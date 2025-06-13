@@ -6,4 +6,4 @@ LATER
 
 NOW
 ===
-* hello
+* hello: Say hello
