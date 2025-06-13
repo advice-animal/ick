@@ -2,11 +2,18 @@
 
 <img align="right" src="https://raw.githubusercontent.com/advice-animal/ick/main/_static/ick.png" width="300" height="287">
 
-Let's say you know of a bunch of repos that might need updating.
+Ick is lightweight polyglot automation for running language-specific
+tools (including auto-fixes) and letting developers know what they can improve.
+
+
+## The problem
+
+Let's say you have a bunch of repos that might need updating.
 
 Not like "format my code" updating, but things that reduce tech debt like
 moving from pinned urllib3 1.x to urllib3 2.x.  That'd be good, right?  But
-maybe not for everyone.  And certainly not *right* now, to block landing PRs.
+maybe not for everyone.  And certainly not *right* now, because you don't want
+to block pull requests.
 
 The traditional dev loop generally looks like this:
 
@@ -35,29 +42,45 @@ that aren't "right now" and aren't "today" but are "important, yet not urgent".
        inner loop                 outer loop               planning cycle
 ```
 
-## Elevator Pitch
+Ick manages and runs rules to help you update repos on your timeline.
 
-`ick` looks at your source code and gives you an evaluation against *someone's*
+
+## Elevator pitch
+
+`ick` looks at your source code and gives you an evaluation against a set of
 rules.  Those rules might come from a central team at your work, or a trusted
 friend, or they might be ones you maintain yourself (like my hobbyhorse, "text
-files must end with a newline" -- I'm looking at you, default vscode config).
+files must end with a newline").
 
-If you're ever tempted to make a one-off shell script and put it in your
-`~/.local/bin` directory, or put a `scripts/release-check.sh` that you run once
-in a while, then this is probably the loose automation framework you're looking
-for that makes that easier to scale past a couple of repos.
+If you're ever tempted to make a one-off shell script, or create a
+`scripts/release-check.sh` that you run once in a while, then ick is the loose
+automation framework you're looking for. Ick makes that kind of work easier to
+scale past a couple of repos.
 
-## For Whom Is It?
+Ick also has the explicit goal of being able to scale from low-risk, easy
+changes (*"text files should end with a newline"*) to medium changes (*"you
+should drop Python 3.6 support and sync your GitHub actions matrix"*) to large
+ones (*"here's the beginning of a refactor to enable testcontainers"*) or even
+ones that involve external state.  The effort to write rules should be roughly
+proportional to how complex they are -- easy things should be easy (and fast!),
+but it's OK for hard things to still be hard.
 
-* Central teams with opinions (e.g. at a company, there might be a language
-  team, a testing team, a loadbalancing team, and they all might want to let
-  you know if there are deprecations coming).
-* Projects with opinions (say your ML project has decided to only bless a
-  certain model or license)
-* Individuals with multiple repositories they want to keep looking similar
-  (see [inspiration](docs/inspiration.md) for some of the giants' shoulders)
-* Individuals with [hobby horses](https://wiki.c2.com/?HobbyHorse), who are
+
+## Who is ick for?
+
+* **Central teams** with opinions. For example, at a company, there might be a
+  language team, a testing team, a load-balancing team, and they all might
+  want to let you know if there are deprecations coming.
+* **Projects** with opinions. Say your ML project has decided to only bless a
+  certain model or license).
+* **Developers** with multiple repositories they want to keep looking similar.
+* **Developers** with [hobby horses](https://wiki.c2.com/?HobbyHorse), who are
   stricter about things others don't (yet) care about.
+
+
+
+
+<!--
 
 ## Don't Reinvent the Wheel
 
@@ -96,8 +119,6 @@ appropriate tools.  But if this is the sort of thing you do at scale and want
 to distribute recommendations that people can adopt as they have time, you need
 automation.
 
-Ick is the lightweight, polyglot automation around running language-specific
-tools (including autofixes) and letting the user know what they can improve.
 
 Its primary job is to let you *move towards a goal over time* and make it
 *trivially easy to write fixes with good tests*.  You can adopt ick without
@@ -183,3 +204,5 @@ from a shell oneliner up to a full docker image, and several things in between
   want to use
 * Give you a heads-up about recommendations that you don't need to apply yet
   (but can if you have spare time or want to be an early adopter)
+
+-->
