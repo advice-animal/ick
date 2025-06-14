@@ -9,8 +9,7 @@ The following attributes can be set in an `ick.toml` or `pyproject.toml`.
 
 ### Optional Attributes
 - `prefix` (str): A prefix to use for the rules from this mount. If not specified, it will be derived from the last component of the URL or path.
-- `base_path` (Path): The directory of the config file that referenced this ruleset. We set this as the `ick.toml`'s parent path.
-- `repo`: No clue how to best describe nor format this yet.
+
 
 ## `[[rule]]` Attributes
 
@@ -19,19 +18,19 @@ A `RuleConfig` (defined in `ick/config/rules.py`) defines the configuration for 
 ### Required Attributes
 
 - `name` (str): The name of the rule
-- `impl` (str): The language the rule will be 
+- `impl` (str): The language in which the rule will be written, see [impls] (TODO)
 
 ### Optional Attributes
 
 #### Execution Control
-- `scope` (Scope): The scope of the rule's execution. Defaults to `SINGLE_FILE`. Available options:
-  - `SINGLE_FILE`: Runs the rule on a single file.
-  - `PROJECT`: Runs the rule on the whole project.
-  - `REPO`: Runs the rule on the whole repository.
+- `scope` (Scope): The scope of the rule's execution. Defaults to single file. Available options:
+  - `"single-file"`: Runs the rule on a single file.
+  - `"project"`: Runs the rule on the whole project.
+  - `"repo"`: Runs the rule on the whole repository.
 - `command` (str | list[str]): The command to execute for this rule. 
 - `success` (Success): How to determine if the rule execution was successful. Defaults to `EXIT_STATUS`. Available options:
-  - `EXIT_STATUS`: Success is determined by the command's exit status
-  - `NO_OUTPUT`: Success is determined by the absence of output
+  - `"exit-status`: Success is determined by the command's exit status
+  - `"no-output"`: Success is determined by the absence of output
 
 #### Risk and Timing
 - `risk` (Risk): The risk level of running this rule. In other words, how likely it is to break something. Defaults to `HIGH`. Available options:
@@ -39,18 +38,18 @@ A `RuleConfig` (defined in `ick/config/rules.py`) defines the configuration for 
   - `MED`: Medium risk level
   - `LOW`: Lowest risk level
 - `urgency` (Urgency): The urgency level of the rule. Defaults to `LATER`. Available options:
-  - `MANUAL`: Requires manual intervention
+  - `MANUAL`: The rule is not intended to be run automatically and should be run by choice.
   - `LATER`: Can be addressed later
   - `SOON`: Should be addressed soon
   - `NOW`: Needs immediate attention
-  - `NOT_SUPPORTED`: Not supported in the current context
+  - `NOT_SUPPORTED`: This rule no longer applies to the current context.
 - `order` (int): No clue.
 - `hours` (int): An estimate on how many hours of manual work will be required after running this codemod.
 
 #### Content Processing
-- `data` (str): No clue
-- `search` (str): No clue
-- `replace` (str): No clue
+- `data` (str): TODO
+- `search` (str): TODO
+- `replace` (str): TODO
 
 #### Dependencies and Paths
 - `deps` (list[str]): List of dependencies for the rule.
@@ -66,4 +65,4 @@ These all follow `.gitignore`-like glob patterns, like `*.py`.
 
 #### Metadata
 - `description` (str): Description of what the rule does. Will print with `ick list-rules`.
-- `contact` (str): Contact information for the rule maintainer.
+- `contact` (str): Contact information for the rule maintainer (e.g., email, slack channel, etc.)
