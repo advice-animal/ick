@@ -100,7 +100,7 @@ class Runner:
                         fut.result()
                     except Exception as e:
                         print("[red]F[/red]", end="")
-                        print(f"  {desc}:", file=buffered_output)
+                        print(f"\n{'-' * 80}\n{desc}:", file=buffered_output)
                         # This should be combined with how we actually run
                         # things...
                         typ, value, tb = sys.exc_info()
@@ -120,7 +120,6 @@ class Runner:
             if buffered_output.tell():
                 print()
                 print("FAILING INFO")
-                print()
                 print(buffered_output.getvalue())
                 return 1
 
@@ -136,8 +135,7 @@ class Runner:
             project = Project(repo.root, "", "python", "invalid.bin")
             ap = test_path / "a"
             bp = test_path / "b"
-            files_to_check = set(glob("*", root_dir=bp, recursive=True))
-            files_to_check.update(glob(".github/**", root_dir=bp, recursive=True))
+            files_to_check = set(glob("*", root_dir=bp, recursive=True, include_hidden=True))
             files_to_check = {f for f in files_to_check if (bp / f).is_file()}
 
             response = self._run_one(rule_instance, repo, project)
@@ -160,25 +158,31 @@ class Runner:
             for r in response[:-1]:
                 assert isinstance(r, Modified)
                 if r.new_bytes is None:
-                    assert r.filename not in files_to_check, "missing removal"
+                    assert r.filename not in files_to_check, f"missing removal {r.filename!r}"
                 else:
-                    assert r.filename in files_to_check, "missing edit"
-                    if (bp / r.filename).read_bytes() != r.new_bytes:
+                    assert r.filename in files_to_check, f"unexpected new file: {r.filename!r}"
+                    af = ap / r.filename
+                    bf = bp / r.filename
+                    if bf.read_bytes() != r.new_bytes:
+                        if af.exists():
+                            atext = af.read_text()
+                        else:
+                            atext = ""
                         print(rule_instance.rule_config.name, "fail")
                         print(
                             combined_diff(
-                                [(ap / r.filename).read_text()],
-                                [(bp / r.filename).read_text(), r.new_bytes.decode()],
+                                [atext],
+                                [bf.read_text(), r.new_bytes.decode()],
                                 from_filenames=["original"],
                                 to_filenames=["expected", "actual"],
                             )
                         )
-                        assert False, f"{r.filename} (modified) differs"
+                        assert False, f"{r.filename!r} (modified) differs"
                     files_to_check.remove(r.filename)
 
             for unchanged_file in files_to_check:
                 assert (test_path / "a" / unchanged_file).read_bytes() == (bp / unchanged_file).read_bytes(), (
-                    f"{unchanged_file} (unchanged) differs"
+                    f"{unchanged_file!r} (unchanged) differs"
                 )
 
     def iter_tests(self):
