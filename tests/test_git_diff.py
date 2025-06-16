@@ -10,7 +10,6 @@ def test_smoketest(tmp_path):
     os.chdir(tmp_path)
     subprocess.check_call(["git", "init"])
     Path("foo.txt").write_text("line\n")
-    subprocess.check_call(["git", "add", "-N", "."])
     messages = list(get_diff_messages("m", "foo", Path.cwd()))
     assert len(messages) == 2
     assert isinstance(messages[0], Modified)
@@ -23,7 +22,6 @@ def test_smoketest(tmp_path):
 def test_smoketest_workdir(tmp_path):
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     Path(tmp_path, "foo.txt").write_text("line\n")
-    subprocess.check_call(["git", "add", "-N", "."], cwd=tmp_path)
     messages = list(get_diff_messages("m", "foo", tmp_path))
     assert len(messages) == 2
     assert isinstance(messages[0], Modified)
@@ -36,10 +34,9 @@ def test_smoketest_workdir(tmp_path):
 def test_smoketest_removal(tmp_path):
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     Path(tmp_path, "foo.txt").write_text("line\nunchanged\n")
-    subprocess.check_call(["git", "add", "-N", "."], cwd=tmp_path)
+    subprocess.check_call(["git", "add", "."], cwd=tmp_path)
     subprocess.check_call(["git", "commit", "-a", "-m", "sync"], cwd=tmp_path)
     Path(tmp_path, "foo.txt").write_text("other\nunchanged\n")
-    # subprocess.check_call(["git", "add", "-N", "."], cwd=tmp_path)
     messages = list(get_diff_messages("m", "foo", tmp_path))
     assert len(messages) == 2
     assert isinstance(messages[0], Modified)
@@ -53,7 +50,7 @@ def test_smoketest_binary(tmp_path):
     os.chdir(tmp_path)
     subprocess.check_call(["git", "init"])
     Path("foo.bin").write_bytes(b"\x00\x01\x02")
-    subprocess.check_call(["git", "add", "-N", "."])
+    subprocess.check_call(["git", "add", "."])
     messages = list(get_diff_messages("m", "foo", Path.cwd()))
     assert len(messages) == 2
     assert isinstance(messages[0], Modified)
