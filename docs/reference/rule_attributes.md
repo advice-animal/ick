@@ -3,7 +3,7 @@ The following attributes can be set in an `ick.toml` or `pyproject.toml`.
 
 ## `[[ruleset]]` Attributes
 
-### Required (at least one)
+### Required (only one can be present)
 - `url` (str): A URL to an external repository containing rules
 - `path` (str): A local path to a directory containing rules
 
@@ -13,7 +13,7 @@ The following attributes can be set in an `ick.toml` or `pyproject.toml`.
 
 ## `[[rule]]` Attributes
 
-A `RuleConfig` (defined in `ick/config/rules.py`) defines the configuration for a single `[[rule]]` in the system. Here are all available attributes:
+A single `[[rule]]` in an an ick.toml can be configured with the following attributes:
 
 ### Required Attributes
 
@@ -28,21 +28,21 @@ A `RuleConfig` (defined in `ick/config/rules.py`) defines the configuration for 
   - `"project"`: Runs the rule on the whole project.
   - `"repo"`: Runs the rule on the whole repository.
 - `command` (str | list[str]): The command to execute for this rule. 
-- `success` (Success): How to determine if the rule execution was successful. Defaults to `EXIT_STATUS`. Available options:
-  - `"exit-status`: Success is determined by the command's exit status
+- `success` (Success): How to determine if the rule execution was successful. Defaults to `"exit-status"`. Available options:
+  - `"exit-status"`: Success is determined by the command's exit status
   - `"no-output"`: Success is determined by the absence of output
 
 #### Risk and Timing
-- `risk` (Risk): The risk level of running this rule. In other words, how likely it is to break something. Defaults to `HIGH`. Available options:
-  - `HIGH`: Highest risk level
-  - `MED`: Medium risk level
-  - `LOW`: Lowest risk level
-- `urgency` (Urgency): The urgency level of the rule. Defaults to `LATER`. Available options:
-  - `MANUAL`: The rule is not intended to be run automatically and should be run by choice.
-  - `LATER`: Can be addressed later
-  - `SOON`: Should be addressed soon
-  - `NOW`: Needs immediate attention
-  - `NOT_SUPPORTED`: This rule no longer applies to the current context.
+- `risk` (str): The risk level of running this rule. In other words, how likely it is to break something. Available options:
+  - `"high"`: Highest risk level (default)
+  - `"med"`: Medium risk level
+  - `"low"`: Lowest risk level
+- `urgency` (str): The urgency level of the rule. Defaults to `"later"`. Available options:
+  - `"manual"`: The rule is not intended to be run automatically and should be run by choice.
+  - `"later"`: Can be addressed later
+  - `"soon"`: Should be addressed soon
+  - `"now"`: Needs immediate attention
+  - `"not_supported"`: This rule no longer applies to the current context.
 - `order` (int): No clue.
 - `hours` (int): An estimate on how many hours of manual work will be required after running this codemod.
 
@@ -53,9 +53,6 @@ A `RuleConfig` (defined in `ick/config/rules.py`) defines the configuration for 
 
 #### Dependencies and Paths
 - `deps` (list[str]): List of dependencies for the rule.
-- `test_path` (Path): Path to the test file for the rule.
-- `script_path` (Path): Path to the script file for the rule.
-- `qualname` (str): The name of the rule within its respective repository. 
 
 #### Input/Output
 These all follow `.gitignore`-like glob patterns, like `*.py`.
