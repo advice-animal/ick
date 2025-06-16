@@ -8,7 +8,7 @@ The following attributes can be set in an `ick.toml` or `pyproject.toml`.
 - `path` (str): A local path to a directory containing rules
 
 ### Optional Attributes
-- `prefix` (str): A prefix to use for the rules from this mount. If not specified, it will be derived from the last component of the URL or path.
+- `prefix` (str): A prefix to use for the rules from this ruleset. If not specified, it will be derived from the last component of the URL or path.
 
 
 ## `[[rule]]` Attributes
@@ -23,8 +23,8 @@ A `RuleConfig` (defined in `ick/config/rules.py`) defines the configuration for 
 ### Optional Attributes
 
 #### Execution Control
-- `scope` (Scope): The scope of the rule's execution. Defaults to single file. Available options:
-  - `"single-file"`: Runs the rule on a single file.
+- `scope` (str): The scope of the rule's execution. Available options:
+  - `"single-file"`: Runs the rule on a single file (default).
   - `"project"`: Runs the rule on the whole project.
   - `"repo"`: Runs the rule on the whole repository.
 - `command` (str | list[str]): The command to execute for this rule. 
@@ -65,4 +65,4 @@ These all follow `.gitignore`-like glob patterns, like `*.py`.
 
 #### Metadata
 - `description` (str): Description of what the rule does. Will print with `ick list-rules`.
-- `contact` (str): Contact information for the rule maintainer (e.g., email, slack channel, etc.)
+- `contact` (str): Contact information for the rule maintainer: email, Slack channel, etc.
