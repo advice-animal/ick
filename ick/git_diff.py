@@ -4,6 +4,8 @@ from typing import Optional
 
 from ick_protocol import Finished, Modified
 
+from .sh import run_cmd
+
 
 def get_diff_messages(msg, rule_name: str, workdir: Path):
     buf = []
@@ -28,10 +30,12 @@ def get_diff_messages(msg, rule_name: str, workdir: Path):
             new_bytes=new_bytes,
         )
 
+    run_cmd(["git", "add", "."], cwd=workdir)
+
     # N.b. we do not pass --binary here because we don't really care about the
     # binary diff, and will include the full contents in `new_bytes` above.
     with subprocess.Popen(
-        ["git", "diff", "--no-prefix", "--no-color"],
+        ["git", "diff", "--staged", "--no-prefix", "--no-color"],
         encoding="utf-8",
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
