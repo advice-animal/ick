@@ -15,7 +15,8 @@ def test_smoke_single_file(tmp_path):
     conf = RuleConfig(
         name="hello",
         impl="shell",
-        command="sed -i -e 's/hello/HELLO/'",
+        # `sed -i` works differently on Mac vs Linux, so use perl instead.
+        command="perl -pi -e 's/hello/HELLO/g'",
     )
     rule = Rule(conf, None)
     with rule.work_on_project(tmp_path) as work:
@@ -85,7 +86,8 @@ def test_smoke_repo(tmp_path):
         name="hello",
         impl="shell",
         scope="repo",
-        command="sed -i -e 's/hello/HELLO/' README.md",
+        # `sed -i` works differently on Mac vs Linux, so use perl instead.
+        command="perl -pi -e 's/hello/HELLO/g' README.md",
     )
     rule = Rule(conf, None)
     with rule.work_on_project(tmp_path) as work:
