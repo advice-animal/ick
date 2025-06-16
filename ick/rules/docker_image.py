@@ -17,7 +17,7 @@ class Rule(BaseRule):
 
         # This is intended to allow passing through args like "." (for repo- or
         # project-scoped rules that don't take filenames)
-        self.command_parts = ["docker", "run", "-v", ".:/data", *self.entry]
+        self.command_parts = ["docker", "run", "--rm", "-w", "/data", "-v", ".:/data", *self.entry]
 
         # TODO limit this to DOCKER_* and whatever it needs for finding config?
         self.command_env = os.environ.copy()
