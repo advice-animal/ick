@@ -18,12 +18,11 @@ testing...
   move_isort_cfg: <no-test> PASS
 
 FAILING INFO
-
 move_isort_cfg: no tests in /tmp/foo/move_isort_cfg/tests
 
 (exited with 1)
 ```
-<!-- [[[end]]] (sum: F3bsavA9Rc) -->
+<!-- [[[end]]] (sum: HSz6QqBZaO) -->
 
 In your `move_isort_cfg` rule directory, create a `tests` subdirectory.  There
 each directory will be a test.  Create a `move_isort_cfg/tests/no_isort`
