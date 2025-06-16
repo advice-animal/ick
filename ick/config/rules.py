@@ -82,6 +82,7 @@ class RuleConfig(Struct):
 
     command: Optional[str] = None
     data: Optional[str] = None
+    entry: Optional[str] = None
 
     search: Optional[str] = None
     # ruff bug: https://github.com/astral-sh/ruff/issues/10874
