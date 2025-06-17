@@ -1,17 +1,21 @@
 import subprocess
+import sys
+
+import pytest
 
 from ick.config import RuleConfig
-from ick.rules.docker_image import Rule
+from ick.rules.docker import Rule
 from ick_protocol import Finished, Modified
 
 
-def test_basic_docker_image(tmp_path):
-    docker_image_rule = Rule(
+@pytest.mark.skipif(sys.platform == "darwin", reason="GHA can't test docker")
+def test_basic_docker(tmp_path):
+    docker_rule = Rule(
         RuleConfig(
             name="append",
-            impl="docker_image",
+            impl="docker",
             scope="repo",
-            entry="alpine:3.14 /bin/sh -c 'echo dist >> /data/.gitignore'",
+            command="alpine:3.14 /bin/sh -c 'echo dist >> .gitignore'",
         ),
         None,
     )
@@ -20,8 +24,8 @@ def test_basic_docker_image(tmp_path):
     subprocess.check_call(["git", "add", ".gitignore"], cwd=tmp_path)
     subprocess.check_call(["git", "commit", "-a", "-msync"], cwd=tmp_path)
 
-    docker_image_rule.prepare()
-    with docker_image_rule.work_on_project(tmp_path) as work:
+    docker_rule.prepare()
+    with docker_rule.work_on_project(tmp_path) as work:
         resp = list(work.run("foo", [".gitignore"]))
 
     assert len(resp) == 2
