@@ -28,7 +28,7 @@ A single `[[rule]]` in an an ick.toml can be configured with the following attri
   - `"project"`: Runs the rule on the whole project.
   - `"repo"`: Runs the rule on the whole repository.
 - `command` (str | list[str]): The command to execute for this rule. 
-- `success` (Success): How to determine if the rule execution was successful. Defaults to `"exit-status"`. Available options:
+- `success` (str): How to determine if the rule execution was successful. Defaults to `"exit-status"`. Available options:
   - `"exit-status"`: Success is determined by the command's exit status
   - `"no-output"`: Success is determined by the absence of output
 
@@ -43,7 +43,7 @@ A single `[[rule]]` in an an ick.toml can be configured with the following attri
   - `"soon"`: Should be addressed soon
   - `"now"`: Needs immediate attention
   - `"not_supported"`: This rule no longer applies to the current context.
-- `order` (int): No clue.
+- `order` (int): If a rule needs to run before another, define that here. Rules with lower orders will be run before rules with higher orders. Intended to be an integer from 0-100, and defaults to 50. 
 - `hours` (int): An estimate on how many hours of manual work will be required after running this codemod.
 
 #### Content Processing
