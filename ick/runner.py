@@ -41,6 +41,17 @@ class HighLevelResult:
     finished: Any
 
 
+@dataclass
+class TestResult:
+    """Capture the result of running a test in a structured way."""
+    rule_instance: BaseRule
+    test_path: str
+    message: str = ""
+    success: bool = False
+    diff: str = ""
+    traceback: str = ""
+
+
 class Runner:
     def __init__(self, rtc, repo, explicit_project=None):
         self.rtc = rtc
@@ -66,52 +77,58 @@ class Runner:
         """
         Returns an exit code (0 on success)
         """
-        with ThreadPoolExecutor() as tpe:
-            print("[dim]testing...[/dim]")
-            # It's about this point I realize that yes, I am writing a whole
-            # test runner and that's not the business I want to be in.  Oh
-            # well...
-            buffered_output = io.StringIO()
+        print("[dim]testing...[/dim]")
+        buffered_output = io.StringIO()
 
-            i = 0
-            for rule_instance, names in self.iter_tests():
+        def buf_print(text):
+            """Print to the buffered output.
+
+            This is needed instead of print(..., file=buffered_output) to get
+            the rich highlighting correct.
+            """
+            buffered_output.write(text)
+            buffered_output.write("\n")
+
+        with ThreadPoolExecutor() as tpe:
+            for rule_instance, test_paths in self.iter_tests():
                 outstanding = {}
                 print(f"  [bold]{rule_instance.rule_config.qualname}[/bold]: ", end="")
                 rule_instance.prepare()
-                if not names:
+                if not test_paths:
                     print("<no-test>", end="")
-                    print(
+                    buf_print(
                         f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
-                        file=buffered_output,
                     )
                 else:
-                    key = str(i)
-                    i += 1
-                    for n in names:
-                        outstanding[tpe.submit(self._perform_test, rule_instance, n)] = (
-                            key,
-                            f"{rule_instance.rule_config.qualname} on {n}",
-                        )
+                    for test_path in test_paths:
+                        result = TestResult(rule_instance, test_path)
+                        fut = tpe.submit(self._perform_test, rule_instance, test_path, result)
+                        outstanding[fut] = result
 
                 success = True
                 for fut in outstanding.keys():
-                    progress_key, desc = outstanding[fut]
+                    result = outstanding[fut]
                     try:
                         fut.result()
                     except Exception as e:
-                        print("[red]F[/red]", end="")
-                        print(f"\n{'-' * 80}\n{desc}:", file=buffered_output)
-                        # This should be combined with how we actually run
-                        # things...
+                        result.success = False
                         typ, value, tb = sys.exc_info()
-                        traceback.print_tb(tb, file=buffered_output)
-                        # TODO redent
-                        print(repr(e), file=buffered_output)
-                        success = False
-                    else:
-                        print(".", end="")
+                        # This should be combined with how we actually run things...
+                        result.traceback = "".join(traceback.format_tb(tb))
+                        result.message = repr(e)
 
-                # TODO try to line these up
+                    if result.success:
+                        print(".", end="")
+                    else:
+                        success = False
+                        print("[red]F[/red]", end="")
+                        buf_print(f"{'-' * 80}")
+                        rel_test_path = result.test_path.relative_to(result.rule_instance.rule_config.test_path)
+                        buf_print(f"testing [bold]{rule_instance.rule_config.qualname}[/] with [bold]{rel_test_path}[/]:")
+                        buf_print(result.traceback)
+                        buf_print(result.message)
+                        buf_print(result.diff)
+
                 if success:
                     print(" [green]PASS[/green]")
                 else:
@@ -125,7 +142,7 @@ class Runner:
 
             return 0
 
-    def _perform_test(self, rule_instance, test_path) -> None:
+    def _perform_test(self, rule_instance, test_path, result: TestResult) -> None:
         with TemporaryDirectory() as td, ExitStack() as stack:
             tp = Path(td)
             copytree(test_path / "a", tp, dirs_exist_ok=True)
@@ -135,7 +152,7 @@ class Runner:
             project = Project(repo.root, "", "python", "invalid.bin")
             ap = test_path / "a"
             bp = test_path / "b"
-            files_to_check = set(glob("*", root_dir=bp, recursive=True, include_hidden=True))
+            files_to_check = set(glob("**", root_dir=bp, recursive=True, include_hidden=True))
             files_to_check = {f for f in files_to_check if (bp / f).is_file()}
 
             response = self._run_one(rule_instance, repo, project)
@@ -144,23 +161,27 @@ class Runner:
             if response[-1].error:
                 expected_path = bp / "output.txt"
                 if not expected_path.exists():
-                    raise AssertionError(
-                        f"Test crashed, but {expected_path} doesn't exist so that seems unintended:\n" + response[-1].message
-                    )
+                    result.message = f"Test crashed, but {expected_path} doesn't exist so that seems unintended:\n{response[-1].message}"
+                    return
 
                 expected = expected_path.read_text()
-                if expected != response[-1].message:
-                    print("Testing", test_path)
-                    print(moreorless.unified_diff(expected, response[-1].message, "output.txt"))
-                    assert False, response[-1].message
+                if expected == response[-1].message:
+                    result.success = True
+                else:
+                    result.diff = moreorless.unified_diff(expected, response[-1].message, "output.txt")
+                    result.message = "Different output found"
                 return
 
             for r in response[:-1]:
                 assert isinstance(r, Modified)
                 if r.new_bytes is None:
-                    assert r.filename not in files_to_check, f"missing removal {r.filename!r}"
+                    if r.filename in files_to_check:
+                        result.message = f"Missing removal of {r.filename!r}"
+                        return
                 else:
-                    assert r.filename in files_to_check, f"unexpected new file: {r.filename!r}"
+                    if r.filename not in files_to_check:
+                        result.message = f"Unexpected new file: {r.filename!r}"
+                        return
                     af = ap / r.filename
                     bf = bp / r.filename
                     if bf.read_bytes() != r.new_bytes:
@@ -168,25 +189,25 @@ class Runner:
                             atext = af.read_text()
                         else:
                             atext = ""
-                        print(rule_instance.rule_config.name, "fail")
-                        print(
-                            combined_diff(
-                                [atext],
-                                [bf.read_text(), r.new_bytes.decode()],
-                                from_filenames=["original"],
-                                to_filenames=["expected", "actual"],
-                            )
+                        result.diff = combined_diff(
+                            [atext],
+                            [bf.read_text(), r.new_bytes.decode()],
+                            from_filenames=["original"],
+                            to_filenames=["expected", "actual"],
                         )
-                        assert False, f"{r.filename!r} (modified) differs"
+                        result.message = f"{r.filename!r} (modified) differs"
+                        return
                     files_to_check.remove(r.filename)
 
             for unchanged_file in files_to_check:
-                assert (test_path / "a" / unchanged_file).read_bytes() == (bp / unchanged_file).read_bytes(), (
-                    f"{unchanged_file!r} (unchanged) differs"
-                )
+                if (test_path / "a" / unchanged_file).read_bytes() != (bp / unchanged_file).read_bytes():
+                    result.message = f"{unchanged_file!r} (unchanged) differs"
+                    return
 
-    def iter_tests(self):
-        # Yields (impl, project_paths) for projects in test dir
+        result.success = True
+
+    def iter_tests(self) -> Iterable[tuple[BaseRule, tuple[str, ...]]]:
+        # Yields (impl, test_paths) for projects in test dir
         for impl in self.iter_rule_impl():
             if hasattr(impl, "rule_config"):
                 test_path = impl.rule_config.test_path
@@ -211,7 +232,7 @@ class Runner:
                 assert isinstance(responses[-1], Finished)
                 yield HighLevelResult(qualname, p.subdir, mod, responses[-1])
 
-    def _run_one(self, rule_instance, repo, project):
+    def _run_one(self, rule_instance, repo, project) -> list[HighLevelResult]:
         try:
             resp = []
             with CloneAside(repo.root) as tmp:
