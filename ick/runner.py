@@ -18,7 +18,7 @@ from typing import Any, Iterable
 
 import moreorless
 from keke import ktrace
-from moreorless.combined import combined_diff
+from moreorless import unified_diff
 from rich import print
 
 from ick_protocol import Finished, Modified
@@ -44,6 +44,7 @@ class HighLevelResult:
 @dataclass
 class TestResult:
     """Capture the result of running a test in a structured way."""
+
     rule_instance: BaseRule
     test_path: str
     message: str = ""
@@ -153,7 +154,6 @@ class Runner:
             repo = maybe_repo(tp, stack.enter_context)
 
             project = Project(repo.root, "", "python", "invalid.bin")
-            ap = test_path / "a"
             bp = test_path / "b"
             files_to_check = set(glob("**", root_dir=bp, recursive=True, include_hidden=True))
             files_to_check = {f for f in files_to_check if (bp / f).is_file()}
@@ -185,18 +185,12 @@ class Runner:
                     if r.filename not in files_to_check:
                         result.message = f"Unexpected new file: {r.filename!r}"
                         return
-                    af = ap / r.filename
                     bf = bp / r.filename
                     if bf.read_bytes() != r.new_bytes:
-                        if af.exists():
-                            atext = af.read_text()
-                        else:
-                            atext = ""
-                        result.diff = combined_diff(
-                            [atext],
-                            [bf.read_text(), r.new_bytes.decode()],
-                            from_filenames=["original"],
-                            to_filenames=["expected", "actual"],
+                        result.diff = unified_diff(
+                            bf.read_text(),
+                            r.new_bytes.decode(),
+                            r.filename,
                         )
                         result.message = f"{r.filename!r} (modified) differs"
                         return
