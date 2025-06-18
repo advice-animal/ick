@@ -121,18 +121,21 @@ class Runner:
                         print(".", end="")
                     else:
                         success = False
-                        print("[red]F[/red]", end="")
+                        print("[red]F[/]", end="")
                         buf_print(f"{'-' * 80}")
                         rel_test_path = result.test_path.relative_to(result.rule_instance.rule_config.test_path)
-                        buf_print(f"testing [bold]{rule_instance.rule_config.qualname}[/] with [bold]{rel_test_path}[/]:")
+                        with_test = ""
+                        if str(rel_test_path) != ".":
+                            with_test = f" with [bold]{rel_test_path}[/]"
+                        buf_print(f"testing [bold]{rule_instance.rule_config.qualname}[/]{with_test}:")
                         buf_print(result.traceback)
                         buf_print(result.message)
                         buf_print(result.diff)
 
                 if success:
-                    print(" [green]PASS[/green]")
+                    print(" [green]PASS[/]")
                 else:
-                    print(" [red]FAIL[/red]")
+                    print(" [red]FAIL[/]")
 
             if buffered_output.tell():
                 print()
