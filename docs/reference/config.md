@@ -16,12 +16,6 @@ which is appdirs.user_data_dir.
 
 Any of these can define one or more `[[ruleset]]` sections, as detailed below.
 
-Additionally, project-level configs are read for `do_not_want` and not much
-else.
-
-* `$PROJECT/ick.toml`
-* `$PROJECT/pyproject.toml`
-
 
 ## Rulesets
 
