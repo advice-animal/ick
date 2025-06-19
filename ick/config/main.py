@@ -6,20 +6,18 @@ This controls where we look for rules and how we find projects.
 
 from __future__ import annotations
 
-import os
 from logging import getLogger
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Optional
 
-import appdirs
 from keke import ktrace
 from msgspec import Struct, ValidationError, field
 from msgspec.structs import replace as replace
 from msgspec.toml import decode as decode_toml
-from vmodule import VLOG_1, VLOG_2
+from vmodule import VLOG_2
 
-from ..git import find_repo_root
 from ..util import merge
+from .search import config_files
 from .settings import FilterConfig, Settings
 
 LOG = getLogger(__name__)
@@ -102,45 +100,13 @@ class ToolConfig(Struct):
 @ktrace()
 def load_main_config(cur: Path, isolated_repo: bool) -> MainConfig:
     conf = MainConfig()
-    paths: List[Path] = []
-    if os.environ.get("ICK_CONFIG"):
-        # This isn't well documented because it's only intended for testing --
-        # I don't have a reason people would want to ignore both repo and user
-        # config.
-        paths.append(Path(os.environ.get("ICK_CONFIG")))
-    else:
-        repo_root = find_repo_root(cur)
-        config_dir = appdirs.user_config_dir("ick", "advice-animal")
-        if cur.resolve() != repo_root.resolve():
-            paths.extend(
-                [
-                    Path(cur, "ick.toml"),
-                    Path(cur, "pyproject.toml"),
-                ]
-            )
-        paths.extend(
-            [
-                Path(repo_root, "ick.toml"),
-                Path(repo_root, "pyproject.toml"),
-            ]
-        )
-        if not isolated_repo:
-            paths.append(
-                Path(config_dir, "ick.toml"),
-            )
-
-        LOG.log(VLOG_1, "Loading main config near %s", cur)
-
-    for p in paths:
-        LOG.debug("Looking for config at %s", p)
-        if p.exists():
-            LOG.log(VLOG_1, "Config found at %s", p)
-            if p.name == "pyproject.toml":
-                c = load_pyproject(p, p.read_bytes())
-            else:
-                c = load_regular(p, p.read_bytes())
-            LOG.log(VLOG_2, "Loaded %s of %r", p, c)
-            conf.inherit(c)
+    for config_path in config_files(cur, isolated_repo):
+        if config_path.name == "pyproject.toml":
+            c = load_pyproject(config_path, config_path.read_bytes())
+        else:
+            c = load_regular(config_path, config_path.read_bytes())
+        LOG.log(VLOG_2, "Loaded %s of %r", config_path, c)
+        conf.inherit(c)
 
     conf.inherit(MainConfig.DEFAULT)
 
