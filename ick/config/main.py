@@ -59,9 +59,6 @@ class MainConfig(Struct):
     explicit_project_dirs: Optional[list] = None
     ignore_project_dirs: Optional[list] = None
 
-    # Can be set in a "user", "repo", or "project"
-    do_not_want: Optional[list[str]] = None
-
     def inherit(self, less_specific_defaults):
         # TODO this is way more verbose than I'd like.
         # "union" semantics
@@ -73,7 +70,6 @@ class MainConfig(Struct):
         )
 
         # "override" semantics
-        self.do_not_want = self.do_not_want if self.do_not_want is not None else less_specific_defaults.do_not_want
         self.explicit_project_dirs = (
             self.explicit_project_dirs if self.explicit_project_dirs is not None else less_specific_defaults.explicit_project_dirs
         )

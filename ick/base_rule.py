@@ -71,24 +71,6 @@ class ExecWork(Work):
         yield from get_diff_messages(rule_name, rule_name, self.project_path)  # TODO msg
 
 
-class ExecProtocolWork(Work):
-    def run(self, rule_name, filenames) -> Generator[Msg, None, None]:
-        try:
-            if self.collection.rule_config.scope == Scope.SINGLE_FILE:
-                run_cmd(self.collection.command_parts + filenames, env=self.collection.command_env, cwd=self.project_path)
-            else:
-                run_cmd(self.collection.command_parts, env=self.collection.command_env, cwd=self.project_path)
-        except FileNotFoundError as e:
-            yield Finished(rule_name, error=True, message=str(e))
-            return
-        except subprocess.CalledProcessError as e:
-            yield Finished(rule_name, error=True, message=str(e))
-            return
-
-        yield from get_diff_messages(rule_name, rule_name, self.project_path)  # TODO msg
-        yield Finished(rule_name)
-
-
 class BaseCollection:
     work_cls: Type[Work] = Work
 
