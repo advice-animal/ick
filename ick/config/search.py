@@ -24,14 +24,15 @@ def possible_config_files(cur: Path, isolated_repo: bool) -> Iterable[tuple[str,
         # config.
         yield "ICK_CONFIG", Path(ick_config)
     else:
-        repo_root = find_repo_root(cur)
         # TODO revisit whether defining rules in pyproject.toml is a good idea
-        if cur.resolve() != repo_root.resolve():
-            yield "current directory", Path(cur, "ick.toml")
-            yield "current directory", Path(cur, "pyproject.toml")
+        yield "current directory", Path(cur, "ick.toml")
+        yield "current directory", Path(cur, "pyproject.toml")
 
-        yield "repo root", Path(repo_root, "ick.toml")
-        yield "repo root", Path(repo_root, "pyproject.toml")
+        repo_root = find_repo_root(cur)
+        if cur.resolve() != repo_root.resolve():
+            LOG.log(VLOG_2, f"Repo root is above current directory: {repo_root.resolve()}")
+            yield "repo root", Path(repo_root, "ick.toml")
+            yield "repo root", Path(repo_root, "pyproject.toml")
 
         if not isolated_repo:
             config_dir = appdirs.user_config_dir("ick", "advice-animal")
@@ -45,6 +46,7 @@ def possible_config_files(cur: Path, isolated_repo: bool) -> Iterable[tuple[str,
 def config_files(cur: Path, isolated_repo: bool) -> Iterable[Path]:
     """Produce a sequence of existing config files to read."""
     for kind, config_path in possible_config_files(cur, isolated_repo):
+        config_path = config_path.resolve()
         LOG.log(VLOG_2, "Looking for %s config at %s", kind, config_path)
         if config_path.exists():
             LOG.log(VLOG_1, "Config from %s found at %s", kind, config_path)
