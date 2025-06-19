@@ -41,13 +41,12 @@ def update_local_cache(url: str, skip_update: bool, freeze: bool = False) -> Pat
     return local_checkout
 
 
-# This function is verbatim from https://github.com/omnilib/trailrunner/blob/main/trailrunner/core.py
 def find_repo_root(path: Path) -> Path:
     """
     Find the project root, looking upward from the given path.
 
-    Looks through all parent paths until either the root is reached, or a directory
-    is found that contains any of :attr:`ROOT_MARKERS`.
+    Looks through parent paths until either the root is reached, or a .git
+    directory is found.
 
     If one is not found, return the original path.
     """
@@ -59,6 +58,7 @@ def find_repo_root(path: Path) -> Path:
 
     for parent in parents:
         if (parent / ".git").exists():
+            LOG.debug(f"Found a git repo at {parent}/.git")
             return parent
 
     # TODO what's the right fallback here?  I'd almost rather an exception.
