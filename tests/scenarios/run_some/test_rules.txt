@@ -1,3 +1,8 @@
 $ ick test-rules
 testing...
+  i_have_no_tests: <no-test> PASS
   move_isort_cfg: .. PASS
+
+FAILING INFO
+i_have_no_tests: no tests in /CWD/i_have_no_tests/tests
+

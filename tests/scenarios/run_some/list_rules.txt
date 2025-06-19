@@ -1,4 +1,5 @@
 $ ick list-rules
 LATER
 =====
+* i_have_no_tests
 * move_isort_cfg

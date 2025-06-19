@@ -1,4 +1,5 @@
 $ ick run --patch
+-> i_have_no_tests on OK
 -> move_isort_cfg on OK
 diff --git isort.cfg isort.cfg
 deleted file mode 100644
