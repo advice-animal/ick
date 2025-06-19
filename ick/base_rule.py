@@ -3,7 +3,7 @@ from __future__ import annotations
 import subprocess
 from contextlib import contextmanager
 from logging import getLogger
-from typing import Generator, Type
+from typing import Iterable, Type
 
 from ick_protocol import Finished, ListResponse, Msg, Scope, Success
 
@@ -33,9 +33,11 @@ class Work:
 
 
 class ExecWork(Work):
-    def run(self, rule_name, filenames) -> Generator[Msg, None, None]:
+    def run(self, rule_name, filenames) -> Iterable[Msg]:
         try:
+            nice_cmd = " ".join(map(str, self.collection.command_parts))
             if self.collection.rule_config.scope == Scope.SINGLE_FILE:
+                LOG.info("Running file-scoped command on %s files: %s", len(filenames), nice_cmd)
                 stdout, rc = run_cmd(
                     ["xargs", "-P10", "-n10", "-0", *self.collection.command_parts],
                     env=self.collection.command_env,
@@ -43,6 +45,7 @@ class ExecWork(Work):
                     input="\0".join(filenames),
                 )
             else:
+                LOG.info("Running project-scoped command in %s: %s", self.project_path, nice_cmd)
                 stdout, rc = run_cmd(
                     self.collection.command_parts,
                     env=self.collection.command_env,
