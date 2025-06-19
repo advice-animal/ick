@@ -29,11 +29,13 @@ def clean_output(output: str) -> str:
     cleaned_output = LOG_LINE_NUMERIC_LINE_RE.sub(lambda m: (m.group(1) + "<n>"), cleaned_output)
     cleaned_output = GIT_VERSION_RE.sub(lambda m: (m.group(1) + "<stuff>"), cleaned_output)
     cleaned_output = TRAILING_WHITESPACE.sub("", cleaned_output)
+    cleaned_output = cleaned_output.replace(os.getcwd(), "/CWD")
     return cleaned_output
 
 
 @pytest.mark.parametrize("filename", SCENARIOS)
 def test_scenario(filename, monkeypatch):
+    __tracebackhide__ = True
     # Avoid reading user-level config in tests, as they probably would change
     # the available rules
     monkeypatch.setenv("XDG_CONFIG_HOME", "/")
@@ -46,13 +48,13 @@ def test_scenario(filename, monkeypatch):
     with runner.isolated_filesystem():
         repo_data = path.parent / "repo"
         Path(".gitconfig").write_text(
-            textwrap.dedent(
-                """
-            [user]
-            name = Tests
-            email = test@example.com
-            """
-            )
+            textwrap.dedent("""
+                [user]
+                name = Tests
+                email = test@example.com
+                [init]
+                defaultBranch = main    # just to quiet the hints
+                """)
         )
         monkeypatch.setenv("HOME", os.getcwd())
         if repo_data.exists():
@@ -67,7 +69,9 @@ def test_scenario(filename, monkeypatch):
             if command.command[:6] == "$ ick ":
                 # TODO: handle global options like -vv
                 args = shlex.split(command.command[6:])
-                result = runner.invoke(main, args, catch_exceptions=False)
+                with monkeypatch.context() as m:
+                    m.setenv("COLUMNS", "999")
+                    result = runner.invoke(main, args, catch_exceptions=False)
                 output = result.output
             elif command.command == "":
                 # This happens with trailing comment lines in the scenario, so
@@ -91,7 +95,7 @@ def test_scenario(filename, monkeypatch):
             if update:
                 command.output = cleaned_output  # pragma: nocover
             else:
-                assert command.output == cleaned_output
+                assert cleaned_output == command.output
 
     if update:  # pragma: nocover
         save_scenario(path, commands)
