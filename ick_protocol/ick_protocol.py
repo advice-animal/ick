@@ -28,7 +28,7 @@ modifications have dependencies, and multiple linters can run in the same
 process (regular LSP just has "format_file").
 """
 
-from enum import Enum, StrEnum, auto
+from enum import Enum
 from typing import Optional, Sequence, Union
 
 from msgspec import Struct
@@ -36,24 +36,20 @@ from msgspec.structs import replace as replace
 
 
 class Risk(Enum):
-    # These are structured for easier translation to a bit field (IntFlags)
-    # later, in case it makes sense for collections in particular to be able to
-    # return one of several risk values after actually analyzing your code.
-
-    HIGH = auto()
-    MED = auto()
-    LOW = auto()
+    HIGH = "high"
+    MED = "med"
+    LOW = "low"
 
     def __lt__(self, other):
         return self._sort_order_ < other._sort_order_
 
 
-class Urgency(StrEnum):
-    MANUAL = auto()
-    LATER = auto()
-    SOON = auto()
-    NOW = auto()
-    NOT_SUPPORTED = auto()
+class Urgency(Enum):
+    MANUAL = "manual"
+    LATER = "later"
+    SOON = "soon"
+    NOW = "now"
+    NOT_SUPPORTED = "not-supported"
 
     def __lt__(self, other):
         return self._sort_order_ < other._sort_order_
