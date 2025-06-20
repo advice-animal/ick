@@ -6,3 +6,4 @@
    getting-started/index
    concepts/index
    reference/index
+   contributing
