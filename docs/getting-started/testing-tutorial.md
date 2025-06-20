@@ -12,7 +12,7 @@ The `ick test-rules` command will run tests for your rules.  We haven't written
 any tests yet, so it has nothing to do:
 
 <!-- [[[cog show_cmd("ick test-rules") ]]] -->
-```shell
+```console
 $ ick test-rules
 testing...
   move_isort_cfg: <no-test> PASS
@@ -22,7 +22,7 @@ move_isort_cfg: no tests in /tmp/foo/move_isort_cfg/tests
 
 (exited with 1)
 ```
-<!-- [[[end]]] (sum: HSz6QqBZaO) -->
+<!-- [[[end]]] (sum: 8WSERickch) -->
 
 In your `move_isort_cfg` rule directory, create a `tests` subdirectory.  There
 each directory will be a test.  Create a `move_isort_cfg/tests/no_isort`
@@ -48,7 +48,7 @@ name = "foo"
 Your directory structure should look like this:
 
 <!-- [[[cog show_cmd("find . -print | sort | sed -e 's;[^/]*/;|-- ;g;s;-- |;   |;g;'", hide_command=True) ]]] -->
-```shell
+```console
 .
 |-- ick.toml
 |-- isort.cfg
@@ -62,18 +62,18 @@ Your directory structure should look like this:
 |   |   |   |   |-- pyproject.toml
 |-- pyproject.toml
 ```
-<!-- [[[end]]] (sum: /K9GxUkPCU) -->
+<!-- [[[end]]] (sum: 6c6ouxqDWR) -->
 
 This is a simple test that checks that if there is no `isort.cfg` file, the
 `pyproject.toml` file will be unchanged.  Run `ick test-rules`:
 
 <!-- [[[cog show_cmd("ick test-rules") ]]] -->
-```shell
+```console
 $ ick test-rules
 testing...
   move_isort_cfg: . PASS
 ```
-<!-- [[[end]]] (sum: UHnmBuZrZ1) -->
+<!-- [[[end]]] (sum: OyKYc1mCka) -->
 
 Now make a more realistic test. Create a `change_made`
 directory in the `tests` directory. Create these files:
@@ -113,9 +113,9 @@ multi_line_output = "3"
 Now `ick test-rules` shows two tests passing:
 
 <!-- [[[cog show_cmd("ick test-rules") ]]] -->
-```shell
+```console
 $ ick test-rules
 testing...
   move_isort_cfg: .. PASS
 ```
-<!-- [[[end]]] (sum: WmmtiTDZw7) -->
+<!-- [[[end]]] (sum: 0QwW4JWipi) -->

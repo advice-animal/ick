@@ -88,7 +88,7 @@ def show_cmd(cmd, hide_command=False, columns=None, **kwargs) -> None:
     if PRETEND_DIR:
         actual_temp = Path(CUR_TEMP_DIR.name).resolve()
         output = output.replace(str(actual_temp), PRETEND_DIR)
-    print("```shell")
+    print("```console")
     if not hide_command:
         print(f"$ {cmd}")
     print(output, end="")

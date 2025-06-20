@@ -62,10 +62,10 @@ path = "."
 If you run `ick list-rules`, it won't find any yet:
 
 <!-- [[[cog show_cmd("ick list-rules") ]]] -->
-```shell
+```console
 $ ick list-rules
 ```
-<!-- [[[end]]] (sum: 9OnFCm6Zhc) -->
+<!-- [[[end]]] (sum: nCRewJbc+z) -->
 
 
 ## Creating a rule definition
@@ -101,13 +101,13 @@ If you run `list-rules` again, the rule appears, but with an indication that
 there's no implementation:
 
 <!-- [[[cog show_cmd("ick list-rules") ]]] -->
-```shell
+```console
 $ ick list-rules
 LATER
 =====
 * move_isort_cfg  *** Couldn't find implementation /tmp/foo/move_isort_cfg.py
 ```
-<!-- [[[end]]] (sum: sXZGDGbJud) -->
+<!-- [[[end]]] (sum: g4EOTtk/5/) -->
 
 
 ## Implementing the rule
@@ -167,7 +167,7 @@ The `ick run` command will run the rule. But if we try it now it will fail
 trying to import those third-party dependencies:
 
 <!-- [[[cog show_cmd("ick run") ]]] -->
-```shell
+```console
 $ ick run
 -> move_isort_cfg on ERROR
      Traceback (most recent call last):
@@ -175,7 +175,7 @@ $ ick run
          import imperfect
      ModuleNotFoundError: No module named 'imperfect'
 ```
-<!-- [[[end]]] (sum: RM/fZ8kmZF) -->
+<!-- [[[end]]] (sum: InwlqxqkZA) -->
 
 We need to tell `ick` about the dependencies the rule needs.
 
@@ -202,11 +202,11 @@ deps = ["imperfect", "tomlkit"]
 Now `ick run` shows that the rule ran:
 
 <!-- [[[cog show_cmd("ick run") ]]] -->
-```shell
+```console
 $ ick run
 -> move_isort_cfg on OK
 ```
-<!-- [[[end]]] (sum: w1xz1GNcCp) -->
+<!-- [[[end]]] (sum: usk7znEc6n) -->
 
 But the rule did nothing because there is no `isort.cfg` file in `/tmp/foo`.
 Create one:
@@ -222,19 +222,19 @@ multi_line_output = 3
 Now `ick run` shows a dry-run summary of the changes that would be made:
 
 <!-- [[[cog show_cmd("ick run") ]]] -->
-```shell
+```console
 $ ick run
 -> move_isort_cfg on OK
      isort.cfg +0-3
      pyproject.toml +3-0
 ```
-<!-- [[[end]]] (sum: xaDXLilG8G) -->
+<!-- [[[end]]] (sum: fIAUg6I58v) -->
 
 Passing the `--patch` option displays the full patch of the changes that would
 be made:
 
 <!-- [[[cog show_cmd("ick run --patch") ]]] -->
-```shell
+```console
 $ ick run --patch
 -> move_isort_cfg on OK
 diff --git isort.cfg isort.cfg
@@ -255,7 +255,7 @@ index e69de29..089c824 100644
 +line_length = "88"
 +multi_line_output = "3"
 ```
-<!-- [[[end]]] (sum: p2e1vYaCST) -->
+<!-- [[[end]]] (sum: OuM5vulYfx) -->
 
 
 ## Reducing execution
