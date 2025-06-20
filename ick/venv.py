@@ -7,7 +7,7 @@ from typing import List
 
 from filelock import FileLock
 
-from .sh import run_cmd
+from .sh import run_cmd, run_cmd_status
 
 
 def find_uv() -> Path:
@@ -38,7 +38,7 @@ class PythonEnv:
         if not py.exists():
             return False
         try:
-            _, returncode = run_cmd([py, "--version"], check=False)
+            _, returncode = run_cmd_status([py, "--version"], check=False)
         except PermissionError:
             return False
         if returncode != 0:
