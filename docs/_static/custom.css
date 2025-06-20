@@ -1,0 +1,4 @@
+/* Someone thought console output should all be italicized? No. */
+.highlight .go {
+    font-style: normal;
+}
