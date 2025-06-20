@@ -94,6 +94,7 @@ class RuleConfig(Struct):
     inputs: Optional[Sequence[str]] = None
     outputs: Optional[Sequence[str]] = None
     extra_inputs: Optional[Sequence[str]] = None
+    project_types: Optional[Sequence[str]] = None
 
     description: Optional[str] = None
     contact: Optional[str] = None
