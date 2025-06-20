@@ -13,7 +13,7 @@ LOG = getLogger(__name__)
 
 
 @ktrace("cmd", "cwd")
-def run_cmd(cmd: list[Union[str, Path]], check: bool = True, cwd: Optional[Union[str, Path]] = None, **kwargs) -> Tuple[str, int]:
+def run_cmd_status(cmd: list[Union[str, Path]], check: bool = True, cwd: Optional[Union[str, Path]] = None, **kwargs) -> Tuple[str, int]:
     cwd = cwd or os.getcwd()
     LOG.log(VLOG_1, "Run %s in %s", cmd, cwd)
     try:
@@ -29,3 +29,8 @@ def run_cmd(cmd: list[Union[str, Path]], check: bool = True, cwd: Optional[Union
     LOG.debug("Stdout:\n%s", proc.stdout)
     LOG.debug("Stderr:\n%s", proc.stderr)
     return proc.stdout, proc.returncode
+
+
+def run_cmd(cmd: list[Union[str, Path]], check: bool = True, cwd: Optional[Union[str, Path]] = None, **kwargs) -> Tuple[str, int]:
+    output, _ = run_cmd_status(cmd, check, cwd, **kwargs)
+    return output

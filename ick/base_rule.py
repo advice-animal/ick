@@ -38,7 +38,7 @@ class ExecWork(Work):
             nice_cmd = " ".join(map(str, self.collection.command_parts))
             if self.collection.rule_config.scope == Scope.SINGLE_FILE:
                 LOG.info("Running file-scoped command on %s files: %s", len(filenames), nice_cmd)
-                stdout, rc = run_cmd(
+                stdout = run_cmd(
                     ["xargs", "-P10", "-n10", "-0", *self.collection.command_parts],
                     env=self.collection.command_env,
                     cwd=self.project_path,
@@ -46,7 +46,7 @@ class ExecWork(Work):
                 )
             else:
                 LOG.info("Running project-scoped command in %s: %s", self.project_path, nice_cmd)
-                stdout, rc = run_cmd(
+                stdout = run_cmd(
                     self.collection.command_parts,
                     env=self.collection.command_env,
                     cwd=self.project_path,
