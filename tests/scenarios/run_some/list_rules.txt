@@ -3,3 +3,4 @@ LATER
 =====
 * i_have_no_tests
 * move_isort_cfg
+* show_ick_vars

@@ -17,6 +17,7 @@ class Work:
     def __init__(self, rule: BaseRule, project_path):
         self.rule = rule
         self.project_path = project_path
+        self.command_env = {}
 
     def invalidate(self, filename):
         pass

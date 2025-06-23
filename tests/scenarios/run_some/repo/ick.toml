@@ -13,3 +13,12 @@ impl = "python"
 name = "i_have_no_tests"
 scope = "project"
 project_types = ["python"]
+
+[[rule]]
+impl = "shell"
+name = "show_ick_vars"
+scope = "project"
+data = """
+env | grep '^ICK_' | sort
+exit 99
+"""
