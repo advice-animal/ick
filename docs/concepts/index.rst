@@ -10,7 +10,6 @@ Concepts
    norms
 
    rules
-   collections
    scope
    order
    projects
