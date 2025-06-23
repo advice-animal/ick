@@ -21,6 +21,3 @@ order = 75
 
 [[ruleset]]
 path = "."
-
-[[mount]]
-path = "."
