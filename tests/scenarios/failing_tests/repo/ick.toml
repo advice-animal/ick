@@ -1,0 +1,8 @@
+[[ruleset]]
+path = "."
+
+[[rule]]
+impl = "python"
+name = "failing_test"
+scope = "project"
+project_types = ["python"]

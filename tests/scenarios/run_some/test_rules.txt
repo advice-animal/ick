@@ -4,7 +4,7 @@ testing...
   move_isort_cfg: .. PASS
   show_ick_vars: <no-test> PASS
 
-FAILING INFO
+DETAILS
 i_have_no_tests: no tests in /CWD/i_have_no_tests/tests
 show_ick_vars: no tests in /CWD/tests/show_ick_vars
 
