@@ -1,0 +1,17 @@
+$ ick test-rules
+testing...
+  failing_test: F FAIL
+
+DETAILS
+--------------------------------------------------------------------------------
+testing failing_test:
+
+'foo.md' (modified) differs
+--- a/foo.md
++++ b/foo.md
+@@ -1 +1 @@
+-RIGHT
++WRONG
+
+
+(exit status: 1)

@@ -73,6 +73,8 @@ def test_scenario(filename, monkeypatch):
                     m.setenv("COLUMNS", "999")
                     result = runner.invoke(main, args, catch_exceptions=False)
                 output = result.output
+                if result.exit_code != 0:
+                    output += f"(exit status: {result.exit_code})\n"
             elif command.command == "":
                 # This happens with trailing comment lines in the scenario, so
                 # there's no command or output.
@@ -90,6 +92,8 @@ def test_scenario(filename, monkeypatch):
                     stderr=subprocess.STDOUT,
                 )
                 output = proc.stdout
+                if proc.returncode != 0:
+                    output += f"(exit status: {proc.returncode})\n"
 
             cleaned_output = clean_output(output)
             if update:

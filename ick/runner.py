@@ -94,6 +94,7 @@ class Runner:
             buffered_output.write("\n")
 
         with ThreadPoolExecutor() as tpe:
+            final_status = 0
             for rule_instance, test_paths in self.iter_tests():
                 outstanding = {}
                 print(f"  [bold]{rule_instance.rule_config.qualname}[/bold]: ", end="")
@@ -125,6 +126,7 @@ class Runner:
                         print(".", end="")
                     else:
                         success = False
+                        final_status = 1
                         print("[red]F[/]", end="")
                         buf_print(f"{'-' * 80}")
                         rel_test_path = result.test_path.relative_to(result.rule_instance.rule_config.test_path)
@@ -143,21 +145,28 @@ class Runner:
 
             if buffered_output.tell():
                 print()
-                print("FAILING INFO")
+                print("DETAILS")
                 print(buffered_output.getvalue())
-                return 1
 
-            return 0
+            return final_status
 
     def _perform_test(self, rule_instance, test_path, result: TestResult) -> None:
+        ap = test_path / "a"
+        bp = test_path / "b"
+        if not ap.exists():
+            result.message = f"Test input directory {ap} is missing"
+            return
+        if not bp.exists():
+            result.message = f"Test output directory {bp} is missing"
+            return
+
         with TemporaryDirectory() as td, ExitStack() as stack:
             tp = Path(td)
-            copytree(test_path / "a", tp, dirs_exist_ok=True)
+            copytree(ap, tp, dirs_exist_ok=True)
 
             repo = maybe_repo(tp, stack.enter_context)
 
             project = Project(repo.root, "", "python", "invalid.bin")
-            bp = test_path / "b"
             files_to_check = set(glob("**", root_dir=bp, recursive=True, include_hidden=True))
             files_to_check = {f for f in files_to_check if (bp / f).is_file()}
 
