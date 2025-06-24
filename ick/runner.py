@@ -206,12 +206,7 @@ class Runner:
     def iter_tests(self) -> Iterable[tuple[BaseRule, tuple[str, ...]]]:
         # Yields (impl, test_paths) for projects in test dir
         for impl in self.iter_rule_impl():
-            if hasattr(impl, "rule_config"):
-                test_path = impl.rule_config.test_path
-            else:
-                print("Test for collections are not implemented")
-                continue
-
+            test_path = impl.rule_config.test_path
             if (test_path / "a").exists():
                 yield impl, (test_path,)
             else:
@@ -234,7 +229,6 @@ class Runner:
             resp = []
             with CloneAside(repo.root) as tmp:
                 with rule_instance.work_on_project(tmp) as work:
-                    # TODO multiple rule names (in a collection) happen at once?
                     for h in rule_instance.list().rule_names:
                         # TODO only if files exist
                         # TODO only if files have some contents

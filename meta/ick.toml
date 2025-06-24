@@ -58,19 +58,6 @@ data = """
 grep -q ALL "$@" && exit 2
 """
 
-[[collection]]
-name = "collection"
-impl = "python"
-# files = ["*"]
-subdir = "." # could be the default?
-
-[[collection]]
-name = "alternate-collection"
-impl = "python"
-subdir = "p1"
-priority = 1
-deps = ["attrs"]
-
 [[rule]]
 name = "no-prints"
 impl = "ast-grep"
