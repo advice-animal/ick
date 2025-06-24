@@ -1,4 +1,4 @@
-$ ick run
+$ ick --vmodule=ick.rules=10 run
 -> i_have_no_tests on OK
 -> move_isort_cfg on OK
      isort.cfg +0-3
