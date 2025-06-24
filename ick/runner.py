@@ -60,7 +60,6 @@ class Runner:
         self.repo = repo
         self.ick_env_vars = {
             "ICK_REPO_PATH": repo.root,
-            "ICK_LOG_LEVEL": str(getLogger("ick.rules").getEffectiveLevel()),
         }
         # TODO there's a var on repo to store this...
         self.projects: list[Project] = find_projects(repo, repo.zfiles, self.rtc.main_config)

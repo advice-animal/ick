@@ -19,5 +19,4 @@ index e69de29..089c824 100644
 +line_length = "88"
 +multi_line_output = "3"
 -> show_ick_vars on ERROR
-     ICK_LOG_LEVEL=30
      ICK_REPO_PATH=/CWD

@@ -4,5 +4,4 @@ $ ick --vmodule=ick.rules=10 run
      isort.cfg +0-3
      pyproject.toml +3-0
 -> show_ick_vars on ERROR
-     ICK_LOG_LEVEL=10
      ICK_REPO_PATH=/CWD
