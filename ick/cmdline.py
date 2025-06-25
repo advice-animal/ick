@@ -128,11 +128,13 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: l
             modifications = []
             for mod in result.modifications:
                 modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
-            ok_status = not result.finished.error
             error_message = result.finished.message if result.finished.error else None
-            project = result.project
-            modified = modifications
-            output = {"project_name": project, "ok_status": ok_status, "modified": modified, "error_message": error_message}
+            output = {
+                "project_name": result.project,
+                "ok_status": not result.finished.error,
+                "modified": modifications,
+                "error_message": error_message,
+            }
             if result.rule not in results:
                 results[result.rule] = [output]
             else:
