@@ -1,4 +1,5 @@
 import re
+from typing import Iterable
 
 
 def advice_name_re(prefix: str) -> str:
@@ -8,7 +9,7 @@ def advice_name_re(prefix: str) -> str:
     return f"^({prefix}$|{prefix}/.*)$"
 
 
-def zfilename_re(opts: list[str]) -> re.Pattern:
+def zfilename_re(opts: Iterable[str]) -> re.Pattern[str]:
     o = "|".join(map(re.escape, opts))
     # This regex could be made compatible with `re2` with a minor change of the
     # `(?=\0)` to `\b`.  This will match names like `pyproject.toml.template`

@@ -40,7 +40,10 @@ lint:
 	ruff check
 	python -m checkdeps --allow-names ick,ick_protocol ick
 	python -m cogapp -cP --check --diff docs/whole-tutorial.md
-	#mypy --strict --install-types --non-interactive advice_animal
+
+.PHONY: mypy
+mypy:
+	python -m mypy --strict --install-types --non-interactive ick tests
 
 .PHONY: test
 test:
