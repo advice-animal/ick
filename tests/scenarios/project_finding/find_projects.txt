@@ -1,3 +1,3 @@
 $ ick find-projects
-'a/'                 (python)
-'b/c/'               (java)
+'python1/'           (python)
+'mono/java/'         (java)
