@@ -1,0 +1,11 @@
+[[ruleset]]
+path = "."
+
+[[rule]]
+impl = "shell"
+name = "show_ick_vars"
+scope = "project"
+data = """
+env | grep '^ICK_' | sort
+exit 99
+"""
