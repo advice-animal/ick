@@ -7,8 +7,9 @@
 We use [vmodule] to provide extra logging levels.  Use `VLOG_1` to mean "info,
 but more" and `VLOG_2` to mean "info, but even more."
 
-Debug messages should be only of interest to ick authors, whereas `VLOG_1` and
-`VLOG_2` can be messages understandable to end users about what ick is doing.
+Debug messages should be only of interest to ick authors, whereas `INFO`,
+`VLOG_1`, and `VLOG_2` can be messages understandable to end users about what
+ick is doing.
 
 For example, if you want to log something including an internal function name,
 it should probably be debug, not `VLOG_2`.
