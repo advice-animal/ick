@@ -1,6 +1,6 @@
 $ ick run --patch
--> i_have_no_tests on OK
--> move_isort_cfg on OK
+-> i_have_no_tests OK
+-> move_isort_cfg OK
 diff --git isort.cfg isort.cfg
 deleted file mode 100644
 index fbab120..0000000
@@ -18,5 +18,5 @@ index e69de29..089c824 100644
 +[tool.isort]
 +line_length = "88"
 +multi_line_output = "3"
--> show_ick_vars on ERROR
+-> show_ick_vars ERROR
      ICK_REPO_PATH=/CWD

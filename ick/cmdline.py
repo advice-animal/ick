@@ -115,24 +115,26 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: l
     r = Runner(ctx.obj, ctx.obj.repo, explicit_project=None)
     for result in r.run():
         if not json_flag:
-            print(f"-> [bold]{result.rule}[/bold] on {result.project}", end="")
-        if result.finished.error and not json_flag:
-            print("[red]ERROR[/red]")
-            for line in result.finished.message.splitlines():
-                print("    ", line)
-        else:
-            if not json_flag:
+            where = f"on {result.project} " if result.project else ""
+            print(f"-> [bold]{result.rule}[/bold] {where}", end="")
+            if result.finished.error:
+                print("[red]ERROR[/red]")
+                for line in result.finished.message.splitlines():
+                    print("    ", line)
+            else:
                 print("[green]OK[/green]")
 
         if json_flag:
             modifications = []
             for mod in result.modifications:
                 modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
-            ok_status = not result.finished.error
             error_message = result.finished.message if result.finished.error else None
-            project = result.project
-            modified = modifications
-            output = {"project_name": project, "ok_status": ok_status, "modified": modified, "error_message": error_message}
+            output = {
+                "project_name": result.project,
+                "ok_status": not result.finished.error,
+                "modified": modifications,
+                "error_message": error_message,
+            }
             if result.rule not in results:
                 results[result.rule] = [output]
             else:
