@@ -6,3 +6,7 @@ $ cat text.txt
 Hello
 Line 2
 # We did!
+$ echo Hello; exit 17
+Hello
+(exit status: 17)
+# all done...
