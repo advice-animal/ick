@@ -117,12 +117,11 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: l
         if not json_flag:
             where = f"on {result.project} " if result.project else ""
             print(f"-> [bold]{result.rule}[/bold] {where}", end="")
-        if result.finished.error and not json_flag:
-            print("[red]ERROR[/red]")
-            for line in result.finished.message.splitlines():
-                print("    ", line)
-        else:
-            if not json_flag:
+            if result.finished.error:
+                print("[red]ERROR[/red]")
+                for line in result.finished.message.splitlines():
+                    print("    ", line)
+            else:
                 print("[green]OK[/green]")
 
         if json_flag:
