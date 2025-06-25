@@ -13,7 +13,7 @@ from .types_project import Project, Repo
 LOG = getLogger(__name__)
 
 
-def find_projects(root_path: Path, zstr: str, conf: MainConfig) -> list[Project]:
+def find_projects(repo: Repo, zstr: str, conf: MainConfig) -> list[Project]:
     """
     Returns topmost projects
     """
@@ -22,6 +22,7 @@ def find_projects(root_path: Path, zstr: str, conf: MainConfig) -> list[Project]
         for i in v:
             marker_to_type[i] = k
     pat = zfilename_re(marker_to_type)
+    LOG.info("Looking for projects in %r", repo.root)
     LOG.log(VLOG_2, "Project root re is %r", pat.pattern)
 
     projects: dict[tuple[str, str], Project] = {}
@@ -42,7 +43,7 @@ def find_projects(root_path: Path, zstr: str, conf: MainConfig) -> list[Project]
         key = (dirname, typ)
         if key not in projects:
             LOG.log(VLOG_1, "Found new %r project at %r with marker %r", typ, dirname, filename)
-            projects[key] = Project(root_path, dirname, typ, filename)
+            projects[key] = Project(repo, dirname, typ, filename)
 
     # this is a tuple to make .startswith happy
     final_project_names: tuple[str] = ()
