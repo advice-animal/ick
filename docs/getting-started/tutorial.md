@@ -169,13 +169,13 @@ trying to import those third-party dependencies:
 <!-- [[[cog show_cmd("ick run") ]]] -->
 ```console
 $ ick run
--> move_isort_cfg on ERROR
+-> move_isort_cfg ERROR
      Traceback (most recent call last):
        File "/tmp/foo/move_isort_cfg/move_isort_cfg.py", line 5, in <module>
          import imperfect
      ModuleNotFoundError: No module named 'imperfect'
 ```
-<!-- [[[end]]] (sum: InwlqxqkZA) -->
+<!-- [[[end]]] (sum: oDYXb339Hu) -->
 
 We need to tell `ick` about the dependencies the rule needs.
 
@@ -204,9 +204,9 @@ Now `ick run` shows that the rule ran:
 <!-- [[[cog show_cmd("ick run") ]]] -->
 ```console
 $ ick run
--> move_isort_cfg on OK
+-> move_isort_cfg OK
 ```
-<!-- [[[end]]] (sum: usk7znEc6n) -->
+<!-- [[[end]]] (sum: CQwDezy1z7) -->
 
 But the rule did nothing because there is no `isort.cfg` file in `/tmp/foo`.
 Create one:
@@ -224,11 +224,11 @@ Now `ick run` shows a dry-run summary of the changes that would be made:
 <!-- [[[cog show_cmd("ick run") ]]] -->
 ```console
 $ ick run
--> move_isort_cfg on OK
+-> move_isort_cfg OK
      isort.cfg +0-3
      pyproject.toml +3-0
 ```
-<!-- [[[end]]] (sum: fIAUg6I58v) -->
+<!-- [[[end]]] (sum: DAYg8v441H) -->
 
 Passing the `--patch` option displays the full patch of the changes that would
 be made:
@@ -236,7 +236,7 @@ be made:
 <!-- [[[cog show_cmd("ick run --patch") ]]] -->
 ```console
 $ ick run --patch
--> move_isort_cfg on OK
+-> move_isort_cfg OK
 diff --git isort.cfg isort.cfg
 deleted file mode 100644
 index fbab120..0000000
@@ -255,7 +255,7 @@ index e69de29..089c824 100644
 +line_length = "88"
 +multi_line_output = "3"
 ```
-<!-- [[[end]]] (sum: OuM5vulYfx) -->
+<!-- [[[end]]] (sum: cujTI1b42k) -->
 
 
 ## Reducing execution

@@ -115,7 +115,8 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: l
     r = Runner(ctx.obj, ctx.obj.repo, explicit_project=None)
     for result in r.run():
         if not json_flag:
-            print(f"-> [bold]{result.rule}[/bold] on {result.project}", end="")
+            where = f"on {result.project} " if result.project else ""
+            print(f"-> [bold]{result.rule}[/bold] {where}", end="")
         if result.finished.error and not json_flag:
             print("[red]ERROR[/red]")
             for line in result.finished.message.splitlines():
