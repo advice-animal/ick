@@ -7,4 +7,5 @@ Reference
 
    api
    config
+   rule_attributes
    protocol

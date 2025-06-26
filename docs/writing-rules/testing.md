@@ -1,5 +1,6 @@
-# Testing Your Ick Rules
-Testing your ick rules are a great way to make sure they work! 
+# Testing Rules
+
+Testing your ick rules are a great way to make sure they work!
 
 ## Ick Rules Test Directory Structure
 
@@ -45,7 +46,7 @@ For two given ick rules, which we've creatively named `rule1` and `rule2`, the f
 |   |   |   |   |-- b
 |   |   |   |   |   |-- foo.bar
 ```
-Each directory in `tests/rule1` is a different test for `rule1`. As long as `tests/rule1` exists in the same directory as `rule1.py`, ick will find the tests with no extra configuration. 
+Each directory in `tests/rule1` is a different test for `rule1`. As long as `tests/rule1` exists in the same directory as `rule1.py`, ick will find the tests with no extra configuration.
 
 (On the to-do list is to change the names of the `a/` and `b/` to `input/` and `output/`, which are more descriptive as to their roles while still sorting nicely alphabetically.)
 
@@ -85,4 +86,4 @@ In the case of a fail, ick will also tell you the following for each failed test
 - Any exceptions that occurred during the test
 
 
-If a test is not provided, `ick test-rules` will note that the rule has no test and mark it as passed. 
+If a test is not provided, `ick test-rules` will note that the rule has no test and mark it as passed.

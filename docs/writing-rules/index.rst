@@ -9,3 +9,4 @@ Details of how to write rules for ick to run.  Start with the
    :hidden:
 
    norms
+   testing
