@@ -58,7 +58,7 @@ class Urgency(Enum):
 class Scope(Enum):
     REPO = "repo"
     PROJECT = "project"
-    SINGLE_FILE = "single-file"
+    FILE = "file"
 
 
 class Success(Enum):

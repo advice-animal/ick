@@ -1,11 +1,11 @@
 # Scope
 
-## Single-file scope
+## File scope
 
 ```toml
 [[rule]]
 # ...
-scope = "single-file"
+scope = "file"
 ```
 
 This is the default scope, and behaves closest to pre-commit. Rules with this
@@ -17,7 +17,7 @@ the project, you can add that:
 ```toml
 [[hook]]
 ...
-scope = "single-file"
+scope = "file"
 extra_inputs = ["pyproject.toml"]
 ```
 

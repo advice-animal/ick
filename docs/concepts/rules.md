@@ -21,7 +21,7 @@ projects, or repos).
 
 ## Scope
 
-* `single-file` (the default) runs the rule assuming that it operates on
+* `file` (the default) runs the rule assuming that it operates on
   individual files.  It's easy to run these concurrently.
 * `project` runs the rule once per detected project -- you can additional
   restrict it to only run on certain types of projects as indicated by their

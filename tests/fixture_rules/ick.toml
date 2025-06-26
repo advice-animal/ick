@@ -8,10 +8,10 @@ urgency = "now"
 [[rule]]
 name = "shouty"
 impl = "shell"
-scope = "single-file"
+scope = "file"
 inputs = ["*.md"]
 # This is perl-speak for uppercasing only the first line of a file in-place.
-# Because this is scope=single-file, filenames will be added after it (similar
+# Because this is scope=file, filenames will be added after it (similar
 # to how commands are run using xargs).
 command = '''
 perl -i -pe 's/(.*)/\U\1/g if $.==1'

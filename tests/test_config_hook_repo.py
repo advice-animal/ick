@@ -22,7 +22,7 @@ def test_load_rule_repo() -> None:
     assert rc.rule[2].name == "goodbye"
     assert rc.rule[2].impl == "shell"
     assert rc.rule[2].command == "exit 1"
-    assert rc.rule[2].scope == Scope.SINGLE_FILE
+    assert rc.rule[2].scope == Scope.FILE
     assert rc.rule[2].test_path == Path("tests/fixture_rules/tests/goodbye").resolve()
 
 
