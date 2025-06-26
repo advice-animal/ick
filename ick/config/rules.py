@@ -76,7 +76,7 @@ class RuleConfig(Struct):
     risk: Optional[Risk] = Risk.HIGH
     urgency: Optional[Urgency] = Urgency.LATER
     order: int = 50
-    hours: int = 1
+    hours: int = 0
 
     command: Optional[str] = None
     data: Optional[str] = None

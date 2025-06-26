@@ -266,8 +266,8 @@ class Runner:
         for impl in self.iter_rule_impl():
             impl.prepare()
             duration = ""
-            # if impl.rule_config.hours != 1:
-            #     duration = f" ({impl.rule_config.hours} {pl('hour', impl.rule_config.hours)})"
+            if impl.rule_config.hours != 0:
+                duration = f" ({impl.rule_config.hours} {pl('hour', impl.rule_config.hours)})"
 
             msg = f"{impl.rule_config.qualname}{duration}"
             if impl.rule_config.description:
