@@ -38,6 +38,14 @@ class ExecWork(Work):
         try:
             nice_cmd = " ".join(map(str, self.rule.command_parts))  # type: ignore[attr-defined] # FIX ME
             if self.rule.rule_config.scope == Scope.FILE:
+                if not filenames:
+                    LOG.info("Skipping run because there are no files matched: %s", nice_cmd)
+                    yield Finished(
+                        rule_name,
+                        error=False,
+                        message="",
+                    )
+                    return
                 LOG.info("Running file-scoped command on %s files: %s", len(filenames), nice_cmd)
                 stdout = run_cmd(
                     ["xargs", "-P10", "-n10", "-0", *self.rule.command_parts],  # type: ignore[attr-defined] # FIX ME

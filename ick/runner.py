@@ -20,6 +20,7 @@ import moreorless
 from keke import ktrace
 from moreorless import unified_diff
 from rich import print
+from vmodule import VLOG_1
 
 from ick_protocol import Finished, Modified
 
@@ -171,7 +172,7 @@ class Runner:
 
             repo = maybe_repo(tp, stack.enter_context)
 
-            project = Project(repo.root, "", "python", "invalid.bin")  # type: ignore[arg-type] # FIX ME
+            project = Project(repo, "", "python", "invalid.bin")
             files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
             files_to_check = {f for f in files_to_check if (outp / f).is_file()}
 
@@ -239,6 +240,9 @@ class Runner:
 
             impl.prepare()
             for p in self.projects:
+                if impl.rule_config.project_types and p.typ not in impl.rule_config.project_types:
+                    LOG.log(VLOG_1, "Skipping run on %s because it is not among %s", p, impl.rule_config.project_types)
+                    continue
                 responses = self._run_one(impl, self.repo, p)
                 mod = [m for m in responses if isinstance(m, Modified)]
                 assert isinstance(responses[-1], Finished)
@@ -251,14 +255,16 @@ class Runner:
                 with rule_instance.work_on_project(tmp) as work:
                     work.rule.command_env.update(self.ick_env_vars)
                     for h in rule_instance.list().rule_names:
-                        # TODO only if files exist
                         # TODO only if files have some contents
-                        filenames = repo.zfiles.rstrip("\0").split("\0")
-                        assert "" not in filenames
+                        filenames = project.relative_filenames()
+                        if project.subdir:
+                            work.project_path += "/" + project.subdir
+
                         # TODO %.py different than *.py once we go parallel
                         if rule_instance.rule_config.inputs:
                             filenames = [f for f in filenames if any(fnmatch(f, x) for x in rule_instance.rule_config.inputs)]
 
+                        # Note: work.run will return early if filenames is empty and we're in single-file mode
                         resp.extend(work.run(rule_instance.rule_config.qualname, filenames))
         except Exception as e:
             typ, value, tb = sys.exc_info()
