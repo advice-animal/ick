@@ -10,13 +10,13 @@ from msgspec.json import encode as json_encode
 from ..base_rule import BaseRule, ExecWork
 
 
-def default(x):
+def default(x):  # type: ignore[no-untyped-def] # FIX ME
     if isinstance(x, Path):
         return str(x)
     raise NotImplementedError
 
 
-def main(filenames):
+def main(filenames):  # type: ignore[no-untyped-def] # FIX ME
     config = json_decode(os.environ["RULE_CONFIG"])
     name = config["name"]
     search = config["search"]
@@ -35,18 +35,18 @@ def main(filenames):
 class Rule(BaseRule):
     work_cls = ExecWork
 
-    def __init__(self, conf, repo_config) -> None:
-        super().__init__(conf, repo_config)
+    def __init__(self, conf, repo_config) -> None:  # type: ignore[no-untyped-def] # FIX ME
+        super().__init__(conf, repo_config)  # type: ignore[no-untyped-call] # FIX ME
         self.command_parts = [sys.executable, "-m", __name__]
         self.command_env = {
             "RULE_CONFIG": json_encode(conf, enc_hook=default),
         }
         if "PYTHONPATH" in os.environ:
-            self.command_env["PYTHONPATH"] = os.environ["PYTHONPATH"]
+            self.command_env["PYTHONPATH"] = os.environ["PYTHONPATH"]  # type: ignore[assignment] # FIX ME
 
-    def prepare(self):
+    def prepare(self):  # type: ignore[no-untyped-def] # FIX ME
         pass
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main(sys.argv[1:])  # type: ignore[no-untyped-call] # FIX ME

@@ -10,11 +10,11 @@ class Rule(BaseRule):
 
     COMMAND = [sys.executable, "-m", __name__]
 
-    def __init__(self, rule_config, repo_config):
+    def __init__(self, rule_config, repo_config):  # type: ignore[no-untyped-def] # FIX ME
         self.rule_config = rule_config
         self.repo_config = repo_config
 
-    def prepare(self):
+    def prepare(self):  # type: ignore[no-untyped-def] # FIX ME
         pass
 
     # def work_on_project(self, project_path):

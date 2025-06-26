@@ -9,12 +9,12 @@ from ick_protocol import Finished, Modified
 
 
 @pytest.mark.skipif(sys.platform == "darwin", reason="GHA can't test docker")
-def test_basic_docker(tmp_path) -> None:
+def test_basic_docker(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
     docker_rule = Rule(
         RuleConfig(
             name="append",
             impl="docker",
-            scope="repo",
+            scope="repo",  # type: ignore[arg-type] # FIX ME
             command="alpine:3.14 /bin/sh -c 'echo dist >> .gitignore'",
         ),
         None,

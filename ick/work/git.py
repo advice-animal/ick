@@ -18,8 +18,8 @@ class GitWorkdirFactory:
 
         # exit_stack.enter_context(in_tmpdir(near=parent))
 
-    def __call__(self):
-        return GitWorkdir(self, self._clones_dir, self._wc_patch)
+    def __call__(self):  # type: ignore[no-untyped-def] # FIX ME
+        return GitWorkdir(self, self._clones_dir, self._wc_patch)  # type: ignore[arg-type, call-arg] # FIX ME
 
 
 class GitWorkdir:
@@ -27,11 +27,11 @@ class GitWorkdir:
         self._clones_dir = clones_dir
         self._wc_patch = wc_patch
 
-    def __enter__(self):
+    def __enter__(self):  # type: ignore[no-untyped-def] # FIX ME
         # come up with a temp name in clones_dir
         this_dir = self._clones_dir / "abc"
         run_cmd(["git", "apply", "--index", self._wc_patch], cwd=this_dir)
 
-        run_cmd(["git", "clone", self._parent, self._clone_dir])
+        run_cmd(["git", "clone", self._parent, self._clone_dir])  # type: ignore[attr-defined] # FIX ME
         ...
-        run_cmd(["git", "diff", "--binary"], cwd=self._parent)
+        run_cmd(["git", "diff", "--binary"], cwd=self._parent)  # type: ignore[attr-defined] # FIX ME

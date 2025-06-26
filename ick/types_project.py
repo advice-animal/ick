@@ -26,7 +26,7 @@ class Repo(Struct):
     zfiles: Optional[str] = None
 
     def __post_init__(self) -> None:
-        self.zfiles = run_cmd(["git", "ls-files", "-z"], cwd=self.root)
+        self.zfiles = run_cmd(["git", "ls-files", "-z"], cwd=self.root)  # type: ignore[assignment] # FIX ME
 
 
 def maybe_repo(path: Path, enter_context: Callable[[ContextManager[_T]], _T]) -> Repo:
@@ -34,9 +34,9 @@ def maybe_repo(path: Path, enter_context: Callable[[ContextManager[_T]], _T]) ->
     if (path / ".git").exists():
         return Repo(path)
     else:
-        td = enter_context(TemporaryDirectory())
-        run_cmd(["git", "init"], cwd=td)
-        copytree(path, td, dirs_exist_ok=True)
-        run_cmd(["git", "add", "-N", "."], cwd=td)
-        run_cmd(["git", "commit", "-a", "--allow-empty", "-m", "init"], cwd=td)
-        return Repo(Path(td))
+        td = enter_context(TemporaryDirectory())  # type: ignore[arg-type] # FIX ME
+        run_cmd(["git", "init"], cwd=td)  # type: ignore[arg-type] # FIX ME
+        copytree(path, td, dirs_exist_ok=True)  # type: ignore[arg-type] # FIX ME
+        run_cmd(["git", "add", "-N", "."], cwd=td)  # type: ignore[arg-type] # FIX ME
+        run_cmd(["git", "commit", "-a", "--allow-empty", "-m", "init"], cwd=td)  # type: ignore[arg-type] # FIX ME
+        return Repo(Path(td))  # type: ignore[arg-type] # FIX ME

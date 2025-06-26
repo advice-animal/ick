@@ -26,7 +26,7 @@ def _get_local_cache_name(url: str) -> str:
 
 
 def update_local_cache(url: str, skip_update: bool, freeze: bool = False) -> Path:
-    import appdirs
+    import appdirs  # type: ignore[import-untyped] # FIX ME
 
     cache_dir = Path(appdirs.user_cache_dir("ick", "advice-animal")).expanduser()
     local_checkout = cache_dir / _get_local_cache_name(url)

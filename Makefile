@@ -44,6 +44,7 @@ lint:
 .PHONY: mypy
 mypy:
 	python -m mypy --strict --install-types --non-interactive ick tests
+	@echo $$(grep -R --include='*.py' '# type: ignore.*# FIX ME' ick tests | wc -l) FIX ME comments remain
 
 .PHONY: test
 test:

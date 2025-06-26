@@ -11,26 +11,26 @@ from msgspec.json import encode as json_encode
 from ..base_rule import BaseRule, ExecWork
 
 
-def default(x):
+def default(x):  # type: ignore[no-untyped-def] # FIX ME
     if isinstance(x, Path):
         return str(x)
     raise NotImplementedError
 
 
-def main(filenames):
+def main(filenames):  # type: ignore[no-untyped-def] # FIX ME
     config = json_decode(os.environ["RULE_CONFIG"])
     desired = tomlkit.parse(config["data"])
 
     for f in filenames:
         current_contents = Path(f).read_text()
         doc = tomlkit.parse(current_contents)
-        merge(doc, desired)
+        merge(doc, desired)  # type: ignore[no-untyped-call] # FIX ME
         new_contents = tomlkit.dumps(doc)
         if new_contents != current_contents:
             Path(f).write_text(new_contents)
 
 
-def merge(d1, d2):
+def merge(d1, d2):  # type: ignore[no-untyped-def] # FIX ME
     """
     Recursive dictionary merge, preserving order and with a special case.
     """
@@ -38,7 +38,7 @@ def merge(d1, d2):
         if k in d2:
             # merge
             if isinstance(d2[k], dict):
-                merge(d1[k], d2[k])
+                merge(d1[k], d2[k])  # type: ignore[no-untyped-call] # FIX ME
             else:
                 d1[k] = d2[k]
 
@@ -51,18 +51,18 @@ def merge(d1, d2):
 class Rule(BaseRule):
     work_cls = ExecWork
 
-    def __init__(self, conf, repo_config) -> None:
-        super().__init__(conf, repo_config)
+    def __init__(self, conf, repo_config) -> None:  # type: ignore[no-untyped-def] # FIX ME
+        super().__init__(conf, repo_config)  # type: ignore[no-untyped-call] # FIX ME
         self.command_parts = [sys.executable, "-m", __name__]
         self.command_env = {
             "RULE_CONFIG": json_encode(conf, enc_hook=default),
         }
         if "PYTHONPATH" in os.environ:
-            self.command_env["PYTHONPATH"] = os.environ["PYTHONPATH"]
+            self.command_env["PYTHONPATH"] = os.environ["PYTHONPATH"]  # type: ignore[assignment] # FIX ME
 
-    def prepare(self):
+    def prepare(self):  # type: ignore[no-untyped-def] # FIX ME
         pass
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main(sys.argv[1:])  # type: ignore[no-untyped-call] # FIX ME
