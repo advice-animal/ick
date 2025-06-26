@@ -1,8 +1,4 @@
-# Contributing
-
-(For now, just some notes to ick authors)
-
-## Logging
+# Logging
 
 We use [vmodule] to provide extra logging levels.  Use `VLOG_1` to mean "info,
 but more" and `VLOG_2` to mean "info, but even more."

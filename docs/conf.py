@@ -57,8 +57,6 @@ autodoc_typehints_format = "short"
 highlight_language = "python3"
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "black": ("https://black.readthedocs.io/en/latest", None),
-    "usort": ("https://usort.readthedocs.io/en/latest", None),
 }
 master_doc = "index"
 
