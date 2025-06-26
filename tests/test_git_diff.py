@@ -6,7 +6,7 @@ from ick.git_diff import get_diff_messages
 from ick_protocol import Finished, Modified
 
 
-def test_smoketest(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_smoketest(tmp_path: Path) -> None:
     os.chdir(tmp_path)
     subprocess.check_call(["git", "init"])
     Path("foo.txt").write_text("line\n")
@@ -19,7 +19,7 @@ def test_smoketest(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
     assert isinstance(messages[1], Finished)
 
 
-def test_smoketest_workdir(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_smoketest_workdir(tmp_path: Path) -> None:
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     Path(tmp_path, "foo.txt").write_text("line\n")
     messages = list(get_diff_messages("m", "foo", tmp_path))
@@ -31,7 +31,7 @@ def test_smoketest_workdir(tmp_path) -> None:  # type: ignore[no-untyped-def] # 
     assert isinstance(messages[1], Finished)
 
 
-def test_smoketest_removal(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_smoketest_removal(tmp_path: Path) -> None:
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     Path(tmp_path, "foo.txt").write_text("line\nunchanged\n")
     subprocess.check_call(["git", "add", "."], cwd=tmp_path)
@@ -46,7 +46,7 @@ def test_smoketest_removal(tmp_path) -> None:  # type: ignore[no-untyped-def] # 
     assert isinstance(messages[1], Finished)
 
 
-def test_smoketest_binary(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_smoketest_binary(tmp_path: Path) -> None:
     os.chdir(tmp_path)
     subprocess.check_call(["git", "init"])
     Path("foo.bin").write_bytes(b"\x00\x01\x02")

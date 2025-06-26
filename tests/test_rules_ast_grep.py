@@ -1,11 +1,12 @@
 import subprocess
+from pathlib import Path
 
 from ick.config import RuleConfig
 from ick.rules.ast_grep import Rule
 from ick_protocol import Finished, Modified
 
 
-def test_ast_grep_works(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_ast_grep_works(tmp_path: Path) -> None:
     ast_grep = Rule(  # type: ignore[no-untyped-call] # FIX ME
         RuleConfig(
             name="foo",

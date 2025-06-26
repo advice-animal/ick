@@ -1,5 +1,6 @@
 import os
 import subprocess
+from pathlib import Path
 
 from ick.venv import PythonEnv, find_uv
 
@@ -8,7 +9,7 @@ def test_find_uv() -> None:
     assert os.access(find_uv(), os.X_OK)
 
 
-def test_env_happy_path(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_env_happy_path(tmp_path: Path) -> None:
     p = PythonEnv(tmp_path, [])
     pybin = p.bin("python")
     assert not pybin.exists()
@@ -37,7 +38,7 @@ def test_env_happy_path(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX
     p.prepare()  # type: ignore[no-untyped-call] # FIX ME
 
 
-def test_env_with_deps(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_env_with_deps(tmp_path: Path) -> None:
     p = PythonEnv(tmp_path, ["ast-grep-cli"])
     p.prepare()  # type: ignore[no-untyped-call] # FIX ME
     assert p.bin("ast-grep").exists()
