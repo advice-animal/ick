@@ -305,15 +305,15 @@ move_isort_cfg: no tests in /tmp/foo/move_isort_cfg/tests
 
 In your `move_isort_cfg` rule directory, create a `tests` subdirectory.  There
 each directory will be a test.  Create a `move_isort_cfg/tests/no_isort`
-directory.  In there, the `a` directory will be the "before" state of the files,
-and the `b` directory will be the expected "after" state of the files.  Running
-the test checks that the files in `a` are transformed to match the files in `b`
+directory.  In there, the `input` directory will be the "before" state of the files,
+and the `output` directory will be the expected "after" state of the files.  Running
+the test checks that the files in `input` are transformed to match the files in `output`
 when the rule runs.
 
-Create two files `a/pyproject.toml` and `b/pyproject.toml` with the same
+Create two files `input/pyproject.toml` and `output/pyproject.toml` with the same
 contents:
 
-<!-- [[[cog show_file("move_isort_cfg/tests/no_isort/a/pyproject.toml") ]]] -->
+<!-- [[[cog show_file("move_isort_cfg/tests/no_isort/input/pyproject.toml") ]]] -->
 ```toml
 [project]
 name = "foo"
@@ -335,13 +335,13 @@ Your directory structure should look like this:
 |   |-- move_isort_cfg.py
 |   |-- tests
 |   |   |-- no_isort
-|   |   |   |-- a
+|   |   |   |-- input
 |   |   |   |   |-- pyproject.toml
-|   |   |   |-- b
+|   |   |   |-- output
 |   |   |   |   |-- pyproject.toml
 |-- pyproject.toml
 ```
-<!-- [[[end]]] (sum: 6c6ouxqDWR) -->
+<!-- [[[end]]] (sum: 6fTx3KuD7w) -->
 
 This is a simple test that checks that if there is no `isort.cfg` file, the
 `pyproject.toml` file will be unchanged.  Run `ick test-rules`:
@@ -358,7 +358,7 @@ Now make a more realistic test. Create a `change_made`
 directory in the `tests` directory. Create these files:
 
 `change_made/a/isort.cfg`:
-<!-- [[[cog show_file("move_isort_cfg/tests/change_made/a/isort.cfg") ]]] -->
+<!-- [[[cog show_file("move_isort_cfg/tests/change_made/input/isort.cfg") ]]] -->
 ```ini
 [settings]
 line_length = 88
@@ -367,7 +367,7 @@ multi_line_output = 3
 <!-- [[[end]]] (sum: CXcy2s50F3) -->
 
 `change_made/a/pyproject.toml`:
-<!-- [[[cog show_file("move_isort_cfg/tests/change_made/a/pyproject.toml") ]]] -->
+<!-- [[[cog show_file("move_isort_cfg/tests/change_made/input/pyproject.toml") ]]] -->
 ```toml
 [project]
 name = "foo"
@@ -375,7 +375,7 @@ name = "foo"
 <!-- [[[end]]] (sum: cl1LTCokhc) -->
 
 `change_made/b/pyproject.toml`:
-<!-- [[[cog show_file("move_isort_cfg/tests/change_made/b/pyproject.toml") ]]] -->
+<!-- [[[cog show_file("move_isort_cfg/tests/change_made/output/pyproject.toml") ]]] -->
 ```toml
 [project]
 name = "foo"

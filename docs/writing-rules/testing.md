@@ -13,13 +13,13 @@ receive its own directory, with the directory name being the name of the test.
 ### Structure of a single test
 
 Each test for an ick rule consists of two directories:
-- `a/` (input): Contains the initial state of files before the rule runs
-- `b/` (output): Contains the expected state of files after the rule runs
+- `input/`: Contains the initial state of files before the rule runs
+- `output/`: Contains the expected state of files after the rule runs
 
 ### Test for an expected exception using `output.txt`
 
 If you want an error/exception to occur during your test, add it verbatim to
-`b/output.txt`.
+`output/output.txt`.
 
 ### Test structure visualized
 
@@ -38,31 +38,27 @@ when you run `ick test-rules`.
 |   |-- tests
 |   |   |-- rule1
 |   |   |   |-- test_rule1
-|   |   |   |   |-- a
+|   |   |   |   |-- input
 |   |   |   |   |   |-- foo.bar
-|   |   |   |   |-- b
+|   |   |   |   |-- output
 |   |   |   |   |   |-- foo.bar
 |   |   |   |-- expected_output
-|   |   |   |   |-- a
+|   |   |   |   |-- input
 |   |   |   |   |   |-- foo.bar
-|   |   |   |   |-- b
+|   |   |   |   |-- output
 |   |   |   |   |   |-- foo.bar
 |   |   |   |   |   |-- output.txt
 |   |   |-- rule2
 |   |   |   |-- test_rule2
-|   |   |   |   |-- a
+|   |   |   |   |-- input
 |   |   |   |   |   |-- foo.bar
-|   |   |   |   |-- b
+|   |   |   |   |-- output
 |   |   |   |   |   |-- foo.bar
 ```
 
 Each directory in `tests/rule1` is a different test for `rule1`. As long as
 `tests/rule1` exists in the same directory as `rule1.py`, ick will find the
 tests with no extra configuration.
-
-(On the to-do list is to change the names of the `a/` and `b/` to `input/` and
-`output/`, which are more descriptive as to their roles while still sorting
-nicely alphabetically.)
 
 ## Running tests
 
@@ -74,9 +70,9 @@ Use the `ick test-rules` command to run all tests for your rules. The command wi
 
 For each test, ick will:
 
-1. Copy the contents of `a/` to a temporary directory
+1. Copy the contents of `input/` to a temporary directory
 2. Run the rule on those files
-3. Compare the results with the contents of `b/`
+3. Compare the results with the contents of `output/`
 
 If the files match exactly, the test passes. If there are any differences, the
 test fails.

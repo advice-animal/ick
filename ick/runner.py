@@ -151,30 +151,35 @@ class Runner:
             return final_status
 
     def _perform_test(self, rule_instance, test_path, result: TestResult) -> None:  # type: ignore[no-untyped-def] # FIX ME
-        ap = test_path / "a"
-        bp = test_path / "b"
-        if not ap.exists():
-            result.message = f"Test input directory {ap} is missing"
-            return
-        if not bp.exists():
-            result.message = f"Test output directory {bp} is missing"
+        inp = test_path / "input"
+        outp = test_path / "output"
+        if not inp.exists():
+            if (test_path / "a").exists():
+                # Backward compatibility for just a short while.
+                inp = test_path / "a"
+                outp = test_path / "b"
+            else:
+                result.message = f"Test input directory {inp} is missing"
+                return
+        if not outp.exists():
+            result.message = f"Test output directory {outp} is missing"
             return
 
         with TemporaryDirectory() as td, ExitStack() as stack:
             tp = Path(td)
-            copytree(ap, tp, dirs_exist_ok=True)
+            copytree(inp, tp, dirs_exist_ok=True)
 
             repo = maybe_repo(tp, stack.enter_context)
 
             project = Project(repo.root, "", "python", "invalid.bin")  # type: ignore[arg-type] # FIX ME
-            files_to_check = set(glob("**", root_dir=bp, recursive=True, include_hidden=True))
-            files_to_check = {f for f in files_to_check if (bp / f).is_file()}
+            files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
+            files_to_check = {f for f in files_to_check if (outp / f).is_file()}
 
             response = self._run_one(rule_instance, repo, project)
             if not isinstance(response[-1], Finished):
                 raise AssertionError(f"Last response is not Finished: {response[-1].__class__.__name__}")
             if response[-1].error:
-                expected_path = bp / "output.txt"
+                expected_path = outp / "output.txt"
                 if not expected_path.exists():
                     result.message = f"Test crashed, but {expected_path} doesn't exist so that seems unintended:\n{response[-1].message}"
                     return
@@ -197,10 +202,10 @@ class Runner:
                     if r.filename not in files_to_check:
                         result.message = f"Unexpected new file: {r.filename!r}"
                         return
-                    bf = bp / r.filename
-                    if bf.read_bytes() != r.new_bytes:
+                    outf = outp / r.filename
+                    if outf.read_bytes() != r.new_bytes:
                         result.diff = unified_diff(
-                            bf.read_text(),
+                            outf.read_text(),
                             r.new_bytes.decode(),
                             r.filename,
                         )
@@ -209,7 +214,7 @@ class Runner:
                     files_to_check.remove(r.filename)
 
             for unchanged_file in files_to_check:
-                if (test_path / "a" / unchanged_file).read_bytes() != (bp / unchanged_file).read_bytes():
+                if (inp / unchanged_file).read_bytes() != (outp / unchanged_file).read_bytes():
                     result.message = f"{unchanged_file!r} (unchanged) differs"
                     return
 
@@ -219,7 +224,10 @@ class Runner:
         # Yields (impl, test_paths) for projects in test dir
         for impl in self.iter_rule_impl():
             test_path = impl.rule_config.test_path
-            if (test_path / "a").exists():
+            if (test_path / "input").exists():
+                yield impl, (test_path,)
+            elif (test_path / "a").exists():
+                # Backward compatibility for just a short while.
                 yield impl, (test_path,)
             else:
                 # Multiple tests have an additional level of directories
