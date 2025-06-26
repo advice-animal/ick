@@ -1,6 +1,6 @@
 <!-- splitme -->
 
-## Testing Tutorial
+## Testing tutorial
 
 This continues right where the previous [Tutorial](tutorial.html) left off.
 

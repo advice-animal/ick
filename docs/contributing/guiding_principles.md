@@ -1,11 +1,11 @@
-# Guiding Principles for ick
+# Guiding principles for ick
 
 Pithily,
 
 * First, corrupt no source code.
 * Second, don't reinvent what works.
 
-## Explicit Goals
+## Explicit goals
 
 * Always give the user an "undo" (default to an informative dry run)
 * Be something that one person on a team can adopt, if they're the only one that cares
@@ -22,7 +22,7 @@ to write a custom linter plugin because it's hard, and resorted to a `grep`
 somewhere, this framework is for you.
 
 
-## Ease of Adoption
+## Ease of adoption
 
 Using `ick` (generally) doesn't require any in-repo configuration, doesn't
 require all committers to use it, and doesn't require using any third-party
