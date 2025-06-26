@@ -1,11 +1,12 @@
 import subprocess
+from pathlib import Path
 
 from ick.config import RuleConfig
 from ick.rules.python import Rule
 from ick_protocol import Finished, Modified
 
 
-def test_python_works(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_python_works(tmp_path: Path) -> None:
     pyrule = Rule(
         RuleConfig(
             name="foo",

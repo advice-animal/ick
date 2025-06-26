@@ -1,11 +1,12 @@
 import subprocess
+from pathlib import Path
 
 from ick.config import RuleConfig
 from ick.rules.merge_toml import Rule
 from ick_protocol import Finished, Modified
 
 
-def test_merge_toml_works(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_merge_toml_works(tmp_path: Path) -> None:
     merge_toml = Rule(
         RuleConfig(
             name="foo",

@@ -1,5 +1,6 @@
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -9,7 +10,7 @@ from ick_protocol import Finished, Modified
 
 
 @pytest.mark.skipif(sys.platform == "darwin", reason="GHA can't test docker")
-def test_basic_docker(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_basic_docker(tmp_path: Path) -> None:
     docker_rule = Rule(
         RuleConfig(
             name="append",
