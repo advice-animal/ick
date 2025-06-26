@@ -13,6 +13,7 @@ import os.path
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterable
 
 import appdirs
 
@@ -29,7 +30,7 @@ class NoValidTempDir(Exception):
 
 
 @contextmanager
-def in_tmpdir(near: Path):
+def in_tmpdir(near: Path) -> Iterable[None]:
     d = find_tmpdir(near)
     old = os.getcwd()
     try:

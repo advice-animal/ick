@@ -10,7 +10,7 @@ from ..venv import PythonEnv
 class Rule(BaseRule):
     work_cls = ExecWork
 
-    def __init__(self, rule_config, repo_config):
+    def __init__(self, rule_config, repo_config) -> None:
         super().__init__(rule_config, repo_config)
         # TODO validate path / rule.name ".py" exists
         venv_key = rule_config.qualname
@@ -30,5 +30,5 @@ class Rule(BaseRule):
 
         self.command_env = os.environ.copy()
 
-    def prepare(self):
+    def prepare(self) -> None:
         self.venv.prepare()

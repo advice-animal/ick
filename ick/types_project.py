@@ -25,7 +25,7 @@ class Repo(Struct):
     projects: Sequence[Project] = ()
     zfiles: Optional[str] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.zfiles = run_cmd(["git", "ls-files", "-z"], cwd=self.root)
 
 

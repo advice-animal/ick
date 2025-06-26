@@ -5,7 +5,7 @@ from ick.rules.shell import Rule
 from ick_protocol import Finished, Modified
 
 
-def test_smoke_single_file(tmp_path):
+def test_smoke_single_file(tmp_path) -> None:
     # This duplicates stuff that ick.runner does
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     (tmp_path / "README.md").write_text("hello world\n")
@@ -31,7 +31,7 @@ def test_smoke_single_file(tmp_path):
     assert isinstance(resp[1], Finished)
 
 
-def test_smoke_not_found(tmp_path):
+def test_smoke_not_found(tmp_path) -> None:
     # This duplicates stuff that ick.runner does
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     (tmp_path / "README.md").write_text("hello world\n")
@@ -53,7 +53,7 @@ def test_smoke_not_found(tmp_path):
     assert "xargs: /bin/zzyzx: No such file or directory" in resp[0].message
 
 
-def test_smoke_failure(tmp_path):
+def test_smoke_failure(tmp_path) -> None:
     # This duplicates stuff that ick.runner does
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     (tmp_path / "README.md").write_text("hello world\n")
@@ -75,7 +75,7 @@ def test_smoke_failure(tmp_path):
     assert "returned non-zero exit status" in resp[0].message
 
 
-def test_smoke_repo(tmp_path):
+def test_smoke_repo(tmp_path) -> None:
     # This duplicates stuff that ick.runner does
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     (tmp_path / "README.md").write_text("hello world\n")

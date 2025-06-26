@@ -34,7 +34,7 @@ def clean_output(output: str) -> str:
 
 
 @pytest.mark.parametrize("filename", SCENARIOS)
-def test_scenario(filename, monkeypatch):
+def test_scenario(filename, monkeypatch) -> None:
     __tracebackhide__ = True
     # Avoid reading user-level config in tests, as they probably would change
     # the available rules
@@ -122,7 +122,7 @@ def parse_scenario(lines: Iterable[str]) -> Iterable[ScenarioCommand]:
     command: ScenarioCommand = ScenarioCommand()
     found_command = False
 
-    def new_command():
+    def new_command() -> None:
         nonlocal command, found_command
         if command is not None:
             commands.append(command)
@@ -183,7 +183,7 @@ def parse_scenario(lines: Iterable[str]) -> Iterable[ScenarioCommand]:
         ),
     ],
 )
-def test_parse_scenario(text, commands):
+def test_parse_scenario(text, commands) -> None:
     lines = textwrap.dedent(text[1:]).splitlines(keepends=True)
     assert list(parse_scenario(lines)) == commands
 

@@ -7,7 +7,7 @@ from ick.project_finder import find_projects
 from ick.types_project import Repo
 
 
-def test_project_finder():
+def test_project_finder() -> None:
     sample_string = "a/pyproject.toml\0a/tests/pyproject.toml\0b/pyproject.toml\0"
     assert [p.subdir for p in find_projects(Repo(Path()), sample_string, MainConfig.DEFAULT)] == ["a/", "b/"]
 
@@ -18,7 +18,7 @@ def test_project_finder():
     assert [p.subdir for p in find_projects(Repo(Path()), sample_string, MainConfig.DEFAULT)] == []
 
 
-def test_project_finder_skip_root():
+def test_project_finder_skip_root() -> None:
     skip_root_config = replace(MainConfig.DEFAULT, skip_project_root_in_repo_root=True)
 
     sample_string = "a/pyproject.toml\0a/tests/pyproject.toml\0b/pyproject.toml\0"
@@ -32,7 +32,7 @@ def test_project_finder_skip_root():
     assert list(find_projects(Repo(Path()), sample_string, skip_root_config)) == []
 
 
-def test_project_finder_marker_can_have_slashes():
+def test_project_finder_marker_can_have_slashes() -> None:
     custom_config = replace(MainConfig.DEFAULT, project_root_markers={"shell": ["scripts/make.sh"]})
 
     sample_string = "foo/scripts/make.sh\0"

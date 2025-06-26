@@ -1,7 +1,7 @@
 from ick.util import bucket, merge
 
 
-def test_merge():
+def test_merge() -> None:
     assert merge(None, "x") == "x"
     assert merge("x", None) == "x"
     assert merge(["x"], ["y"]) == ["x", "y"]
@@ -11,7 +11,7 @@ def test_merge():
     assert merge({"a": ["b"]}, {"b": ["c"]}) == {"a": ["b"], "b": ["c"]}
 
 
-def test_bucket():
+def test_bucket() -> None:
     rv = bucket([], key=lambda i: i == 2)
     assert rv == {}
     rv = bucket([1, 2, 3, 4], key=lambda i: i == 2)

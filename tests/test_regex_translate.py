@@ -1,7 +1,7 @@
 from ick._regex_translate import zfilename_re
 
 
-def test_regex_matching_zfilenames():
+def test_regex_matching_zfilenames() -> None:
     # start (and end)
     m = zfilename_re(["literal.txt"]).match("literal.txt\0")
     assert m.group("dirname") == ""
