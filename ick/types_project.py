@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from shutil import copytree
 from tempfile import TemporaryDirectory
-from typing import Callable, ContextManager, Optional, Sequence, TypeVar
+from typing import Callable, ContextManager, Iterable, Optional, Sequence, TypeVar
 
 from msgspec import Struct
 
@@ -17,6 +17,16 @@ class Project(Struct):
     subdir: str
     typ: str
     marker_filename: str
+
+    def relative_filenames(self) -> Iterable[str]:
+        zfiles = self.repo.zfiles
+        if zfiles is None:
+            return []
+        filenames = zfiles.rstrip("\0").split("\0")
+        assert "" not in filenames
+        if self.subdir:
+            filenames = [f[len(self.subdir) :] for f in filenames if f.startswith(self.subdir)]
+        return filenames
 
 
 class Repo(Struct):
