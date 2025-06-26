@@ -5,8 +5,8 @@ from ick.rules.ast_grep import Rule
 from ick_protocol import Finished, Modified
 
 
-def test_ast_grep_works(tmp_path) -> None:
-    ast_grep = Rule(
+def test_ast_grep_works(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
+    ast_grep = Rule(  # type: ignore[no-untyped-call] # FIX ME
         RuleConfig(
             name="foo",
             impl="ast-grep",
@@ -15,7 +15,7 @@ def test_ast_grep_works(tmp_path) -> None:
         ),
         None,
     )
-    ast_grep.prepare()
+    ast_grep.prepare()  # type: ignore[no-untyped-call] # FIX ME
 
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     (tmp_path / "foo.py").write_text("A(1,2,3)\nF(4,5,6)\n")

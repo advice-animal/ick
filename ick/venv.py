@@ -21,14 +21,14 @@ class PythonEnv:
         self.env_path = env_path
         self.deps = deps
 
-    def bin(self, prog) -> Path:
+    def bin(self, prog) -> Path:  # type: ignore[no-untyped-def] # FIX ME
         """
         Returns a theoretical Path for the given `prog`.
 
         Does not need to exist yet.
         """
         # TODO scripts and .exe for windows?
-        return self.env_path / "bin" / prog
+        return self.env_path / "bin" / prog  # type: ignore[no-any-return] # FIX ME
 
     def _deps_path(self) -> Path:
         return self.env_path / "deps.txt"
@@ -52,7 +52,7 @@ class PythonEnv:
             return False
         return deps == json.dumps(self.deps)
 
-    def prepare(self):
+    def prepare(self):  # type: ignore[no-untyped-def] # FIX ME
         if self.health_check():
             return True
 
@@ -87,7 +87,7 @@ class PythonEnv:
             # reasonable error during prepare if it's not present/downloadable
             # on the system.
             if self.deps:
-                env["VIRTUAL_ENV"] = self.env_path
+                env["VIRTUAL_ENV"] = self.env_path  # type: ignore[assignment] # FIX ME
                 run_cmd(
                     [uv, "pip", "install", *self.deps],
                     env=env,

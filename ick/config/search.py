@@ -3,7 +3,7 @@ from logging import getLogger
 from pathlib import Path
 from typing import Iterable
 
-import appdirs
+import appdirs  # type: ignore[import-untyped] # FIX ME
 from vmodule import VLOG_1, VLOG_2
 
 from ..git import find_repo_root

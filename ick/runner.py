@@ -54,7 +54,7 @@ class TestResult:
 
 
 class Runner:
-    def __init__(self, rtc, repo, explicit_project=None):
+    def __init__(self, rtc, repo, explicit_project=None):  # type: ignore[no-untyped-def] # FIX ME
         self.rtc = rtc
         self.rules = discover_rules(rtc)
         self.repo = repo
@@ -84,7 +84,7 @@ class Runner:
         print("[dim]testing...[/dim]")
         buffered_output = io.StringIO()
 
-        def buf_print(text):
+        def buf_print(text):  # type: ignore[no-untyped-def] # FIX ME
             """Print to the buffered output.
 
             This is needed instead of print(..., file=buffered_output) to get
@@ -101,7 +101,7 @@ class Runner:
                 rule_instance.prepare()
                 if not test_paths:
                     print("<no-test>", end="")
-                    buf_print(
+                    buf_print(  # type: ignore[no-untyped-call] # FIX ME
                         f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
                     )
                 else:
@@ -128,15 +128,15 @@ class Runner:
                         success = False
                         final_status = 1
                         print("[red]F[/]", end="")
-                        buf_print(f"{'-' * 80}")
-                        rel_test_path = result.test_path.relative_to(result.rule_instance.rule_config.test_path)
+                        buf_print(f"{'-' * 80}")  # type: ignore[no-untyped-call] # FIX ME
+                        rel_test_path = result.test_path.relative_to(result.rule_instance.rule_config.test_path)  # type: ignore[attr-defined] # FIX ME
                         with_test = ""
                         if str(rel_test_path) != ".":
                             with_test = f" with [bold]{rel_test_path}[/]"
-                        buf_print(f"testing [bold]{rule_instance.rule_config.qualname}[/]{with_test}:")
-                        buf_print(result.traceback)
-                        buf_print(result.message)
-                        buf_print(result.diff)
+                        buf_print(f"testing [bold]{rule_instance.rule_config.qualname}[/]{with_test}:")  # type: ignore[no-untyped-call] # FIX ME
+                        buf_print(result.traceback)  # type: ignore[no-untyped-call] # FIX ME
+                        buf_print(result.message)  # type: ignore[no-untyped-call] # FIX ME
+                        buf_print(result.diff)  # type: ignore[no-untyped-call] # FIX ME
 
                 if success:
                     print(" [green]PASS[/]")
@@ -150,7 +150,7 @@ class Runner:
 
             return final_status
 
-    def _perform_test(self, rule_instance, test_path, result: TestResult) -> None:
+    def _perform_test(self, rule_instance, test_path, result: TestResult) -> None:  # type: ignore[no-untyped-def] # FIX ME
         ap = test_path / "a"
         bp = test_path / "b"
         if not ap.exists():
@@ -166,7 +166,7 @@ class Runner:
 
             repo = maybe_repo(tp, stack.enter_context)
 
-            project = Project(repo.root, "", "python", "invalid.bin")
+            project = Project(repo.root, "", "python", "invalid.bin")  # type: ignore[arg-type] # FIX ME
             files_to_check = set(glob("**", root_dir=bp, recursive=True, include_hidden=True))
             files_to_check = {f for f in files_to_check if (bp / f).is_file()}
 
@@ -236,7 +236,7 @@ class Runner:
                 assert isinstance(responses[-1], Finished)
                 yield HighLevelResult(qualname, p.subdir, mod, responses[-1])
 
-    def _run_one(self, rule_instance, repo, project) -> list[HighLevelResult]:
+    def _run_one(self, rule_instance, repo, project) -> list[HighLevelResult]:  # type: ignore[no-untyped-def] # FIX ME
         try:
             resp = []
             with CloneAside(repo.root) as tmp:

@@ -9,17 +9,17 @@ from ick.types_project import Repo
 
 def test_project_finder() -> None:
     sample_string = "a/pyproject.toml\0a/tests/pyproject.toml\0b/pyproject.toml\0"
-    assert [p.subdir for p in find_projects(Repo(Path()), sample_string, MainConfig.DEFAULT)] == ["a/", "b/"]
+    assert [p.subdir for p in find_projects(Repo(Path()), sample_string, MainConfig.DEFAULT)] == ["a/", "b/"]  # type: ignore[attr-defined] # FIX ME
 
     sample_string = "pyproject.toml\0tests/pyproject.toml\0b/pyproject.toml\0"
-    assert [p.subdir for p in find_projects(Repo(Path()), sample_string, MainConfig.DEFAULT)] == [""]
+    assert [p.subdir for p in find_projects(Repo(Path()), sample_string, MainConfig.DEFAULT)] == [""]  # type: ignore[attr-defined] # FIX ME
 
     sample_string = "readme.txt\0"
-    assert [p.subdir for p in find_projects(Repo(Path()), sample_string, MainConfig.DEFAULT)] == []
+    assert [p.subdir for p in find_projects(Repo(Path()), sample_string, MainConfig.DEFAULT)] == []  # type: ignore[attr-defined] # FIX ME
 
 
 def test_project_finder_skip_root() -> None:
-    skip_root_config = replace(MainConfig.DEFAULT, skip_project_root_in_repo_root=True)
+    skip_root_config = replace(MainConfig.DEFAULT, skip_project_root_in_repo_root=True)  # type: ignore[attr-defined] # FIX ME
 
     sample_string = "a/pyproject.toml\0a/tests/pyproject.toml\0b/pyproject.toml\0"
     assert [p.subdir for p in find_projects(Repo(Path()), sample_string, skip_root_config)] == ["a/", "b/"]
@@ -33,7 +33,7 @@ def test_project_finder_skip_root() -> None:
 
 
 def test_project_finder_marker_can_have_slashes() -> None:
-    custom_config = replace(MainConfig.DEFAULT, project_root_markers={"shell": ["scripts/make.sh"]})
+    custom_config = replace(MainConfig.DEFAULT, project_root_markers={"shell": ["scripts/make.sh"]})  # type: ignore[attr-defined] # FIX ME
 
     sample_string = "foo/scripts/make.sh\0"
     assert [p.subdir for p in find_projects(Repo(Path()), sample_string, custom_config)] == ["foo/"]

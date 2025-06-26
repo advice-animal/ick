@@ -34,7 +34,7 @@ def clean_output(output: str) -> str:
 
 
 @pytest.mark.parametrize("filename", SCENARIOS)
-def test_scenario(filename, monkeypatch) -> None:
+def test_scenario(filename, monkeypatch) -> None:  # type: ignore[no-untyped-def] # FIX ME
     __tracebackhide__ = True
     # Avoid reading user-level config in tests, as they probably would change
     # the available rules
@@ -183,7 +183,7 @@ def parse_scenario(lines: Iterable[str]) -> Iterable[ScenarioCommand]:
         ),
     ],
 )
-def test_parse_scenario(text, commands) -> None:
+def test_parse_scenario(text, commands) -> None:  # type: ignore[no-untyped-def] # FIX ME
     lines = textwrap.dedent(text[1:]).splitlines(keepends=True)
     assert list(parse_scenario(lines)) == commands
 

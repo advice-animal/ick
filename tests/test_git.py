@@ -13,7 +13,7 @@ def test_find_repo_root() -> None:
 
 
 # This only works on some linux
-def test_update_local_cache(tmp_path, mocker) -> None:
+def test_update_local_cache(tmp_path, mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
     mock_run_cmd = mocker.patch("ick.git.run_cmd", autospec=True)
 
     rv = update_local_cache("https://github.com/thatch/hobbyhorse", skip_update=False, freeze=False)

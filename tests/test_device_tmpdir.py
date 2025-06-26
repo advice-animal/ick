@@ -3,7 +3,7 @@ from pathlib import Path
 from ick.device_tmpdir import find_tmpdir
 
 
-def get_device(fn, follow_symlinks=False) -> int:
+def get_device(fn, follow_symlinks=False) -> int:  # type: ignore[no-untyped-def] # FIX ME
     fn = str(fn)
     if fn == "/home/user/.cache/uv":
         return 1
@@ -28,7 +28,7 @@ def expanduser(p: str) -> str:
         return p
 
 
-def test_device_tmpdir(mocker) -> None:
+def test_device_tmpdir(mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
     mocker.patch("ick.device_tmpdir._get_device", get_device)
     mocker.patch("ick.device_tmpdir._access_ok", lambda _: True)
     mocker.patch("os.path.expanduser", expanduser)

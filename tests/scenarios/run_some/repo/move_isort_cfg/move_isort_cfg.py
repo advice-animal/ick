@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-import imperfect
+import imperfect  # type: ignore[import-not-found] # FIX ME
 import tomlkit
 
 if __name__ == "__main__":

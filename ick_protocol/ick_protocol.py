@@ -40,8 +40,8 @@ class Risk(Enum):
     MED = "med"
     LOW = "low"
 
-    def __lt__(self, other):
-        return self._sort_order_ < other._sort_order_
+    def __lt__(self, other):  # type: ignore[no-untyped-def] # FIX ME
+        return self._sort_order_ < other._sort_order_  # type: ignore[attr-defined] # FIX ME
 
 
 class Urgency(Enum):
@@ -51,8 +51,8 @@ class Urgency(Enum):
     NOW = "now"
     NOT_SUPPORTED = "not-supported"
 
-    def __lt__(self, other):
-        return self._sort_order_ < other._sort_order_
+    def __lt__(self, other):  # type: ignore[no-untyped-def] # FIX ME
+        return self._sort_order_ < other._sort_order_  # type: ignore[attr-defined] # FIX ME
 
 
 class Scope(Enum):
