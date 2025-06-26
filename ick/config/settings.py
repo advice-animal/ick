@@ -14,6 +14,8 @@ class Settings(Struct):
     dry_run=True, yolo=False: Tell me what needs to be changed
     dry_run=False, yolo=False: Make (safe) changes here
     dry_run=False, yolo=True: Make (safe+unsafe) changes here
+
+    skip_update: When loading rules from a repo, don't pull if some version already exists locally
     """
 
     #: Intended to be explicitly set based on flags
@@ -22,6 +24,8 @@ class Settings(Struct):
     yolo: bool = False
     #: Intended to be explicitly set based on flags
     isolated_repo: bool = False
+    #: Intended to be explicitly set based on flags
+    skip_update: bool = False
 
 
 class FilterConfig(Struct):

@@ -82,9 +82,10 @@ def test_rules(ctx):  # type: ignore[no-untyped-def] # FIX ME
 @click.option("-p", "--patch", is_flag=True, help="Show patch instead of applying")
 @click.option("--yolo", is_flag=True, help="Yolo mode enables modifying external state")
 @click.option("--json", "json_flag", is_flag=True, help="Outputs json indicating if a rule caused modifications")
+@click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
 @click.argument("filters", nargs=-1)
 @click.pass_context
-def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: list[str]):  # type: ignore[no-untyped-def] # FIX ME
+def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, skip_update: bool, filters: list[str]):  # type: ignore[no-untyped-def] # FIX ME
     """
     Run the applicable rules to the current repo/path
 
@@ -96,6 +97,7 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, filters: l
 
     ctx.obj.settings.dry_run = dry_run
     ctx.obj.settings.yolo = yolo
+    ctx.obj.settings.skip_update = skip_update
 
     if len(filters) == 0:
         ctx.obj.settings.dry_run = True  # force it
