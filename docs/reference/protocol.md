@@ -19,9 +19,6 @@ protocol to report results where the additional input is mentioned.
 
 ## Intent (and other flags)
 
-
-
-
 ## Additional flags
 
 The default way things are run operates on copies, so is pretty similar to a

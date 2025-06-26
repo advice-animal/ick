@@ -275,7 +275,7 @@ it needs to.
 
 ## Testing
 
-Be sure to continue the journey with the [Testing Tutorial](testing-tutorial.html), which lets you
-ensure that your rules still work as time goes on.
+Be sure to continue the journey with the [Testing Tutorial](testing-tutorial.html),
+which lets you ensure that your rules still work as time goes on.
 
 <!-- splitme -->
