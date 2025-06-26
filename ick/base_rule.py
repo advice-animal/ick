@@ -37,7 +37,7 @@ class ExecWork(Work):
     def run(self, rule_name, filenames) -> Iterable[Msg]:  # type: ignore[no-untyped-def, override] # FIX ME
         try:
             nice_cmd = " ".join(map(str, self.rule.command_parts))  # type: ignore[attr-defined] # FIX ME
-            if self.rule.rule_config.scope == Scope.SINGLE_FILE:
+            if self.rule.rule_config.scope == Scope.FILE:
                 LOG.info("Running file-scoped command on %s files: %s", len(filenames), nice_cmd)
                 stdout = run_cmd(
                     ["xargs", "-P10", "-n10", "-0", *self.rule.command_parts],  # type: ignore[attr-defined] # FIX ME

@@ -17,4 +17,4 @@ built-in guardrails.  Rules are expected to behave themselves, which in a nutshe
 
 Ick promises that once a rule starts running, the working copy won't be further
 modified **by ick**.  You might have multiple simultaneous runs of the same
-scope=single-file rule in the same working copy, if there's reason to.
+`scope=file` rule in the same working copy, if there's reason to.

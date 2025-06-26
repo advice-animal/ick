@@ -69,7 +69,7 @@ class RuleConfig(Struct):
     name: str
     impl: str
 
-    scope: Scope = Scope.SINGLE_FILE
+    scope: Scope = Scope.FILE
     command: Optional[Union[str, list[str]]] = None
     success: Success = Success.EXIT_STATUS
 

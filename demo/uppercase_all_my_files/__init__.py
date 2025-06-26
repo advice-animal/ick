@@ -1,7 +1,7 @@
 """
 # Uppercase all my files
 
-This is an example of a simple hook that operates at the `single-file` (the
+This is an example of a simple hook that operates at the `file` (the
 default) scope.  It is something that you might use with `xargs`, and is a
 close match to how pre-commit uses its hooks.
 

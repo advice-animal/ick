@@ -29,7 +29,7 @@ A single `[[rule]]` in an an ick.toml can be configured with the following attri
 #### Execution control
 
 - `scope` (str): The scope of the rule's execution. Available options:
-  - `"single-file"`: Runs the rule on a single file (default).
+  - `"file"`: Runs the rule on a single file (default).
   - `"project"`: Runs the rule on the whole project.
   - `"repo"`: Runs the rule on the whole repository.
 - `command` (str | list[str]): The command to execute for this rule.
