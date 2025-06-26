@@ -51,7 +51,7 @@ def load_rule_repo(mount: Mount, *, skip_update=False) -> RuleRepoConfig:
         # TODO config for a subdir within?
         repo_path = update_local_cache(mount.url, skip_update=skip_update)  # TODO
     else:
-        repo_path = Path(mount.base_path, mount.path).resolve()
+        repo_path = Path(mount.base_path, mount.path).resolve()  # type: ignore[arg-type] # FIX ME
 
     rc = RuleRepoConfig(repo_path=repo_path)
 
@@ -77,7 +77,7 @@ def load_rule_repo(mount: Mount, *, skip_update=False) -> RuleRepoConfig:
         base = dirname(filename).lstrip("/")
         if base:
             base += "/"
-        prefix = mount.prefix + "/" if (mount.prefix not in ["", "."]) else ""
+        prefix = mount.prefix + "/" if (mount.prefix not in ["", "."]) else ""  # type: ignore[operator] # FIX ME
         for rule in c.rule:
             rule.qualname = prefix + base + rule.name
             if (p.parent / rule.name).exists():
@@ -87,7 +87,7 @@ def load_rule_repo(mount: Mount, *, skip_update=False) -> RuleRepoConfig:
                 rule.test_path = repo_path / base / "tests" / rule.name
                 rule.script_path = repo_path / base / rule.name
 
-        rc.inherit(c)
+        rc.inherit(c)  # type: ignore[no-untyped-call] # FIX ME
 
     return rc
 
@@ -115,6 +115,6 @@ def get_impl(rule: RuleConfig) -> Type[BaseRule]:
     name = f"ick.rules.{rule.impl}"
     name = name.replace("-", "_")
     __import__(name)
-    impl: Type[BaseRule] = sys.modules[name].Rule  # type: ignore[assignment]
+    impl: Type[BaseRule] = sys.modules[name].Rule
     assert issubclass(impl, BaseRule)
     return impl

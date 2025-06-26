@@ -5,7 +5,7 @@ from ick.rules.python import Rule
 from ick_protocol import Finished, Modified
 
 
-def test_python_works(tmp_path):
+def test_python_works(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
     pyrule = Rule(
         RuleConfig(
             name="foo",

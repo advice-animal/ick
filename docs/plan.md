@@ -8,7 +8,6 @@
 
 # repo/readme-shouldnt-say-fixme
 
-
 # python/project-definition/stop-using-poetry
 
 # python/project-definition/use-lockfiles
@@ -32,7 +31,6 @@ Maybe to setup.cfg, maybe full pep 517
 # python/project-definition/use-canonical-name
 # python/project-definition/use-canonical-version
 
-
 # python/deps/dwyu
 
 Depend on what you use (all direct imports should be in your direct deps)
@@ -44,7 +42,6 @@ Would be great if this didn't require a live virtualenv.
 # python/deps/include-upper-bound
 
 # python/deps/dont-pin-in-public-deps
-
 
 # python/decorators/async-test-should-cone-first
 
@@ -98,7 +95,6 @@ https://peps.python.org/pep-0585/ (lowercase generics)
 
 # python/types/stubs-should-include-public-names
 
-
 # python/migration/runtime
 
 # python/migration/psycopg2
@@ -106,7 +102,6 @@ https://peps.python.org/pep-0585/ (lowercase generics)
 # python/migration/dataclasses
 
 # python/migration/importlib-metadata-instead-of-setuptools-at-runtime
-
 
 # python/ci/use-github-actions
 

@@ -3,7 +3,7 @@ from pathlib import Path
 from ick.git import find_repo_root, update_local_cache
 
 
-def test_find_repo_root():
+def test_find_repo_root() -> None:
     assert find_repo_root(Path.cwd()) == Path.cwd()
     assert find_repo_root(Path("tests")) == Path.cwd()
     # Doesn't have to really exist
@@ -13,7 +13,7 @@ def test_find_repo_root():
 
 
 # This only works on some linux
-def test_update_local_cache(tmp_path, mocker):
+def test_update_local_cache(tmp_path, mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
     mock_run_cmd = mocker.patch("ick.git.run_cmd", autospec=True)
 
     rv = update_local_cache("https://github.com/thatch/hobbyhorse", skip_update=False, freeze=False)

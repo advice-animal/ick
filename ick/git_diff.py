@@ -7,27 +7,27 @@ from ick_protocol import Finished, Modified
 from .sh import run_cmd
 
 
-def get_diff_messages(msg, rule_name: str, workdir: Path):
-    buf = []
+def get_diff_messages(msg, rule_name: str, workdir: Path):  # type: ignore[no-untyped-def] # FIX ME
+    buf = []  # type: ignore[var-annotated] # FIX ME
     plus_count = None
     minus_count = None
     filename = None
 
-    def get_chunk():
+    def get_chunk():  # type: ignore[no-untyped-def] # FIX ME
         new_bytes: Optional[bytes] = None
 
         try:
-            new_bytes = Path(workdir, filename).read_bytes()
+            new_bytes = Path(workdir, filename).read_bytes()  # type: ignore[arg-type] # FIX ME
         except FileNotFoundError:
             pass
 
         return Modified(
             rule_name=rule_name,
-            filename=filename,
+            filename=filename,  # type: ignore[arg-type] # FIX ME
             additional_input_filenames=(),
             diffstat=f"+{plus_count}-{minus_count}",
             diff="".join(buf),
-            new_bytes=new_bytes,
+            new_bytes=new_bytes,  # type: ignore[arg-type] # FIX ME
         )
 
     run_cmd(["git", "add", "."], cwd=workdir)
@@ -41,10 +41,10 @@ def get_diff_messages(msg, rule_name: str, workdir: Path):
         stdout=subprocess.PIPE,
         cwd=workdir,
     ) as proc:
-        for line in proc.stdout:
+        for line in proc.stdout:  # type: ignore[union-attr] # FIX ME
             if line.startswith("diff --git "):
                 if buf:
-                    yield get_chunk()
+                    yield get_chunk()  # type: ignore[no-untyped-call] # FIX ME
                 buf = [line]
                 plus_count = 0
                 minus_count = 0
@@ -60,10 +60,10 @@ def get_diff_messages(msg, rule_name: str, workdir: Path):
             elif line.startswith(" "):
                 buf.append(line)
             elif line.startswith("+"):
-                plus_count += 1
+                plus_count += 1  # type: ignore[operator] # FIX ME
                 buf.append(line)
             elif line.startswith("-"):
-                minus_count += 1
+                minus_count += 1  # type: ignore[operator] # FIX ME
                 buf.append(line)
             elif line.startswith("Binary files "):
                 pass
@@ -72,6 +72,6 @@ def get_diff_messages(msg, rule_name: str, workdir: Path):
                 buf.append(line)
 
     if buf:
-        yield get_chunk()
+        yield get_chunk()  # type: ignore[no-untyped-call] # FIX ME
 
     yield Finished(error=False, rule_name=rule_name, message=msg)

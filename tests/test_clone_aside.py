@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from ick.clone_aside import CloneAside, run_cmd
+from ick.clone_aside import CloneAside, run_cmd  # type: ignore[attr-defined] # FIX ME
 
 
-def test_no_modified_files(tmp_path):
+def test_no_modified_files(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
     run_cmd(["git", "init"], cwd=tmp_path)
     (tmp_path / "README.md").write_text("# Hello\n")
     run_cmd(["git", "add", "README.md"], cwd=tmp_path)
@@ -13,7 +13,7 @@ def test_no_modified_files(tmp_path):
         assert Path(f, "README.md").read_text() == "# Hello\n"
 
 
-def test_untracked_files(tmp_path):
+def test_untracked_files(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
     run_cmd(["git", "init"], cwd=tmp_path)
     (tmp_path / "README.md").write_text("# Hello\n")
     run_cmd(["git", "add", "README.md"], cwd=tmp_path)
@@ -25,7 +25,7 @@ def test_untracked_files(tmp_path):
         assert Path(f, "misc.md").read_text() == "# foo\n"
 
 
-def test_modified_files(tmp_path):
+def test_modified_files(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
     run_cmd(["git", "init"], cwd=tmp_path)
     (tmp_path / "README.md").write_text("# Hello\n")
     run_cmd(["git", "add", "README.md"], cwd=tmp_path)
@@ -36,7 +36,7 @@ def test_modified_files(tmp_path):
         assert Path(f, "README.md").read_text() == "# Hello Modified\n"
 
 
-def test_staged_files(tmp_path):
+def test_staged_files(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
     run_cmd(["git", "init"], cwd=tmp_path)
     (tmp_path / "README.md").write_text("# Hello\n")
     run_cmd(["git", "add", "README.md"], cwd=tmp_path)

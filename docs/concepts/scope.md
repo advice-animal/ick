@@ -1,6 +1,6 @@
 # Scope
 
-## Single-File Scope
+## Single-file scope
 
 ```toml
 [[rule]]

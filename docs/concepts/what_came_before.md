@@ -1,12 +1,12 @@
-# What Came Before
+# What came before
 
 Ick is not the first tool to examine and modify source code -- these have
 existed since the beginning of (unix)time, and there are several successful
 ones that we drew inspiration from (and either still use ourselves for other
 uses, or use _within_ an `ick` rule).
 
-All of the tools mentioned here are good at something. `ick` is good at orchestration and tries
-to leave you to your own devices.  See if you agree with
+All of the tools mentioned here are good at something. `ick` is good at
+orchestration and tries to leave you to your own devices.  See if you agree with
 [Guiding Principles](guiding_principles.html) and [Norms](norms.html) for the
 remaining limitations that might be worth writing an even better tool.
 
@@ -68,6 +68,3 @@ remaining limitations that might be worth writing an even better tool.
 
     One good concept that came from this is how function signatures get parsed,
     which handles positional and keyword arguments.  I wish more tools did that.
-
-    
-

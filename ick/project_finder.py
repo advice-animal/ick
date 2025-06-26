@@ -18,7 +18,7 @@ def find_projects(repo: Repo, zstr: str, conf: MainConfig) -> list[Project]:
     Returns topmost projects
     """
     marker_to_type = {}
-    for k, v in conf.project_root_markers.items():
+    for k, v in conf.project_root_markers.items():  # type: ignore[union-attr] # FIX ME
         for i in v:
             marker_to_type[i] = k
     pat = zfilename_re(marker_to_type)
@@ -46,7 +46,7 @@ def find_projects(repo: Repo, zstr: str, conf: MainConfig) -> list[Project]:
             projects[key] = Project(repo, dirname, typ, filename)
 
     # this is a tuple to make .startswith happy
-    final_project_names: tuple[str] = ()
+    final_project_names: tuple[str] = ()  # type: ignore[assignment] # FIX ME
     final_projects: list[Project] = []
 
     for project in sorted(projects.values(), key=lambda p: (p.subdir.count("/"), p.subdir)):
@@ -61,21 +61,21 @@ def find_projects(repo: Repo, zstr: str, conf: MainConfig) -> list[Project]:
         else:
             LOG.debug("Keeping project at %r", project.subdir)
         final_projects.append(project)
-        final_project_names = (*final_project_names, project.subdir)
+        final_project_names = (*final_project_names, project.subdir)  # type: ignore[assignment] # FIX ME
 
     return final_projects
 
 
 if __name__ == "__main__":  # pragma: no cover
-    from .main import repo_root
+    from .main import repo_root  # type: ignore[import-not-found] # FIX ME
 
     basicConfig(level=VLOG_2, format=DEFAULT_FORMAT)
     cur = Path(sys.argv[1]) if len(sys.argv) > 1 else Path()
     repo = Repo(repo_root(cur))
 
     print(
-        find_projects(
+        find_projects(  # type: ignore[call-arg] # FIX ME
             repo,
-            load_main_config(cur, repo),
+            load_main_config(cur, repo),  # type: ignore[arg-type] # FIX ME
         )
     )

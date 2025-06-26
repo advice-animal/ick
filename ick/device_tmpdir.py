@@ -13,8 +13,9 @@ import os.path
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterable
 
-import appdirs
+import appdirs  # type: ignore[import-untyped] # FIX ME
 
 HARDCODED_DEFAULTS = [
     os.getenv("TMPDIR") or "/tmp",
@@ -28,8 +29,8 @@ class NoValidTempDir(Exception):
     pass
 
 
-@contextmanager
-def in_tmpdir(near: Path):
+@contextmanager  # type: ignore[arg-type] # FIX ME
+def in_tmpdir(near: Path) -> Iterable[None]:
     d = find_tmpdir(near)
     old = os.getcwd()
     try:

@@ -4,17 +4,17 @@ import subprocess
 from ick.venv import PythonEnv, find_uv
 
 
-def test_find_uv():
+def test_find_uv() -> None:
     assert os.access(find_uv(), os.X_OK)
 
 
-def test_env_happy_path(tmp_path):
+def test_env_happy_path(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
     p = PythonEnv(tmp_path, [])
     pybin = p.bin("python")
     assert not pybin.exists()
     assert not p.health_check()
 
-    p.prepare()
+    p.prepare()  # type: ignore[no-untyped-call] # FIX ME
     assert pybin.exists()
     assert p.health_check()
 
@@ -30,15 +30,15 @@ def test_env_happy_path(tmp_path):
     assert os.access(pybin, os.X_OK)
     assert not p.health_check()
 
-    p.prepare()
+    p.prepare()  # type: ignore[no-untyped-call] # FIX ME
     assert p.health_check()
 
     # cover one last line where prepare is a no-op
-    p.prepare()
+    p.prepare()  # type: ignore[no-untyped-call] # FIX ME
 
 
-def test_env_with_deps(tmp_path):
+def test_env_with_deps(tmp_path) -> None:  # type: ignore[no-untyped-def] # FIX ME
     p = PythonEnv(tmp_path, ["ast-grep-cli"])
-    p.prepare()
+    p.prepare()  # type: ignore[no-untyped-call] # FIX ME
     assert p.bin("ast-grep").exists()
     subprocess.check_output([p.bin("ast-grep"), "--version"])

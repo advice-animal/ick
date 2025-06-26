@@ -13,7 +13,7 @@ LOG = getLogger(__name__)
 
 
 @ktrace("cmd", "cwd")
-def run_cmd_status(cmd: list[Union[str, Path]], check: bool = True, cwd: Optional[Union[str, Path]] = None, **kwargs) -> Tuple[str, int]:
+def run_cmd_status(cmd: list[Union[str, Path]], check: bool = True, cwd: Optional[Union[str, Path]] = None, **kwargs) -> Tuple[str, int]:  # type: ignore[no-untyped-def] # FIX ME
     cwd = cwd or os.getcwd()
     LOG.log(VLOG_1, "Run %s in %s", cmd, cwd)
     try:
@@ -31,6 +31,6 @@ def run_cmd_status(cmd: list[Union[str, Path]], check: bool = True, cwd: Optiona
     return proc.stdout, proc.returncode
 
 
-def run_cmd(cmd: list[Union[str, Path]], check: bool = True, cwd: Optional[Union[str, Path]] = None, **kwargs) -> Tuple[str, int]:
+def run_cmd(cmd: list[Union[str, Path]], check: bool = True, cwd: Optional[Union[str, Path]] = None, **kwargs) -> Tuple[str, int]:  # type: ignore[no-untyped-def] # FIX ME
     output, _ = run_cmd_status(cmd, check, cwd, **kwargs)
-    return output
+    return output  # type: ignore[return-value] # FIX ME

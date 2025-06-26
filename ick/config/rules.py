@@ -27,8 +27,8 @@ class RulesConfig(Struct):
 
     ruleset: Sequence[Mount] = ()
 
-    def inherit(self, less_specific_defaults):
-        self.ruleset = merge(self.ruleset, less_specific_defaults.ruleset)
+    def inherit(self, less_specific_defaults):  # type: ignore[no-untyped-def] # FIX ME
+        self.ruleset = merge(self.ruleset, less_specific_defaults.ruleset)  # type: ignore[no-untyped-call] # FIX ME
 
 
 class Mount(Struct):
@@ -40,9 +40,9 @@ class Mount(Struct):
 
     repo: Optional[RuleRepoConfig] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.prefix is None:
-            self.prefix = (self.url or self.path).rstrip("/").split("/")[-1]
+            self.prefix = (self.url or self.path).rstrip("/").split("/")[-1]  # type: ignore[union-attr] # FIX ME
 
 
 class PyprojectRulesConfig(Struct):
@@ -57,8 +57,8 @@ class RuleRepoConfig(Struct):
     rule: list[RuleConfig] = field(default_factory=list)
     repo_path: Optional[Path] = None
 
-    def inherit(self, less_specific_defaults):
-        self.rule = merge(self.rule, less_specific_defaults.rule)
+    def inherit(self, less_specific_defaults):  # type: ignore[no-untyped-def] # FIX ME
+        self.rule = merge(self.rule, less_specific_defaults.rule)  # type: ignore[no-untyped-call] # FIX ME
 
 
 class RuleConfig(Struct):
@@ -78,7 +78,7 @@ class RuleConfig(Struct):
     order: int = 50
     hours: int = 0
 
-    command: Optional[str] = None
+    command: Optional[str] = None  # type: ignore[no-redef] # FIX ME
     data: Optional[str] = None
     entry: Optional[str] = None
 
@@ -105,7 +105,7 @@ def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:
     for config_path in config_files(cur, isolated_repo):
         if config_path.name == "pyproject.toml":
             try:
-                c = decode_toml(config_path.read_bytes(), type=PyprojectToolConfig).tool.ick
+                c = decode_toml(config_path.read_bytes(), type=PyprojectToolConfig).tool.ick  # type: ignore[attr-defined] # FIX ME
             except ValidationError as e:
                 # TODO surely there's a cleaner way to validate _inside_
                 # but not care if [tool.other] is present...
@@ -123,7 +123,7 @@ def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:
 
         # TODO finalize mount paths so relative works
         try:
-            conf.inherit(c)
+            conf.inherit(c)  # type: ignore[no-untyped-call] # FIX ME
         except Exception as e:
             raise Exception(f"While merging {config_path}: {e!r}")
 

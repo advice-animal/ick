@@ -30,7 +30,7 @@ from .types_project import maybe_repo
 @click.option("--isolated-repo", is_flag=True, help="Isolate from user-level config", envvar="ICK_ISOLATED_REPO")
 @click.option("--target", default=".", help="Directory to modify")  # TODO path, existing
 @click.pass_context
-def main(ctx, v, verbose, vmodule, trace, isolated_repo, target) -> None:
+def main(ctx, v, verbose, vmodule, trace, isolated_repo, target) -> None:  # type: ignore[no-untyped-def] # FIX ME
     """
     Applier of fine source code fixes since 2025
     """
@@ -49,7 +49,7 @@ def main(ctx, v, verbose, vmodule, trace, isolated_repo, target) -> None:
 
 @main.command()
 @click.pass_context
-def find_projects(ctx):
+def find_projects(ctx):  # type: ignore[no-untyped-def] # FIX ME
     """
     Lists projects found in the current repo
     """
@@ -59,21 +59,21 @@ def find_projects(ctx):
 
 @main.command()
 @click.pass_context
-def list_rules(ctx):
+def list_rules(ctx):  # type: ignore[no-untyped-def] # FIX ME
     """
     Lists rules applicable to the current repo
     """
-    r = Runner(ctx.obj, ctx.obj.repo)
+    r = Runner(ctx.obj, ctx.obj.repo)  # type: ignore[no-untyped-call] # FIX ME
     r.echo_rules()
 
 
 @main.command()
 @click.pass_context
-def test_rules(ctx):
+def test_rules(ctx):  # type: ignore[no-untyped-def] # FIX ME
     """
     Run self-tests against all rules.
     """
-    r = Runner(ctx.obj, ctx.obj.repo)
+    r = Runner(ctx.obj, ctx.obj.repo)  # type: ignore[no-untyped-call] # FIX ME
     sys.exit(r.test_rules())
 
 
@@ -85,7 +85,7 @@ def test_rules(ctx):
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
 @click.argument("filters", nargs=-1)
 @click.pass_context
-def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, skip_update: bool, filters: list[str]):
+def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, skip_update: bool, filters: list[str]):  # type: ignore[no-untyped-def] # FIX ME
     """
     Run the applicable rules to the current repo/path
 
@@ -114,7 +114,7 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, skip_updat
 
     results = {}
 
-    r = Runner(ctx.obj, ctx.obj.repo, explicit_project=None)
+    r = Runner(ctx.obj, ctx.obj.repo, explicit_project=None)  # type: ignore[no-untyped-call] # FIX ME
     for result in r.run():
         if not json_flag:
             where = f"on {result.project} " if result.project else ""
