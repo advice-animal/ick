@@ -35,7 +35,7 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
         LOG.log(VLOG_1, "Processing %s", mount)
         # Prefixes should be unique; they override here
         skip_update = rtc.settings.skip_update
-        mounts[mount.prefix] = load_rule_repo(mount, skip_update)
+        mounts[mount.prefix] = load_rule_repo(mount, skip_update=skip_update)
 
     for k, v in mounts.items():
         rules.extend(v.rule)
@@ -46,10 +46,10 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
 
 
 @ktrace("mount.url", "mount.path")
-def load_rule_repo(mount: Mount, skip_update=False) -> RuleRepoConfig:
+def load_rule_repo(mount: Mount, *, skip_update=False) -> RuleRepoConfig:
     if mount.url:
         # TODO config for a subdir within?
-        repo_path = update_local_cache(mount.url, skip_update)  # TODO
+        repo_path = update_local_cache(mount.url, skip_update=skip_update)  # TODO
     else:
         repo_path = Path(mount.base_path, mount.path).resolve()
 

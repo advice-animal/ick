@@ -25,7 +25,7 @@ def _get_local_cache_name(url: str) -> str:
     return f"{repo_name}-{url_hash[:8]}"
 
 
-def update_local_cache(url: str, skip_update: bool, freeze: bool = False) -> Path:
+def update_local_cache(url: str, *, skip_update: bool, freeze: bool = False) -> Path:
     import appdirs
 
     cache_dir = Path(appdirs.user_cache_dir("ick", "advice-animal")).expanduser()
