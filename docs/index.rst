@@ -5,5 +5,6 @@
 
    getting-started/index
    concepts/index
+   writing-rules/index
    reference/index
-   contributing
+   contributing/index

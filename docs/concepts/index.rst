@@ -4,10 +4,6 @@ Concepts
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
-
-   guiding_principles
-   norms
 
    rules
    scope

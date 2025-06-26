@@ -1,6 +1,6 @@
 # Guiding Principles for ick
 
-Pithiily,
+Pithily,
 
 * First, corrupt no source code.
 * Second, don't reinvent what works.
