@@ -46,7 +46,7 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
 
 
 @ktrace("mount.url", "mount.path")
-def load_rule_repo(mount: Mount, *, skip_update=False) -> RuleRepoConfig:
+def load_rule_repo(mount: Mount, *, skip_update: bool = False) -> RuleRepoConfig:
     if mount.url:
         # TODO config for a subdir within?
         repo_path = update_local_cache(mount.url, skip_update=skip_update)  # TODO
