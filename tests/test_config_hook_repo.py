@@ -5,7 +5,7 @@ from ick.config.rule_repo import discover_rules, get_impl, load_pyproject, load_
 from ick_protocol import Scope
 
 
-def test_load_rule_repo():
+def test_load_rule_repo() -> None:
     m = Mount(base_path=Path.cwd(), path="tests/fixture_rules")
     rc = load_rule_repo(m)
     assert len(rc.rule) == 3
@@ -26,18 +26,18 @@ def test_load_rule_repo():
     assert rc.rule[2].test_path == Path("tests/fixture_rules/tests/goodbye").resolve()
 
 
-def test_load_pyproject_errors():
+def test_load_pyproject_errors() -> None:
     assert load_pyproject(Path(), b"") == RuleRepoConfig()
     assert load_pyproject(Path(), b"[tool]") == RuleRepoConfig()
     assert load_pyproject(Path(), b"[tool.ick]") == RuleRepoConfig()
     assert load_pyproject(Path(), b"[tool.ick.baz]") == RuleRepoConfig()
 
 
-def test_get_impl():
+def test_get_impl() -> None:
     assert get_impl(RuleConfig(name="foo", impl="shell"))
 
 
-def test_discover():
+def test_discover() -> None:
     m = Mount(base_path=Path.cwd(), path="tests/fixture_rules")
     h = RulesConfig(ruleset=[m])
     rules = discover_rules(rtc=RuntimeConfig(main_config=MainConfig(), rules_config=h, settings=Settings()))

@@ -9,7 +9,7 @@ from ..base_rule import BaseRule, ExecWork
 class Rule(BaseRule):
     work_cls = ExecWork
 
-    def __init__(self, rule_config, repo_config):
+    def __init__(self, rule_config, repo_config) -> None:
         super().__init__(rule_config, repo_config)
         if rule_config.command:
             self.command_parts = shlex.split(rule_config.command)
@@ -20,5 +20,5 @@ class Rule(BaseRule):
         # TODO
         self.command_env = os.environ.copy()
 
-    def prepare(self):
+    def prepare(self) -> None:
         pass

@@ -5,7 +5,7 @@ from ick.rules.ast_grep import Rule
 from ick_protocol import Finished, Modified
 
 
-def test_ast_grep_works(tmp_path):
+def test_ast_grep_works(tmp_path) -> None:
     ast_grep = Rule(
         RuleConfig(
             name="foo",

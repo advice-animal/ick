@@ -8,7 +8,7 @@ from ..sh import run_cmd
 class Rule(BaseRule):
     work_cls = ExecWork
 
-    def __init__(self, rule_config, repo_config):
+    def __init__(self, rule_config, repo_config) -> None:
         super().__init__(rule_config, repo_config)
         if isinstance(self.rule_config.command, str):
             parts = shlex.split(self.rule_config.command)
@@ -26,5 +26,5 @@ class Rule(BaseRule):
         # TODO limit this to DOCKER_* and whatever it needs for finding config?
         self.command_env = os.environ.copy()
 
-    def prepare(self):
+    def prepare(self) -> None:
         run_cmd(["docker", "pull", self.image_name], env=self.command_env)

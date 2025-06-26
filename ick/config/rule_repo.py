@@ -114,6 +114,6 @@ def get_impl(rule: RuleConfig) -> Type[BaseRule]:
     name = f"ick.rules.{rule.impl}"
     name = name.replace("-", "_")
     __import__(name)
-    impl: Type[BaseRule] = sys.modules[name].Rule  # type: ignore[assignment]
+    impl: Type[BaseRule] = sys.modules[name].Rule
     assert issubclass(impl, BaseRule)
     return impl
