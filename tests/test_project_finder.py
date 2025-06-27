@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Any
 
 from msgspec import to_builtins
 from msgspec.structs import replace
@@ -7,12 +6,6 @@ from msgspec.structs import replace
 from ick.config import MainConfig
 from ick.project_finder import find_projects
 from ick.types_project import Repo
-
-
-def path_default(obj: Any) -> str:
-    if isinstance(obj, Path):
-        return str(obj)
-    raise NotImplementedError
 
 
 def test_project_finder() -> None:
@@ -55,13 +48,13 @@ def test_project_finder_types() -> None:
     projects[0].repo = "FAKE"  # type: ignore[assignment]
     projects[1].repo = "FAKE"  # type: ignore[assignment]
 
-    assert to_builtins(projects[0], enc_hook=path_default) == {
+    assert to_builtins(projects[0]) == {
         "subdir": "a/",
         "marker_filename": "pyproject.toml",
         "typ": "python",
         "repo": "FAKE",
     }
-    assert to_builtins(projects[1], enc_hook=path_default) == {
+    assert to_builtins(projects[1]) == {
         "subdir": "b/",
         "marker_filename": "build.gradle",
         "typ": "java",
