@@ -3,7 +3,7 @@ from logging import getLogger
 from pathlib import Path
 from typing import Iterable
 
-import appdirs  # type: ignore[import-untyped] # FIX ME
+import platformdirs
 from vmodule import VLOG_1, VLOG_2
 
 from ..git import find_repo_root
@@ -35,7 +35,7 @@ def possible_config_files(cur: Path, isolated_repo: bool) -> Iterable[tuple[str,
             yield "repo root", Path(repo_root, "pyproject.toml")
 
         if not isolated_repo:
-            config_dir = appdirs.user_config_dir("ick", "advice-animal")
+            config_dir = platformdirs.user_config_dir("ick", "advice-animal")
             yield "user settings", Path(config_dir, "ick.toml.local")
             yield "user settings", Path(config_dir, "ick.toml")
 
