@@ -15,7 +15,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterable
 
-import appdirs  # type: ignore[import-untyped] # FIX ME
+import platformdirs
 
 HARDCODED_DEFAULTS = [
     os.getenv("TMPDIR") or "/tmp",
@@ -52,7 +52,7 @@ def _get_device(p: Path) -> int:
 
 def find_tmpdir(near: Path) -> Path:
     desired_dev = _get_device(near)
-    user_cache = Path(appdirs.user_cache_dir("ick", "advice-animal"))
+    user_cache = Path(platformdirs.user_cache_dir("ick", "advice-animal"))
     user_cache.mkdir(exist_ok=True, parents=True)
     if _get_device(user_cache) == desired_dev and _access_ok(user_cache):
         return user_cache
