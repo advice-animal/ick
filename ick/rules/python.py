@@ -20,7 +20,7 @@ class Rule(BaseRule):
         self.command_parts = [self.venv.bin("python")]
 
         if rule_config.data:
-            self.command_parts.extend(["-c", rule_config.data])  # type: ignore[list-item] # FIX ME
+            self.command_parts.extend(["-c", rule_config.data])
         else:
             py_script = rule_config.script_path.with_suffix(".py")
             if not py_script.exists():

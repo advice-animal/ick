@@ -4,7 +4,7 @@ import os
 import subprocess
 from logging import getLogger
 from pathlib import Path
-from typing import Optional, Tuple, Union
+from typing import Any, Sequence
 
 from keke import ktrace
 from vmodule import VLOG_1, VLOG_2
@@ -13,7 +13,7 @@ LOG = getLogger(__name__)
 
 
 @ktrace("cmd", "cwd")
-def run_cmd_status(cmd: list[Union[str, Path]], check: bool = True, cwd: Optional[Union[str, Path]] = None, **kwargs) -> Tuple[str, int]:  # type: ignore[no-untyped-def] # FIX ME
+def run_cmd_status(cmd: Sequence[str | Path], check: bool = True, cwd: str | Path | None = None, **kwargs: Any) -> tuple[str, int]:
     cwd = cwd or os.getcwd()
     LOG.log(VLOG_1, "Run %s in %s", cmd, cwd)
     try:
@@ -31,6 +31,6 @@ def run_cmd_status(cmd: list[Union[str, Path]], check: bool = True, cwd: Optiona
     return proc.stdout, proc.returncode
 
 
-def run_cmd(cmd: list[Union[str, Path]], check: bool = True, cwd: Optional[Union[str, Path]] = None, **kwargs) -> Tuple[str, int]:  # type: ignore[no-untyped-def] # FIX ME
+def run_cmd(cmd: Sequence[str | Path], check: bool = True, cwd: str | Path | None = None, **kwargs: Any) -> str:
     output, _ = run_cmd_status(cmd, check, cwd, **kwargs)
-    return output  # type: ignore[return-value] # FIX ME
+    return output

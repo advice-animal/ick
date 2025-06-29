@@ -42,7 +42,7 @@ class Rule(BaseRule):
             "RULE_CONFIG": json_encode(conf, enc_hook=default),
         }
         if "PYTHONPATH" in os.environ:
-            self.command_env["PYTHONPATH"] = os.environ["PYTHONPATH"]  # type: ignore[assignment] # FIX ME
+            self.command_env["PYTHONPATH"] = os.environ["PYTHONPATH"]
 
     def prepare(self):  # type: ignore[no-untyped-def] # FIX ME
         pass
