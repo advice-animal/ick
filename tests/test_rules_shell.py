@@ -1,12 +1,22 @@
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from ick.config import RuleConfig
 from ick.rules.shell import Rule
 from ick_protocol import Finished, Modified
 
 
-def test_smoke_single_file(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "cmd",
+    [
+        # `sed -i` works differently on Mac vs Linux, so use perl instead.
+        "perl -pi -e 's/hello/HELLO/g'",
+        ["perl", "-pi", "-e", "s/hello/HELLO/g"],
+    ],
+)
+def test_smoke_single_file(cmd: str | list[str], tmp_path: Path) -> None:
     # This duplicates stuff that ick.runner does
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     (tmp_path / "README.md").write_text("hello world\n")
@@ -16,8 +26,7 @@ def test_smoke_single_file(tmp_path: Path) -> None:
     conf = RuleConfig(
         name="hello",
         impl="shell",
-        # `sed -i` works differently on Mac vs Linux, so use perl instead.
-        command="perl -pi -e 's/hello/HELLO/g'",
+        command=cmd,
     )
     rule = Rule(conf)
     with rule.work_on_project(tmp_path) as work:

@@ -79,7 +79,7 @@ class RuleConfig(Struct):
     order: int = 50
     hours: int | None = None
 
-    command: Optional[str] = None
+    command: str | Sequence[str] | None = None
     data: Optional[str] = None
     entry: Optional[str] = None
 
