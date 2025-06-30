@@ -15,7 +15,7 @@ from vmodule import VLOG_1, VLOG_2
 
 from ..base_rule import BaseRule
 from ..git import update_local_cache
-from . import Mount, PyprojectRulesConfig, RuleConfig, RuleRepoConfig, RuntimeConfig
+from . import PyprojectRulesConfig, RuleConfig, RuleRepoConfig, Ruleset, RuntimeConfig
 
 LOG = getLogger(__name__)
 
@@ -30,14 +30,14 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
     """
     rules: list[RuleConfig] = []
 
-    mounts = {}
-    for mount in rtc.rules_config.ruleset:
-        LOG.log(VLOG_1, "Processing %s", mount)
+    rulesets = {}
+    for ruleset in rtc.rules_config.ruleset:
+        LOG.log(VLOG_1, "Processing %s", ruleset)
         # Prefixes should be unique; they override here
         skip_update = rtc.settings.skip_update
-        mounts[mount.prefix] = load_rule_repo(mount, skip_update=skip_update)
+        rulesets[ruleset.prefix] = load_rule_repo(ruleset, skip_update=skip_update)
 
-    for k, v in mounts.items():
+    for k, v in rulesets.items():
         rules.extend(v.rule)
 
     rules.sort(key=lambda h: (h.order, h.qualname))
@@ -45,13 +45,13 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
     return rules
 
 
-@ktrace("mount.url", "mount.path")
-def load_rule_repo(mount: Mount, *, skip_update: bool = False) -> RuleRepoConfig:
-    if mount.url:
+@ktrace("ruleset.url", "ruleset.path")
+def load_rule_repo(ruleset: Ruleset, *, skip_update: bool = False) -> RuleRepoConfig:
+    if ruleset.url:
         # TODO config for a subdir within?
-        repo_path = update_local_cache(mount.url, skip_update=skip_update)  # TODO
+        repo_path = update_local_cache(ruleset.url, skip_update=skip_update)  # TODO
     else:
-        repo_path = Path(mount.base_path, mount.path).resolve()  # type: ignore[arg-type] # FIX ME
+        repo_path = Path(ruleset.base_path, ruleset.path).resolve()  # type: ignore[arg-type] # FIX ME
 
     rc = RuleRepoConfig(repo_path=repo_path)
 
@@ -77,7 +77,7 @@ def load_rule_repo(mount: Mount, *, skip_update: bool = False) -> RuleRepoConfig
         base = dirname(filename).lstrip("/")
         if base:
             base += "/"
-        prefix = mount.prefix + "/" if (mount.prefix not in ["", "."]) else ""  # type: ignore[operator] # FIX ME
+        prefix = ruleset.prefix + "/" if (ruleset.prefix not in ["", "."]) else ""  # type: ignore[operator] # FIX ME
         for rule in c.rule:
             rule.qualname = prefix + base + rule.name
             if (p.parent / rule.name).exists():

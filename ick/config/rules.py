@@ -25,13 +25,15 @@ LOG = getLogger(__name__)
 class RulesConfig(Struct):
     """ """
 
-    ruleset: Sequence[Mount] = ()
+    # This should really be called `rulesets`, but this name lets us use
+    # `[[ruleset]]` syntax in the TOML files.
+    ruleset: Sequence[Ruleset] = ()
 
     def inherit(self, less_specific_defaults):  # type: ignore[no-untyped-def] # FIX ME
         self.ruleset = merge(self.ruleset, less_specific_defaults.ruleset)  # type: ignore[no-untyped-call] # FIX ME
 
 
-class Mount(Struct):
+class Ruleset(Struct):
     url: Optional[str] = None
     path: Optional[str] = None
 
@@ -119,10 +121,10 @@ def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:
         else:
             c = decode_toml(config_path.read_bytes(), type=RulesConfig)
 
-        for mount in c.ruleset:
-            mount.base_path = config_path.parent
+        for ruleset in c.ruleset:
+            ruleset.base_path = config_path.parent
 
-        # TODO finalize mount paths so relative works
+        # TODO finalize ruleset paths so relative works
         try:
             conf.inherit(c)  # type: ignore[no-untyped-call] # FIX ME
         except Exception as e:
