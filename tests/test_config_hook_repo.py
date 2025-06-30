@@ -1,13 +1,13 @@
 from pathlib import Path
 
-from ick.config import MainConfig, Mount, RuleConfig, RuleRepoConfig, RulesConfig, RuntimeConfig, Settings
+from ick.config import MainConfig, RuleConfig, RuleRepoConfig, RulesConfig, Ruleset, RuntimeConfig, Settings
 from ick.config.rule_repo import discover_rules, get_impl, load_pyproject, load_rule_repo
 from ick_protocol import Scope
 
 
 def test_load_rule_repo() -> None:
-    m = Mount(base_path=Path.cwd(), path="tests/fixture_rules")
-    rc = load_rule_repo(m)
+    r = Ruleset(base_path=Path.cwd(), path="tests/fixture_rules")
+    rc = load_rule_repo(r)
     assert len(rc.rule) == 3
 
     assert rc.rule[0].name == "hello"
@@ -38,7 +38,7 @@ def test_get_impl() -> None:
 
 
 def test_discover() -> None:
-    m = Mount(base_path=Path.cwd(), path="tests/fixture_rules")
-    h = RulesConfig(ruleset=[m])
+    r = Ruleset(base_path=Path.cwd(), path="tests/fixture_rules")
+    h = RulesConfig(ruleset=[r])
     rules = discover_rules(rtc=RuntimeConfig(main_config=MainConfig(), rules_config=h, settings=Settings()))
     assert len(rules) == 3
