@@ -4,15 +4,19 @@ import os
 import shlex
 
 from ..base_rule import BaseRule, ExecWork
+from ..config import RuleConfig
 
 
 class Rule(BaseRule):
     work_cls = ExecWork
 
-    def __init__(self, rule_config, repo_config) -> None:  # type: ignore[no-untyped-def] # FIX ME
-        super().__init__(rule_config, repo_config)  # type: ignore[no-untyped-call] # FIX ME
+    def __init__(self, rule_config: RuleConfig) -> None:
+        super().__init__(rule_config)
         if rule_config.command:
-            self.command_parts = shlex.split(rule_config.command)
+            if isinstance(rule_config.command, str):
+                self.command_parts = shlex.split(rule_config.command)
+            else:
+                self.command_parts = rule_config.command
         else:
             assert rule_config.data
             self.command_parts = ["/bin/bash", "-c", rule_config.data.strip(), "placeholder"]

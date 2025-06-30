@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from logging import getLogger
 from pathlib import Path
-from typing import Optional, Sequence, Union
+from typing import Optional, Sequence
 
 from keke import ktrace
 from msgspec import Struct, ValidationError, field
@@ -72,7 +72,6 @@ class RuleConfig(Struct):
     impl: str
 
     scope: Scope = Scope.FILE
-    command: Optional[Union[str, list[str]]] = None
     success: Success = Success.EXIT_STATUS
 
     risk: Optional[Risk] = Risk.HIGH
@@ -80,7 +79,7 @@ class RuleConfig(Struct):
     order: int = 50
     hours: int | None = None
 
-    command: Optional[str] = None  # type: ignore[no-redef] # FIX ME
+    command: str | Sequence[str] | None = None
     data: Optional[str] = None
     entry: Optional[str] = None
 

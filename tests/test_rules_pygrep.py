@@ -14,7 +14,6 @@ def test_pygrep_works(tmp_path: Path) -> None:
             search="hello",
             replace="bar",
         ),
-        None,
     )
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     (tmp_path / "foo.py").write_text("xhello\n")

@@ -16,7 +16,6 @@ def test_merge_toml_works(tmp_path: Path) -> None:
 baz = 99
 """,
         ),
-        None,
     )
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     (tmp_path / "foo.toml").write_text("# doc comment\n[foo]\nbar = 0\nbaz = 1\nfloof = 2\n")

@@ -18,7 +18,6 @@ def test_basic_docker(tmp_path: Path) -> None:
             scope="repo",  # type: ignore[arg-type] # FIX ME
             command="alpine:3.14 /bin/sh -c 'echo dist >> .gitignore'",
         ),
-        None,
     )
     subprocess.check_call(["git", "init"], cwd=tmp_path)
     (tmp_path / ".gitignore").write_text("*.pyc\n")

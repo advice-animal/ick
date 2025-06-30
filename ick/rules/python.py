@@ -4,14 +4,15 @@ from pathlib import Path
 import appdirs  # type: ignore[import-untyped] # FIX ME
 
 from ..base_rule import BaseRule, ExecWork
+from ..config import RuleConfig
 from ..venv import PythonEnv
 
 
 class Rule(BaseRule):
     work_cls = ExecWork
 
-    def __init__(self, rule_config, repo_config) -> None:  # type: ignore[no-untyped-def] # FIX ME
-        super().__init__(rule_config, repo_config)  # type: ignore[no-untyped-call] # FIX ME
+    def __init__(self, rule_config: RuleConfig) -> None:
+        super().__init__(rule_config)
         # TODO validate path / rule.name ".py" exists
         venv_key = rule_config.qualname
         venv_path = Path(appdirs.user_cache_dir("ick", "advice-animal"), "envs", venv_key)
@@ -22,7 +23,7 @@ class Rule(BaseRule):
         if rule_config.data:
             self.command_parts.extend(["-c", rule_config.data])
         else:
-            py_script = rule_config.script_path.with_suffix(".py")
+            py_script = rule_config.script_path.with_suffix(".py")  # type: ignore[union-attr] # FIX ME
             if not py_script.exists():
                 self.runnable = False
                 self.status = f"Couldn't find implementation {py_script}"
