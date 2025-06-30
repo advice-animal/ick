@@ -29,7 +29,7 @@ process (regular LSP just has "format_file").
 """
 
 from enum import Enum
-from typing import Optional, Sequence, Union
+from typing import Sequence, Union
 
 from msgspec import Struct
 from msgspec.structs import replace as replace
@@ -72,7 +72,7 @@ class Success(Enum):
 class Setup(Struct, tag_field="t", tag="S"):
     rule_path: str
     timeout_seconds: int
-    collection_name: Optional[str] = None
+    collection_name: str | None = None
     # either common stuff, or serialized config
 
 
@@ -99,10 +99,10 @@ class ListResponse(Struct, tag_field="t", tag="LR"):
 class Modified(Struct, tag_field="t", tag="M"):
     rule_name: str
     filename: str
-    new_bytes: bytes
+    new_bytes: bytes | None
     additional_input_filenames: Sequence[str] = ()
-    diffstat: Optional[str] = None
-    diff: Optional[str] = None
+    diffstat: str | None = None
+    diff: str | None = None
 
 
 class Finished(Struct, tag_field="t", tag="F"):

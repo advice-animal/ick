@@ -36,7 +36,7 @@ class Repo(Struct):
     zfiles: Optional[str] = None
 
     def __post_init__(self) -> None:
-        self.zfiles = run_cmd(["git", "ls-files", "-z"], cwd=self.root)  # type: ignore[assignment] # FIX ME
+        self.zfiles = run_cmd(["git", "ls-files", "-z"], cwd=self.root)
 
 
 def maybe_repo(path: Path, enter_context: Callable[[ContextManager[_T]], _T]) -> Repo:

@@ -21,12 +21,12 @@ class CloneAside:
     def __init__(self, orig_path: Path) -> None:
         self.orig_path = Path(orig_path)
         self.head_commit = run_cmd(["git", "rev-parse", "HEAD"], cwd=orig_path)
-        self.head_commit = self.head_commit.strip()  # type: ignore[attr-defined] # FIX ME
+        self.head_commit = self.head_commit.strip()
         self.head = head(orig_path)
         self.td = TemporaryDirectory(dir=find_tmpdir(self.orig_path))
 
     @ktrace()
-    def __enter__(self):  # type: ignore[no-untyped-def] # FIX ME
+    def __enter__(self) -> str:
         tdp = self.td.__enter__()
 
         # do clone (defaults to HEAD)
@@ -60,7 +60,7 @@ class CloneAside:
         run_cmd(["git", "commit", "-a", "-m", "sync-wc"], cwd=tdp, check=False)
         # either find that last commit, or the original one
         sync_commit = run_cmd(["git", "rev-parse", "HEAD"], cwd=tdp)
-        self.sync_commit = sync_commit.strip()  # type: ignore[attr-defined] # FIX ME
+        self.sync_commit = sync_commit.strip()
 
         return tdp
 
