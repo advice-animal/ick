@@ -9,6 +9,7 @@ from msgspec.json import decode as json_decode
 from msgspec.json import encode as json_encode
 
 from ..base_rule import BaseRule, ExecWork
+from ..config import RuleConfig
 
 
 def default(x):  # type: ignore[no-untyped-def] # FIX ME
@@ -51,11 +52,11 @@ def merge(d1, d2):  # type: ignore[no-untyped-def] # FIX ME
 class Rule(BaseRule):
     work_cls = ExecWork
 
-    def __init__(self, conf, repo_config) -> None:  # type: ignore[no-untyped-def] # FIX ME
-        super().__init__(conf, repo_config)  # type: ignore[no-untyped-call] # FIX ME
+    def __init__(self, rule_config: RuleConfig) -> None:
+        super().__init__(rule_config)
         self.command_parts = [sys.executable, "-m", __name__]
         self.command_env = {
-            "RULE_CONFIG": json_encode(conf, enc_hook=default),
+            "RULE_CONFIG": json_encode(rule_config, enc_hook=default),
         }
         if "PYTHONPATH" in os.environ:
             self.command_env["PYTHONPATH"] = os.environ["PYTHONPATH"]

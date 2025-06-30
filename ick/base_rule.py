@@ -8,6 +8,7 @@ from typing import Iterable, Mapping, Sequence, Type
 
 from ick_protocol import Finished, ListResponse, Msg, Scope, Success
 
+from .config import RuleConfig
 from .git_diff import get_diff_messages
 from .sh import run_cmd
 
@@ -82,9 +83,8 @@ class ExecWork(Work):
 class BaseRule:
     work_cls: Type[Work] = Work
 
-    def __init__(self, rule_config, repo_config):  # type: ignore[no-untyped-def] # FIX ME
+    def __init__(self, rule_config: RuleConfig) -> None:
         self.rule_config = rule_config
-        self.repo_config = repo_config
         self.runnable = True
         self.status = ""
         self.command_parts: Sequence[str | Path] = []

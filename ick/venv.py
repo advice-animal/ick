@@ -3,7 +3,6 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from typing import List
 
 from filelock import FileLock
 
@@ -17,9 +16,9 @@ def find_uv() -> Path:
 
 
 class PythonEnv:
-    def __init__(self, env_path: Path, deps: List[str]) -> None:
+    def __init__(self, env_path: Path, deps: list[str] | None) -> None:
         self.env_path = env_path
-        self.deps = deps
+        self.deps = deps or []
 
     def bin(self, prog) -> Path:  # type: ignore[no-untyped-def] # FIX ME
         """

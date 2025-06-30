@@ -1,6 +1,7 @@
 import sys
 
 from ..base_rule import BaseRule
+from ..config import RuleConfig
 
 
 class Rule(BaseRule):
@@ -10,9 +11,8 @@ class Rule(BaseRule):
 
     COMMAND = [sys.executable, "-m", __name__]
 
-    def __init__(self, rule_config, repo_config):  # type: ignore[no-untyped-def] # FIX ME
+    def __init__(self, rule_config: RuleConfig) -> None:
         self.rule_config = rule_config
-        self.repo_config = repo_config
 
     def prepare(self):  # type: ignore[no-untyped-def] # FIX ME
         pass

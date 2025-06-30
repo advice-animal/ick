@@ -75,7 +75,7 @@ class Runner:
             if not name_filter(rule.qualname):
                 continue
 
-            i = get_impl(rule)(rule, self.rtc)
+            i = get_impl(rule)(rule)
             yield i
 
     def test_rules(self) -> int:
@@ -225,14 +225,14 @@ class Runner:
         # Yields (impl, test_paths) for projects in test dir
         for impl in self.iter_rule_impl():
             test_path = impl.rule_config.test_path
-            if (test_path / "input").exists():
-                yield impl, (test_path,)
-            elif (test_path / "a").exists():
+            if (test_path / "input").exists():  # type: ignore[operator] # FIX ME
+                yield impl, (test_path,)  # type: ignore[misc] # FIX ME
+            elif (test_path / "a").exists():  # type: ignore[operator] # FIX ME
                 # Backward compatibility for just a short while.
-                yield impl, (test_path,)
+                yield impl, (test_path,)  # type: ignore[misc] # FIX ME
             else:
                 # Multiple tests have an additional level of directories
-                yield impl, tuple(test_path.glob("*/"))
+                yield impl, tuple(test_path.glob("*/"))  # type: ignore[union-attr,arg-type] # FIX ME
 
     def run(self) -> Iterable[HighLevelResult]:
         for impl in self.iter_rule_impl():
@@ -298,8 +298,8 @@ class Runner:
             else:
                 first = False
 
-            print(urgency_label.name)
-            print("=" * len(str(urgency_label.name)))
+            print(urgency_label.name)  # type: ignore[union-attr] # FIX ME
+            print("=" * len(str(urgency_label.name)))  # type: ignore[union-attr] # FIX ME
             for rule in rules:
                 print(f"* {rule}")
 

@@ -7,14 +7,13 @@ from ick_protocol import Finished, Modified
 
 
 def test_ast_grep_works(tmp_path: Path) -> None:
-    ast_grep = Rule(  # type: ignore[no-untyped-call] # FIX ME
+    ast_grep = Rule(
         RuleConfig(
             name="foo",
             impl="ast-grep",
             search="F($$$X)",
             replace="G($$$X)",
         ),
-        None,
     )
     ast_grep.prepare()  # type: ignore[no-untyped-call] # FIX ME
 

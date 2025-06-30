@@ -2,18 +2,19 @@ import os
 import shlex
 
 from ..base_rule import BaseRule, ExecWork
+from ..config import RuleConfig
 from ..sh import run_cmd
 
 
 class Rule(BaseRule):
     work_cls = ExecWork
 
-    def __init__(self, rule_config, repo_config) -> None:  # type: ignore[no-untyped-def] # FIX ME
-        super().__init__(rule_config, repo_config)  # type: ignore[no-untyped-call] # FIX ME
+    def __init__(self, rule_config: RuleConfig) -> None:
+        super().__init__(rule_config)
         if isinstance(self.rule_config.command, str):
             parts = shlex.split(self.rule_config.command)
         else:
-            parts = self.rule_config.command
+            parts = self.rule_config.command  # type: ignore[assignment] # FIX ME
 
         # TODO we'd like to pull this (singly) ahead of time, so need to
         # extract it, but don't want to do full argument parsing.
