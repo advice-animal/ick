@@ -326,22 +326,21 @@ name = "foo"
 
 Your directory structure should look like this:
 
-<!-- [[[cog show_cmd("find . -print | sort | sed -e 's;[^/]*/;|-- ;g;s;-- |;   |;g;'", hide_command=True) ]]] -->
+<!-- [[[cog show_tree(".") ]]]-->
 ```console
-.
-|-- ick.toml
-|-- isort.cfg
-|-- move_isort_cfg
-|   |-- move_isort_cfg.py
-|   |-- tests
-|   |   |-- no_isort
-|   |   |   |-- input
-|   |   |   |   |-- pyproject.toml
-|   |   |   |-- output
-|   |   |   |   |-- pyproject.toml
-|-- pyproject.toml
+├── ick.toml
+├── isort.cfg
+├── move_isort_cfg/
+│   ├── move_isort_cfg.py
+│   └── tests/
+│       └── no_isort/
+│           ├── input/
+│           │   └── pyproject.toml
+│           └── output/
+│               └── pyproject.toml
+└── pyproject.toml
 ```
-<!-- [[[end]]] (sum: 6fTx3KuD7w) -->
+<!-- [[[end]]] (sum: vVAiMlVpDF) -->
 
 This is a simple test that checks that if there is no `isort.cfg` file, the
 `pyproject.toml` file will be unchanged.  Run `ick test-rules`:

@@ -49,6 +49,29 @@ def show_file(fname, *, start=None, end=None):
     print("```")
 
 
+def show_tree(dir_path: str) -> None:
+    # from https://stackoverflow.com/a/59109706
+    SPACE = "    "
+    BRANCH = "│   "
+    TEE = "├── "
+    LAST = "└── "
+
+    def tree(dir_path: Path, prefix: str = ""):
+        contents = sorted(dir_path.iterdir())
+        pointers = [TEE] * (len(contents) - 1) + [LAST]
+        for pointer, path in zip(pointers, contents):
+            is_dir = path.is_dir()
+            yield prefix + pointer + path.name + ("/" if is_dir else "")
+            if is_dir:
+                extension = BRANCH if pointer == TEE else SPACE
+                yield from tree(path, prefix=prefix + extension)
+
+    print("```console")
+    for line in tree(Path(dir_path)):
+        print(line)
+    print("```")
+
+
 def cd_temp(*, pretend=None):
     global CUR_TEMP_DIR, PRETEND_DIR
     CUR_TEMP_DIR = tempfile.TemporaryDirectory(prefix="ickdoc_")
