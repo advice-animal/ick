@@ -59,20 +59,26 @@ def find_projects(ctx):  # type: ignore[no-untyped-def] # FIX ME
 
 @main.command()
 @click.pass_context
-def list_rules(ctx):  # type: ignore[no-untyped-def] # FIX ME
+@click.argument("filters", nargs=-1)
+def list_rules(ctx: click.Context, filters: list[str]) -> None:
     """
     Lists rules applicable to the current repo
     """
+    apply_filters(ctx, filters)
     r = Runner(ctx.obj, ctx.obj.repo)  # type: ignore[no-untyped-call] # FIX ME
     r.echo_rules()
 
 
 @main.command()
 @click.pass_context
-def test_rules(ctx):  # type: ignore[no-untyped-def] # FIX ME
+@click.argument("filters", nargs=-1)
+def test_rules(ctx: click.Context, filters: list[str]) -> None:
     """
-    Run self-tests against all rules.
+    Run rule self-tests.
+
+    With no filters, run tests in all rules.
     """
+    apply_filters(ctx, filters)
     r = Runner(ctx.obj, ctx.obj.repo)  # type: ignore[no-untyped-call] # FIX ME
     sys.exit(r.test_rules())
 
@@ -101,14 +107,8 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, skip_updat
 
     if len(filters) == 0:
         ctx.obj.settings.dry_run = True  # force it
-    elif len(filters) == 1 and getattr(Urgency, filters[0].upper(), None):
-        # python 3.11 doesn't support __contains__ on enum, but also doesn't
-        # support .get and the choices are [] catching the exception or getattr
-        # which is what I can fit on one line.
-        urgency = Urgency[filters[0].upper()]
-        ctx.obj.filter_config.urgency_filter = urgency
     else:
-        ctx.obj.filter_config.name_filter_re = "|".join(advice_name_re(name) for name in filters)
+        apply_filters(ctx, filters)
 
     # DO THE NEEDFUL
 
@@ -159,6 +159,19 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, skip_updat
 
     if json_flag:
         print(json.dumps({"results": results}, indent=4))
+
+
+def apply_filters(ctx: click.Context, filters: list[str]) -> None:
+    if not filters:
+        pass
+    elif len(filters) == 1 and getattr(Urgency, filters[0].upper(), None):
+        # python 3.11 doesn't support __contains__ on enum, but also doesn't
+        # support .get and the choices are [] catching the exception or getattr
+        # which is what I can fit on one line.
+        urgency = Urgency[filters[0].upper()]
+        ctx.obj.filter_config.urgency_filter = urgency
+    else:
+        ctx.obj.filter_config.name_filter_re = "|".join(advice_name_re(name) for name in filters)
 
 
 def verbose_init(v: int, verbose: Optional[int], vmodule: Optional[str]) -> None:
