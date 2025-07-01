@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import IO, Optional
 
 import click
 import keke
@@ -30,7 +30,15 @@ from .types_project import maybe_repo
 @click.option("--isolated-repo", is_flag=True, help="Isolate from user-level config", envvar="ICK_ISOLATED_REPO")
 @click.option("--target", default=".", help="Directory to modify")  # TODO path, existing
 @click.pass_context
-def main(ctx, v, verbose, vmodule, trace, isolated_repo, target) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def main(
+    ctx: click.Context,
+    v: int,
+    verbose: int,
+    vmodule: str,
+    trace: IO[str] | None,
+    isolated_repo: bool,
+    target: str,
+) -> None:
     """
     Applier of fine source code fixes since 2025
     """
@@ -49,7 +57,7 @@ def main(ctx, v, verbose, vmodule, trace, isolated_repo, target) -> None:  # typ
 
 @main.command()
 @click.pass_context
-def find_projects(ctx):  # type: ignore[no-untyped-def] # FIX ME
+def find_projects(ctx: click.Context) -> None:
     """
     Lists projects found in the current repo
     """
@@ -65,7 +73,7 @@ def list_rules(ctx: click.Context, filters: list[str]) -> None:
     Lists rules applicable to the current repo
     """
     apply_filters(ctx, filters)
-    r = Runner(ctx.obj, ctx.obj.repo)  # type: ignore[no-untyped-call] # FIX ME
+    r = Runner(ctx.obj, ctx.obj.repo)
     r.echo_rules()
 
 
@@ -79,7 +87,7 @@ def test_rules(ctx: click.Context, filters: list[str]) -> None:
     With no filters, run tests in all rules.
     """
     apply_filters(ctx, filters)
-    r = Runner(ctx.obj, ctx.obj.repo)  # type: ignore[no-untyped-call] # FIX ME
+    r = Runner(ctx.obj, ctx.obj.repo)
     sys.exit(r.test_rules())
 
 
@@ -91,7 +99,15 @@ def test_rules(ctx: click.Context, filters: list[str]) -> None:
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
 @click.argument("filters", nargs=-1)
 @click.pass_context
-def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, skip_update: bool, filters: list[str]):  # type: ignore[no-untyped-def] # FIX ME
+def run(
+    ctx: click.Context,
+    dry_run: bool,
+    patch: bool,
+    yolo: bool,
+    json_flag: bool,
+    skip_update: bool,
+    filters: list[str],
+) -> None:
     """
     Run the applicable rules to the current repo/path
 
@@ -114,7 +130,7 @@ def run(ctx, dry_run: bool, patch: bool, yolo: bool, json_flag: bool, skip_updat
 
     results = {}
 
-    r = Runner(ctx.obj, ctx.obj.repo, explicit_project=None)  # type: ignore[no-untyped-call] # FIX ME
+    r = Runner(ctx.obj, ctx.obj.repo)
     for result in r.run():
         if not json_flag:
             where = f"on {result.project} " if result.project else ""

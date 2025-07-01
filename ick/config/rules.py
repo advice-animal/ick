@@ -74,8 +74,8 @@ class RuleConfig(Struct):
     scope: Scope = Scope.FILE
     success: Success = Success.EXIT_STATUS
 
-    risk: Optional[Risk] = Risk.HIGH
-    urgency: Optional[Urgency] = Urgency.LATER
+    risk: Risk = Risk.HIGH
+    urgency: Urgency = Urgency.LATER
     order: int = 50
     hours: int | None = None
 
