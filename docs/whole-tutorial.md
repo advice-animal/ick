@@ -23,15 +23,20 @@ sourced from many places: your code's repo, a rules repo of your own, a rules
 repo provided by someone else, or even a local directory.  Ick lets you use rules
 from a number of sources at once.
 
-## Setting up a local development ruleset
+A key idea of ick rules is that they can be run without ick.  This can simplify
+the testing and development of rules, and means that ick can run rules that
+weren't written specifically for ick.
+
+
+## Setting up a local rule
 
 Let's say you have a situation you want to improve, like moving config
 incrementally from individual files into one big file, like `isort.cfg` ->
 `pyproject.toml`.
 
-To start simply, create an empty directory at `/tmp/foo`.  This dir will hold
-the rule and the code the rule is working on.  Of course you can use a different
-path or an existing git repo, just adjust the path examples here.
+To start simply, create an empty directory at `/tmp/foo`.  This directory will
+hold the rule and the code the rule is working on.  Of course you can use a
+different path or an existing git repo, just adjust the path examples here.
 
 NOTE: If you run this from within an existing git repo, it is possible that your
 tutorial rule will make changes to its contents.  Although it defaults to a
@@ -112,12 +117,11 @@ LATER
 
 ## Implementing the rule
 
-To implement the rule, create a subdirectory matching the rule name with a
-file in it also matching the rule name:
+To implement the rule, create a Python file matching the rule name:
 
-<!-- [[[cog copy_file("move_isort_cfg/move_isort_cfg.py", show=True) ]]] -->
+<!-- [[[cog copy_file("move_isort_cfg.py", show=True) ]]] -->
 ```python
-# This file is /tmp/foo/move_isort_cfg/move_isort_cfg.py
+# This file is /tmp/foo/move_isort_cfg.py
 
 from pathlib import Path
 
@@ -138,7 +142,7 @@ if __name__ == "__main__":
         toml.write_text(tomlkit.dumps(toml_data))
         cfg.unlink()
 ```
-<!-- [[[end]]] (sum: kpNRLhmBlR) -->
+<!-- [[[end]]] (sum: Tq3NfSIvon) -->
 
 The details of this implementation aren't important.  The key thing to note is
 this is Python code that uses third-party packages to read the `isort.cfg` file
@@ -171,11 +175,11 @@ trying to import those third-party dependencies:
 $ ick run
 -> move_isort_cfg ERROR
      Traceback (most recent call last):
-       File "/tmp/foo/move_isort_cfg/move_isort_cfg.py", line 5, in <module>
+       File "/tmp/foo/move_isort_cfg.py", line 5, in <module>
          import imperfect
      ModuleNotFoundError: No module named 'imperfect'
 ```
-<!-- [[[end]]] (sum: oDYXb339Hu) -->
+<!-- [[[end]]] (sum: bJhojfmIai) -->
 
 We need to tell `ick` about the dependencies the rule needs.
 
@@ -282,7 +286,7 @@ which lets you ensure that your rules still work as time goes on.
 
 ## Testing tutorial
 
-This continues right where the previous [Tutorial](tutorial.html) left off.
+This continues where the previous [Tutorial](tutorial.html) left off.
 
 One of the chief problems with writing codemods is being able to succinctly test
 them.  Because `ick` is built around *modifying* *sets* of files, the tests for
@@ -295,26 +299,28 @@ any tests yet, so it has nothing to do:
 ```console
 $ ick test-rules
 testing...
-but: script_path = PosixPath('/tmp/foo/move_isort_cfg/move_isort_cfg'), test_path = PosixPath('/tmp/foo/move_isort_cfg/tests')
   move_isort_cfg: <no-test> PASS
 
 DETAILS
-move_isort_cfg: no tests in /tmp/foo/move_isort_cfg/tests
+move_isort_cfg: no tests in /tmp/foo/tests/move_isort_cfg
 
 ```
-<!-- [[[end]]] (sum: LzVl3G5Twi) -->
+<!-- [[[end]]] (sum: f7Oez2GCKL) -->
 
-In your `move_isort_cfg` rule directory, create a `tests` subdirectory.  There
-each directory will be a test.  Create a `move_isort_cfg/tests/no_isort`
-directory.  In there, the `input` directory will be the "before" state of the files,
-and the `output` directory will be the expected "after" state of the files.  Running
-the test checks that the files in `input` are transformed to match the files in `output`
+The ick output shows where the tests should go.
+
+In your rule directory, create a `tests` subdirectory with another subdirectory
+named for your rule: `tests/move_isort_cfg`.  In there each additional directory
+will be a test.  Create a `tests/move_isort_cfg/no_isort` directory.  In there,
+the `input` directory will be the "before" state of the files, and the `output`
+directory will be the expected "after" state of the files.  Running the test
+checks that the files in `input` are transformed to match the files in `output`
 when the rule runs.
 
 Create two files `input/pyproject.toml` and `output/pyproject.toml` with the same
 contents:
 
-<!-- [[[cog show_file("move_isort_cfg/tests/no_isort/input/pyproject.toml") ]]] -->
+<!-- [[[cog show_file("tests/move_isort_cfg/no_isort/input/pyproject.toml") ]]] -->
 ```toml
 [project]
 name = "foo"
@@ -322,7 +328,7 @@ name = "foo"
 <!-- [[[end]]] (sum: cl1LTCokhc) -->
 
 
-<!-- [[[cog copy_tree("move_isort_cfg/tests/no_isort") ]]] -->
+<!-- [[[cog copy_tree("tests/move_isort_cfg/no_isort") ]]] -->
 <!-- [[[end]]] (sum: 1B2M2Y8Asg) -->
 
 Your directory structure should look like this:
@@ -331,17 +337,17 @@ Your directory structure should look like this:
 ```console
 ├── ick.toml
 ├── isort.cfg
-├── move_isort_cfg/
-│   ├── move_isort_cfg.py
-│   └── tests/
-│       └── no_isort/
-│           ├── input/
-│           │   └── pyproject.toml
-│           └── output/
-│               └── pyproject.toml
-└── pyproject.toml
+├── move_isort_cfg.py
+├── pyproject.toml
+└── tests/
+    └── move_isort_cfg/
+        └── no_isort/
+            ├── input/
+            │   └── pyproject.toml
+            └── output/
+                └── pyproject.toml
 ```
-<!-- [[[end]]] (sum: vVAiMlVpDF) -->
+<!-- [[[end]]] (sum: O+MN8yIAFo) -->
 
 This is a simple test that checks that if there is no `isort.cfg` file, the
 `pyproject.toml` file will be unchanged.  Run `ick test-rules`:
@@ -350,17 +356,15 @@ This is a simple test that checks that if there is no `isort.cfg` file, the
 ```console
 $ ick test-rules
 testing...
-but: script_path = PosixPath('/tmp/foo/move_isort_cfg/move_isort_cfg'), test_path = PosixPath('/tmp/foo/move_isort_cfg/tests')
-  move_isort_cfg: test_path = PosixPath('/tmp/foo/move_isort_cfg/tests/no_isort')
-. PASS
+  move_isort_cfg: . PASS
 ```
-<!-- [[[end]]] (sum: 6qwyOXFiem) -->
+<!-- [[[end]]] (sum: OyKYc1mCka) -->
 
-Now make a more realistic test. Create a `change_made`
-directory in the `tests` directory. Create these files:
+Now make a more realistic test. Create a `change_made` directory in the
+`tests/move_isort_cfg` directory. Create these files:
 
-`change_made/a/isort.cfg`:
-<!-- [[[cog show_file("move_isort_cfg/tests/change_made/input/isort.cfg") ]]] -->
+`change_made/input/isort.cfg`:
+<!-- [[[cog show_file("tests/move_isort_cfg/change_made/input/isort.cfg") ]]] -->
 ```ini
 [settings]
 line_length = 88
@@ -368,16 +372,16 @@ multi_line_output = 3
 ```
 <!-- [[[end]]] (sum: CXcy2s50F3) -->
 
-`change_made/a/pyproject.toml`:
-<!-- [[[cog show_file("move_isort_cfg/tests/change_made/input/pyproject.toml") ]]] -->
+`change_made/input/pyproject.toml`:
+<!-- [[[cog show_file("tests/move_isort_cfg/change_made/input/pyproject.toml") ]]] -->
 ```toml
 [project]
 name = "foo"
 ```
 <!-- [[[end]]] (sum: cl1LTCokhc) -->
 
-`change_made/b/pyproject.toml`:
-<!-- [[[cog show_file("move_isort_cfg/tests/change_made/output/pyproject.toml") ]]] -->
+`change_made/output/pyproject.toml`:
+<!-- [[[cog show_file("tests/move_isort_cfg/change_made/output/pyproject.toml") ]]] -->
 ```toml
 [project]
 name = "foo"
@@ -388,7 +392,7 @@ multi_line_output = "3"
 ```
 <!-- [[[end]]] (sum: axp71Iu8bP) -->
 
-<!-- [[[cog copy_tree("move_isort_cfg/tests/change_made") ]]] -->
+<!-- [[[cog copy_tree("tests/move_isort_cfg/change_made") ]]] -->
 <!-- [[[end]]] (sum: 1B2M2Y8Asg) -->
 
 Now `ick test-rules` shows two tests passing:
@@ -397,9 +401,33 @@ Now `ick test-rules` shows two tests passing:
 ```console
 $ ick test-rules
 testing...
-but: script_path = PosixPath('/tmp/foo/move_isort_cfg/move_isort_cfg'), test_path = PosixPath('/tmp/foo/move_isort_cfg/tests')
-  move_isort_cfg: test_path = PosixPath('/tmp/foo/move_isort_cfg/tests/change_made')
-test_path = PosixPath('/tmp/foo/move_isort_cfg/tests/no_isort')
-.. PASS
+  move_isort_cfg: .. PASS
 ```
-<!-- [[[end]]] (sum: 3DhoT/cW3o) -->
+<!-- [[[end]]] (sum: 0QwW4JWipi) -->
+
+Now that we have two tests, the full directory structure looks like this:
+
+<!-- [[[cog show_tree(".") ]]]-->
+```console
+├── ick.toml
+├── isort.cfg
+├── move_isort_cfg.py
+├── pyproject.toml
+└── tests/
+    └── move_isort_cfg/
+        ├── change_made/
+        │   ├── input/
+        │   │   ├── isort.cfg
+        │   │   └── pyproject.toml
+        │   └── output/
+        │       └── pyproject.toml
+        └── no_isort/
+            ├── input/
+            │   └── pyproject.toml
+            └── output/
+                └── pyproject.toml
+```
+<!-- [[[end]]] (sum: 2OFdcYcxz6) -->
+
+This can seem intricate, but it establishes a good structure: a directory can
+have more than one rule, each rule can have more than one test.

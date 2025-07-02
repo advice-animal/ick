@@ -23,15 +23,20 @@ sourced from many places: your code's repo, a rules repo of your own, a rules
 repo provided by someone else, or even a local directory.  Ick lets you use rules
 from a number of sources at once.
 
-## Setting up a local development ruleset
+A key idea of ick rules is that they can be run without ick.  This can simplify
+the testing and development of rules, and means that ick can run rules that
+weren't written specifically for ick.
+
+
+## Setting up a local rule
 
 Let's say you have a situation you want to improve, like moving config
 incrementally from individual files into one big file, like `isort.cfg` ->
 `pyproject.toml`.
 
-To start simply, create an empty directory at `/tmp/foo`.  This dir will hold
-the rule and the code the rule is working on.  Of course you can use a different
-path or an existing git repo, just adjust the path examples here.
+To start simply, create an empty directory at `/tmp/foo`.  This directory will
+hold the rule and the code the rule is working on.  Of course you can use a
+different path or an existing git repo, just adjust the path examples here.
 
 NOTE: If you run this from within an existing git repo, it is possible that your
 tutorial rule will make changes to its contents.  Although it defaults to a
@@ -89,7 +94,7 @@ project_types = ["python"]
 ```
 <!-- [[[end]]] (sum: oNIFtGdtuN) -->
 
-The `language` setting means we will implement the rule with Python code.
+The `impl` setting means we will implement the rule with Python code.
 Setting `scope` to `project` means the rule will be invoked at the project
 level instead of on individual files (but that doesn't work yet, so it's
 commented out).
@@ -112,12 +117,11 @@ LATER
 
 ## Implementing the rule
 
-To implement the rule, create a subdirectory matching the rule name with a
-file in it also matching the rule name:
+To implement the rule, create a Python file matching the rule name:
 
-<!-- [[[cog copy_file("move_isort_cfg/move_isort_cfg.py", show=True) ]]] -->
+<!-- [[[cog copy_file("move_isort_cfg.py", show=True) ]]] -->
 ```python
-# This file is /tmp/foo/move_isort_cfg/move_isort_cfg.py
+# This file is /tmp/foo/move_isort_cfg.py
 
 from pathlib import Path
 
@@ -138,7 +142,7 @@ if __name__ == "__main__":
         toml.write_text(tomlkit.dumps(toml_data))
         cfg.unlink()
 ```
-<!-- [[[end]]] (sum: kpNRLhmBlR) -->
+<!-- [[[end]]] (sum: Tq3NfSIvon) -->
 
 The details of this implementation aren't important.  The key thing to note is
 this is Python code that uses third-party packages to read the `isort.cfg` file
@@ -171,11 +175,11 @@ trying to import those third-party dependencies:
 $ ick run
 -> move_isort_cfg ERROR
      Traceback (most recent call last):
-       File "/tmp/foo/move_isort_cfg/move_isort_cfg.py", line 5, in <module>
+       File "/tmp/foo/move_isort_cfg.py", line 5, in <module>
          import imperfect
      ModuleNotFoundError: No module named 'imperfect'
 ```
-<!-- [[[end]]] (sum: oDYXb339Hu) -->
+<!-- [[[end]]] (sum: bJhojfmIai) -->
 
 We need to tell `ick` about the dependencies the rule needs.
 
