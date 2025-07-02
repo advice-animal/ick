@@ -1,0 +1,3 @@
+$ ick test-rules '.*cfg'
+testing...
+  move_isort_cfg: .. PASS
