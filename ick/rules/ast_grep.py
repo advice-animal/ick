@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-import appdirs  # type: ignore[import-untyped] # FIX ME
+import platformdirs
 
 from ick_protocol import Success
 
@@ -18,7 +18,7 @@ class Rule(BaseRule):
             rule_config.success = Success.NO_OUTPUT
         super().__init__(rule_config)
         venv_key = "ast-grep"
-        venv_path = Path(appdirs.user_cache_dir("ick", "advice-animal"), "envs", venv_key)
+        venv_path = Path(platformdirs.user_cache_dir("ick", "advice-animal"), "envs", venv_key)
         self.venv = PythonEnv(venv_path, ["ast-grep-cli"])
         if rule_config.replace is not None:
             self.command_parts = [
