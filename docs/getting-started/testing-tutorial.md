@@ -15,13 +15,14 @@ any tests yet, so it has nothing to do:
 ```console
 $ ick test-rules
 testing...
+but: script_path = PosixPath('/tmp/foo/move_isort_cfg/move_isort_cfg'), test_path = PosixPath('/tmp/foo/move_isort_cfg/tests')
   move_isort_cfg: <no-test> PASS
 
 DETAILS
 move_isort_cfg: no tests in /tmp/foo/move_isort_cfg/tests
 
 ```
-<!-- [[[end]]] (sum: 6h77V1w+fR) -->
+<!-- [[[end]]] (sum: LzVl3G5Twi) -->
 
 In your `move_isort_cfg` rule directory, create a `tests` subdirectory.  There
 each directory will be a test.  Create a `move_isort_cfg/tests/no_isort`
@@ -69,9 +70,11 @@ This is a simple test that checks that if there is no `isort.cfg` file, the
 ```console
 $ ick test-rules
 testing...
-  move_isort_cfg: . PASS
+but: script_path = PosixPath('/tmp/foo/move_isort_cfg/move_isort_cfg'), test_path = PosixPath('/tmp/foo/move_isort_cfg/tests')
+  move_isort_cfg: test_path = PosixPath('/tmp/foo/move_isort_cfg/tests/no_isort')
+. PASS
 ```
-<!-- [[[end]]] (sum: OyKYc1mCka) -->
+<!-- [[[end]]] (sum: 6qwyOXFiem) -->
 
 Now make a more realistic test. Create a `change_made`
 directory in the `tests` directory. Create these files:
@@ -114,6 +117,9 @@ Now `ick test-rules` shows two tests passing:
 ```console
 $ ick test-rules
 testing...
-  move_isort_cfg: .. PASS
+but: script_path = PosixPath('/tmp/foo/move_isort_cfg/move_isort_cfg'), test_path = PosixPath('/tmp/foo/move_isort_cfg/tests')
+  move_isort_cfg: test_path = PosixPath('/tmp/foo/move_isort_cfg/tests/change_made')
+test_path = PosixPath('/tmp/foo/move_isort_cfg/tests/no_isort')
+.. PASS
 ```
-<!-- [[[end]]] (sum: 0QwW4JWipi) -->
+<!-- [[[end]]] (sum: 3DhoT/cW3o) -->
