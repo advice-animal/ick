@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from shutil import copytree
 from tempfile import TemporaryDirectory
-from typing import Callable, ContextManager, Iterable, Optional, Sequence, TypeVar
+from typing import Callable, ContextManager, Iterable, Sequence, TypeVar
 
 from msgspec import Struct
 
@@ -33,7 +33,7 @@ class Repo(Struct):
     root: Path
     # TODO restrict to a subdir
     projects: Sequence[Project] = ()
-    zfiles: Optional[str] = None
+    zfiles: str = ""
 
     def __post_init__(self) -> None:
         self.zfiles = run_cmd(["git", "ls-files", "-z"], cwd=self.root)

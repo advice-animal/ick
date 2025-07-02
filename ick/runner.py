@@ -26,9 +26,10 @@ from ick_protocol import Finished, Modified
 
 from .base_rule import BaseRule
 from .clone_aside import CloneAside
+from .config import RuntimeConfig
 from .config.rule_repo import discover_rules, get_impl
 from .project_finder import find_projects
-from .types_project import Project, maybe_repo
+from .types_project import Project, Repo, maybe_repo
 
 LOG = getLogger(__name__)
 
@@ -55,7 +56,7 @@ class TestResult:
 
 
 class Runner:
-    def __init__(self, rtc, repo, explicit_project=None):  # type: ignore[no-untyped-def] # FIX ME
+    def __init__(self, rtc: RuntimeConfig, repo: Repo) -> None:
         self.rtc = rtc
         self.rules = discover_rules(rtc)
         self.repo = repo
@@ -64,8 +65,6 @@ class Runner:
         }
         # TODO there's a var on repo to store this...
         self.projects: list[Project] = find_projects(repo, repo.zfiles, self.rtc.main_config)
-        assert explicit_project is None
-        self.explicit_project = explicit_project
 
     def iter_rule_impl(self) -> Iterable[BaseRule]:
         name_filter = re.compile(self.rtc.filter_config.name_filter_re).fullmatch
@@ -85,7 +84,7 @@ class Runner:
         print("[dim]testing...[/dim]")
         buffered_output = io.StringIO()
 
-        def buf_print(text):  # type: ignore[no-untyped-def] # FIX ME
+        def buf_print(text: str) -> None:
             """Print to the buffered output.
 
             This is needed instead of print(..., file=buffered_output) to get
@@ -102,7 +101,7 @@ class Runner:
                 rule_instance.prepare()
                 if not test_paths:
                     print("<no-test>", end="")
-                    buf_print(  # type: ignore[no-untyped-call] # FIX ME
+                    buf_print(
                         f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
                     )
                 else:
@@ -129,15 +128,15 @@ class Runner:
                         success = False
                         final_status = 1
                         print("[red]F[/]", end="")
-                        buf_print(f"{'-' * 80}")  # type: ignore[no-untyped-call] # FIX ME
+                        buf_print(f"{'-' * 80}")
                         rel_test_path = result.test_path.relative_to(result.rule_instance.rule_config.test_path)  # type: ignore[attr-defined] # FIX ME
                         with_test = ""
                         if str(rel_test_path) != ".":
                             with_test = f" with [bold]{rel_test_path}[/]"
-                        buf_print(f"testing [bold]{rule_instance.rule_config.qualname}[/]{with_test}:")  # type: ignore[no-untyped-call] # FIX ME
-                        buf_print(result.traceback)  # type: ignore[no-untyped-call] # FIX ME
-                        buf_print(result.message)  # type: ignore[no-untyped-call] # FIX ME
-                        buf_print(result.diff)  # type: ignore[no-untyped-call] # FIX ME
+                        buf_print(f"testing [bold]{rule_instance.rule_config.qualname}[/]{with_test}:")
+                        buf_print(result.traceback)
+                        buf_print(result.message)
+                        buf_print(result.diff)
 
                 if success:
                     print(" [green]PASS[/]")
@@ -298,8 +297,8 @@ class Runner:
             else:
                 first = False
 
-            print(urgency_label.name)  # type: ignore[union-attr] # FIX ME
-            print("=" * len(str(urgency_label.name)))  # type: ignore[union-attr] # FIX ME
+            print(urgency_label.name)
+            print("=" * len(str(urgency_label.name)))
             for rule in rules:
                 print(f"* {rule}")
 
