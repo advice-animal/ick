@@ -80,12 +80,8 @@ def load_rule_repo(ruleset: Ruleset, *, skip_update: bool = False) -> RuleRepoCo
         prefix = ruleset.prefix + "/" if (ruleset.prefix not in ["", "."]) else ""  # type: ignore[operator] # FIX ME
         for rule in c.rule:
             rule.qualname = prefix + base + rule.name
-            if (p.parent / rule.name).exists():
-                rule.test_path = repo_path / base / rule.name / "tests"
-                rule.script_path = repo_path / base / rule.name / rule.name
-            else:
-                rule.test_path = repo_path / base / "tests" / rule.name
-                rule.script_path = repo_path / base / rule.name
+            rule.test_path = repo_path / base / "tests" / rule.name
+            rule.script_path = repo_path / base / rule.name
 
         rc.inherit(c)  # type: ignore[no-untyped-call] # FIX ME
 
