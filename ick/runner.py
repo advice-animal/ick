@@ -219,11 +219,7 @@ class Runner:
         # Yields (impl, test_paths) for projects in test dir
         for impl in self.iter_rule_impl():
             test_path = impl.rule_config.test_path
-            if (test_path / "input").exists():  # type: ignore[operator] # FIX ME
-                yield impl, (test_path,)  # type: ignore[misc] # FIX ME
-            else:
-                # Multiple tests have an additional level of directories
-                yield impl, tuple(test_path.glob("*/"))  # type: ignore[union-attr,arg-type] # FIX ME
+            yield impl, tuple(test_path.glob("*/"))  # type: ignore[union-attr,arg-type] # FIX ME
 
     def run(self) -> Iterable[HighLevelResult]:
         for impl in self.iter_rule_impl():
