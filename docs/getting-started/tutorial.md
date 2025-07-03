@@ -30,19 +30,24 @@ dead-simple repo:
         show_cmd(
             "git clone https://github.com/advice-animal/ick-tutorial-sample-1",
             "cd ick-tutorial-sample-1",
-            "ls",
         )
     ]]] -->
 ```console
 $ git clone https://github.com/advice-animal/ick-tutorial-sample-1
 Cloning into 'ick-tutorial-sample-1'...
 $ cd ick-tutorial-sample-1
-$ ls
-isort.cfg
-pyproject.toml
-README.md
 ```
-<!-- [[[end]]] (sum: Qld8bx/Pmr) -->
+<!-- [[[end]]] (sum: RimKp2Mp9W) -->
+
+This repo only has a few files:
+
+<!-- [[[cog show_tree(".") ]]]-->
+```console
+├── README.md
+├── isort.cfg
+└── pyproject.toml
+```
+<!-- [[[end]]] (sum: Hby/Xig7nS) -->
 
 The simple rule we'll demonstrate moves isort settings from an isort.cfg file
 into the pyproject.toml file.  That rule is in our [second repo][tutrules], but

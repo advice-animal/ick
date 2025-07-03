@@ -57,7 +57,7 @@ def show_tree(dir_path: str) -> None:
     LAST = "└── "
 
     def tree(dir_path: Path, prefix: str = ""):
-        contents = sorted(dir_path.iterdir())
+        contents = sorted(f for f in dir_path.iterdir() if not str(f).startswith("."))
         pointers = [TEE] * (len(contents) - 1) + [LAST]
         for pointer, path in zip(pointers, contents):
             is_dir = path.is_dir()
