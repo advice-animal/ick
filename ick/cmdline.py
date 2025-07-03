@@ -14,7 +14,7 @@ from vmodule import vmodule_init
 from ick_protocol import Urgency
 
 from ._regex_translate import advice_name_re
-from .config import RuntimeConfig, Settings, load_main_config, load_rules_config
+from .config import RuntimeConfig, Settings, load_main_config, load_rules_config, one_repo_config
 from .git import find_repo_root
 from .project_finder import find_projects as find_projects_fn
 from .runner import Runner
@@ -29,6 +29,7 @@ from .types_project import maybe_repo
 @click.option("--trace", type=click.File(mode="w"), help="Trace output filename")
 @click.option("--isolated-repo", is_flag=True, help="Isolate from user-level config", envvar="ICK_ISOLATED_REPO")
 @click.option("--target", default=".", help="Directory to modify")  # TODO path, existing
+@click.option("--rules-repo", help="ad-hoc rules repo to use")
 @click.pass_context
 def main(
     ctx: click.Context,
@@ -38,6 +39,7 @@ def main(
     trace: IO[str] | None,
     isolated_repo: bool,
     target: str,
+    rules_repo: str | None,
 ) -> None:
     """
     Applier of fine source code fixes since 2025
@@ -48,8 +50,11 @@ def main(
     # This takes a target because rules can be defined in the target repo too
     cur = Path(target)
     conf = load_main_config(cur, isolated_repo=isolated_repo)
-    hc = load_rules_config(cur, isolated_repo=isolated_repo)
-    ctx.obj = RuntimeConfig(conf, hc, Settings(isolated_repo=isolated_repo))
+    if rules_repo is not None:
+        rules_config = one_repo_config(rules_repo)
+    else:
+        rules_config = load_rules_config(cur, isolated_repo=isolated_repo)
+    ctx.obj = RuntimeConfig(conf, rules_config, Settings(isolated_repo=isolated_repo))
 
     repo_path = find_repo_root(cur)
     ctx.obj.repo = maybe_repo(repo_path, ctx.with_resource)
