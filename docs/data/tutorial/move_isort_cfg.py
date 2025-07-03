@@ -1,4 +1,4 @@
-# This file is /tmp/foo/move_isort_cfg/move_isort_cfg.py
+# This file is /tmp/foo/move_isort_cfg.py
 
 from pathlib import Path
 

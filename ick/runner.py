@@ -154,13 +154,8 @@ class Runner:
         inp = test_path / "input"
         outp = test_path / "output"
         if not inp.exists():
-            if (test_path / "a").exists():
-                # Backward compatibility for just a short while.
-                inp = test_path / "a"
-                outp = test_path / "b"
-            else:
-                result.message = f"Test input directory {inp} is missing"
-                return
+            result.message = f"Test input directory {inp} is missing"
+            return
         if not outp.exists():
             result.message = f"Test output directory {outp} is missing"
             return
@@ -224,14 +219,7 @@ class Runner:
         # Yields (impl, test_paths) for projects in test dir
         for impl in self.iter_rule_impl():
             test_path = impl.rule_config.test_path
-            if (test_path / "input").exists():  # type: ignore[operator] # FIX ME
-                yield impl, (test_path,)  # type: ignore[misc] # FIX ME
-            elif (test_path / "a").exists():  # type: ignore[operator] # FIX ME
-                # Backward compatibility for just a short while.
-                yield impl, (test_path,)  # type: ignore[misc] # FIX ME
-            else:
-                # Multiple tests have an additional level of directories
-                yield impl, tuple(test_path.glob("*/"))  # type: ignore[union-attr,arg-type] # FIX ME
+            yield impl, tuple(test_path.glob("*/"))  # type: ignore[union-attr,arg-type] # FIX ME
 
     def run(self) -> Iterable[HighLevelResult]:
         for impl in self.iter_rule_impl():
