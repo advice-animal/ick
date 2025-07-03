@@ -130,3 +130,9 @@ def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:
             raise Exception(f"While merging {config_path}: {e!r}")
 
     return conf
+
+
+def one_repo_config(url: str) -> RulesConfig:
+    conf = RulesConfig()
+    conf.ruleset = [Ruleset(url=url)]
+    return conf
