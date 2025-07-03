@@ -20,8 +20,8 @@ modifications.
 
 Rules can be written in any language and use any tooling you want.  Rules can be
 sourced from many places: your code's repo, a rules repo of your own, a rules
-repo provided by someone else, or even a local directory.  Ick lets you use rules
-from a number of sources at once.
+repo provided by someone else, or even a local directory.  Ick lets you use
+rules from a number of sources at once.
 
 A key idea of ick rules is that they can be run without ick.  This can simplify
 the testing and development of rules, and means that ick can run rules that
@@ -43,15 +43,20 @@ tutorial rule will make changes to its contents.  Although it defaults to a
 dry-run mode (sometimes), you should still be careful and not do this in your
 only copy of it.
 
-<!-- [[[cog
-    run_cmd("""
-        touch pyproject.toml
-    """)
-]]] -->
-<!-- [[[end]]] (sum: 1B2M2Y8Asg) -->
-
 [BTW: it seems odd that this directory has to be a git repo. Why can't ick
-work in a plain-old directory?]
+work in a plain-old directory?] [In this tutorial, it isn't a git repo. What
+changed?]
+
+Ick currently needs to find "projects" to operate in. It identifies them by
+well-known file names.  For this tutorial create an empty file named
+"pyproject.toml" to convince ick this is a Python project.  This will also be a
+file our rule will modify later:
+
+<!-- [[[cog show_cmd("touch pyproject.toml") ]]] -->
+```console
+$ touch pyproject.toml
+```
+<!-- [[[end]]] (sum: FH1pLb1W5x)  -->
 
 Ick reads `ick.toml` files to find rules.  A ruleset is a location to find
 rules.  In `/tmp/foo` create an `ick.toml` file to say that the current
@@ -158,14 +163,14 @@ raises an exception, the user will be alerted without actually changing their
 real working tree.
 
 If you want to provide more context for why this change is useful, simply
-`print(...)` it to stdout.
+`print(...)` it to stdout:
 
 ```python
 print("You can move the isort config into pyproject.toml to have fewer")
 print("files in the root of your repo.  See http://go/unified-config")
 ```
 
-If you don't modify files, and exit 0, anything you print is ignored.
+If you don't modify files and exit 0, anything you print is ignored.
 
 The `ick run` command will run the rule. But if we try it now it will fail
 trying to import those third-party dependencies:
