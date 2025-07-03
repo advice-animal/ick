@@ -93,30 +93,35 @@ def run_cmd(cmds, **kwargs) -> None:
         )
 
 
-def show_cmd(cmd, hide_command=False, columns=None, **kwargs) -> None:
+def show_cmd(*cmds, hide_command=False, columns=None, **kwargs) -> None:
+    print("```console")
     env = dict(os.environ)
     env["COLUMNS"] = str(columns or 999)
-    proc = subprocess.run(
-        cmd,
-        encoding="utf-8",
-        shell=True,
-        check=False,
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        **kwargs,
-    )
-    output = proc.stdout
-    output = re.sub(pattern=r"(?m) +$", repl="", string=output)
-    if PRETEND_DIR:
-        actual_temp = Path(CUR_TEMP_DIR.name).resolve()
-        output = output.replace(str(actual_temp), PRETEND_DIR)
-    print("```console")
-    if not hide_command:
-        print(f"$ {cmd}")
-    print(output, end="")
-    if proc.returncode != 0:
-        print(f"(exited with {proc.returncode})")
+    for cmd in cmds:
+        if cmd.startswith("cd "):
+            os.chdir(cmd[3:])
+            output = ""
+        else:
+            proc = subprocess.run(
+                cmd,
+                encoding="utf-8",
+                shell=True,
+                check=False,
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                **kwargs,
+            )
+            output = proc.stdout
+            output = re.sub(pattern=r"(?m) +$", repl="", string=output)
+            if PRETEND_DIR:
+                actual_temp = Path(CUR_TEMP_DIR.name).resolve()
+                output = output.replace(str(actual_temp), PRETEND_DIR)
+        if not hide_command:
+            print(f"$ {cmd}")
+        print(output, end="")
+        if proc.returncode != 0:
+            print(f"(exited with {proc.returncode})")
     print("```")
 
 
