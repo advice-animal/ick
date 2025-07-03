@@ -23,8 +23,9 @@ setup: .venv
 .PHONY: prepdocs
 prepdocs: .venv
 	source $(ACTIVATE) && python -m cogapp -rcP docs/whole-tutorial.md
-	perl -ne 'print if 1../splitme/' < docs/whole-tutorial.md > docs/getting-started/tutorial.md
-	perl -ne 'print if /splitme/..1' < docs/whole-tutorial.md > docs/getting-started/testing-tutorial.md
+	perl -ne 'print if 1../splitme1/' < docs/whole-tutorial.md > docs/getting-started/tutorial.md
+	perl -ne 'print if /splitme1/../splitme2/' < docs/whole-tutorial.md > docs/getting-started/writing-tutorial.md
+	perl -ne 'print if /splitme2/..1' < docs/whole-tutorial.md > docs/getting-started/testing-tutorial.md
 
 .PHONY: html
 html: prepdocs .venv README.md docs/*.rst docs/conf.py
