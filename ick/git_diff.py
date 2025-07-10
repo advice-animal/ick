@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Optional
 
 from ick_protocol import Finished, Modified, Msg
 
@@ -12,6 +12,7 @@ def get_diff_messages(msg: str, rule_name: str, workdir: Path) -> Iterable[Msg]:
     plus_count = None
     minus_count = None
     filename = ""
+    status: Optional[bool] = True  # all's ok
 
     def get_chunk() -> Msg:
         new_bytes: bytes | None = None
@@ -20,6 +21,9 @@ def get_diff_messages(msg: str, rule_name: str, workdir: Path) -> Iterable[Msg]:
             new_bytes = Path(workdir, filename).read_bytes()
         except FileNotFoundError:
             pass
+
+        nonlocal status
+        status = False
 
         return Modified(
             rule_name=rule_name,
@@ -74,4 +78,4 @@ def get_diff_messages(msg: str, rule_name: str, workdir: Path) -> Iterable[Msg]:
     if buf:
         yield get_chunk()
 
-    yield Finished(error=False, rule_name=rule_name, message=msg)
+    yield Finished(status=status, rule_name=rule_name, message=msg)

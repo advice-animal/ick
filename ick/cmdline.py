@@ -135,8 +135,12 @@ def run(
         if not json_flag:
             where = f"on {result.project} " if result.project else ""
             print(f"-> [bold]{result.rule}[/bold] {where}", end="")
-            if result.finished.error:
+            if result.finished.status is None:
                 print("[red]ERROR[/red]")
+                for line in result.finished.message.splitlines():
+                    print("    ", line)
+            elif result.finished.status is False:
+                print("[yellow]FAIL[/yellow]")
                 for line in result.finished.message.splitlines():
                     print("    ", line)
             else:
@@ -146,12 +150,12 @@ def run(
             modifications = []
             for mod in result.modifications:
                 modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
-            error_message = result.finished.message if result.finished.error else None
             output = {
                 "project_name": result.project,
-                "ok_status": not result.finished.error,
+                "status": result.finished.status,
                 "modified": modifications,
-                "error_message": error_message,
+                # The meaning of this field depends on the status field above
+                "message": result.finished.message,
             }
             if result.rule not in results:
                 results[result.rule] = [output]

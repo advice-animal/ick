@@ -38,6 +38,6 @@ def test_ast_grep_works(tmp_path: Path) -> None:
 
     assert resp[1] == Finished(
         rule_name="ast-grep",
-        error=False,
+        status=False,
         message="ast-grep",
     )

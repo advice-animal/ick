@@ -29,7 +29,7 @@ process (regular LSP just has "format_file").
 """
 
 from enum import Enum
-from typing import Sequence, Union
+from typing import Optional, Sequence, Union
 
 from msgspec import Struct
 from msgspec.structs import replace as replace
@@ -107,7 +107,16 @@ class Modified(Struct, tag_field="t", tag="M"):
 
 class Finished(Struct, tag_field="t", tag="F"):
     rule_name: str
-    error: bool
+
+    # * If the rule does not run to completion, status=None and the error info is
+    #   in message (ERROR, in unittest terms)
+    # * If the rule runs to completion and the code is already in the ideal
+    #   state, then status=True (PASS, in unittest terms)
+    # * If the rule runs to completion and the code needs help, then
+    #   status=False (FAIL, in unittest terms, regardless of whether there are
+    #   suggested modifications).
+    status: Optional[bool]
+
     # the entire rule is only allowed one message; it's used as the commit
     # message or displayed inline.
     message: str

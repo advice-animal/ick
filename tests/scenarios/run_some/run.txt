@@ -1,7 +1,8 @@
 $ ick run
 -> i_have_no_tests OK
--> move_isort_cfg OK
+-> move_isort_cfg FAIL
+     move_isort_cfg
      isort.cfg +0-3
      pyproject.toml +3-0
--> show_ick_vars ERROR
+-> show_ick_vars FAIL
      ICK_REPO_PATH=/CWD

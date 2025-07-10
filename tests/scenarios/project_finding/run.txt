@@ -1,5 +1,5 @@
 $ ick run
--> show_ick_vars on python1/ ERROR
+-> show_ick_vars on python1/ FAIL
      ICK_REPO_PATH=/CWD
--> show_ick_vars on mono/java/ ERROR
+-> show_ick_vars on mono/java/ FAIL
      ICK_REPO_PATH=/CWD
