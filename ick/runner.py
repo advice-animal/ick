@@ -22,7 +22,7 @@ from moreorless import unified_diff
 from rich import print
 from vmodule import VLOG_1
 
-from ick_protocol import Finished, Modified
+from ick_protocol import Finished, Modified, Scope
 
 from .base_rule import BaseRule
 from .clone_aside import CloneAside
@@ -239,14 +239,20 @@ class Runner:
             qualname = impl.rule_config.qualname
 
             impl.prepare()
-            for p in self.projects:
-                if impl.rule_config.project_types and p.typ not in impl.rule_config.project_types:
-                    LOG.log(VLOG_1, "Skipping run on %s because it is not among %s", p, impl.rule_config.project_types)
-                    continue
-                responses = self._run_one(impl, self.repo, p)
+            if impl.rule_config.scope == Scope.REPO:
+                responses = self._run_one(impl, self.repo, Project(self.repo, ".", "repo", ""))
                 mod = [m for m in responses if isinstance(m, Modified)]
                 assert isinstance(responses[-1], Finished)
-                yield HighLevelResult(qualname, p.subdir, mod, responses[-1])
+                yield HighLevelResult(qualname, ".", mod, responses[-1])
+            else:
+                for p in self.projects:
+                    if impl.rule_config.project_types and p.typ not in impl.rule_config.project_types:
+                        LOG.log(VLOG_1, "Skipping run on %s because it is not among %s", p, impl.rule_config.project_types)
+                        continue
+                    responses = self._run_one(impl, self.repo, p)
+                    mod = [m for m in responses if isinstance(m, Modified)]
+                    assert isinstance(responses[-1], Finished)
+                    yield HighLevelResult(qualname, p.subdir, mod, responses[-1])
 
     def _run_one(self, rule_instance, repo, project) -> list[HighLevelResult]:  # type: ignore[no-untyped-def] # FIX ME
         try:
