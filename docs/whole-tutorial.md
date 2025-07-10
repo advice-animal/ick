@@ -233,11 +233,12 @@ Now `ick run` shows a dry-run summary of the changes that would be made:
 <!-- [[[cog show_cmd("ick run") ]]] -->
 ```console
 $ ick run
--> move_isort_cfg OK
+-> move_isort_cfg FAIL
+     move_isort_cfg
      isort.cfg +0-3
      pyproject.toml +3-0
 ```
-<!-- [[[end]]] (sum: DAYg8v441H) -->
+<!-- [[[end]]] (sum: NMU6ekvaPt) -->
 
 Passing the `--patch` option displays the full patch of the changes that would
 be made:
@@ -245,7 +246,8 @@ be made:
 <!-- [[[cog show_cmd("ick run --patch") ]]] -->
 ```console
 $ ick run --patch
--> move_isort_cfg OK
+-> move_isort_cfg FAIL
+     move_isort_cfg
 diff --git isort.cfg isort.cfg
 deleted file mode 100644
 index fbab120..0000000
@@ -264,7 +266,7 @@ index e69de29..089c824 100644
 +line_length = "88"
 +multi_line_output = "3"
 ```
-<!-- [[[end]]] (sum: cujTI1b42k) -->
+<!-- [[[end]]] (sum: zy/3zowNaD) -->
 
 
 ## Reducing execution
