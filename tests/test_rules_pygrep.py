@@ -36,6 +36,6 @@ def test_pygrep_works(tmp_path: Path) -> None:
 
     assert resp[1] == Finished(
         rule_name="pygrep",
-        error=False,
+        status=False,
         message="pygrep",
     )

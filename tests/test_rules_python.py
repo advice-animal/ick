@@ -46,6 +46,6 @@ for f in sys.argv[1:]:
 
     assert resp[1] == Finished(
         rule_name="foo",
-        error=False,
+        status=False,
         message="foo",
     )

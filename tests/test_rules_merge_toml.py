@@ -38,6 +38,6 @@ baz = 99
 
     assert resp[1] == Finished(
         rule_name="merge_toml",
-        error=False,
+        status=False,
         message="merge_toml",
     )

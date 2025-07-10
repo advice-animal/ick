@@ -43,7 +43,7 @@ class ExecWork(Work):
                     LOG.info("Skipping run because there are no files matched: %s", nice_cmd)
                     yield Finished(
                         rule_name,
-                        error=False,
+                        status=True,  # vacuously satisfied
                         message="",
                     )
                     return
@@ -62,19 +62,26 @@ class ExecWork(Work):
                     cwd=self.project_path,
                 )
         except FileNotFoundError as e:
-            yield Finished(rule_name, error=True, message=str(e))
+            yield Finished(rule_name, status=None, message=str(e))
             return
         except subprocess.CalledProcessError as e:
-            yield Finished(
-                rule_name,
-                error=True,
-                message=((e.stdout + e.stderr) or f"{self.rule.command_parts[0]} returned non-zero exit status {e.returncode}"),
-            )
+            if e.returncode == 99:
+                yield Finished(
+                    rule_name,
+                    status=False,
+                    message=e.stdout,
+                )
+            else:
+                yield Finished(
+                    rule_name,
+                    status=None,
+                    message=((e.stdout + e.stderr) or f"{self.rule.command_parts[0]} returned non-zero exit status {e.returncode}"),
+                )
             return
 
         if self.rule.rule_config.success == Success.NO_OUTPUT:
             if stdout:
-                yield Finished(rule_name, error=True, message=stdout)
+                yield Finished(rule_name, status=False, message=stdout)
                 return
 
         yield from get_diff_messages(rule_name, rule_name, self.project_path)  # TODO msg

@@ -41,6 +41,6 @@ def test_basic_docker(tmp_path: Path) -> None:
 
     assert resp[1] == Finished(
         rule_name="foo",
-        error=False,
+        status=False,
         message="foo",
     )

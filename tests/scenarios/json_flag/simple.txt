@@ -4,23 +4,23 @@ $ ick run --json
         "do_nothing": [
             {
                 "project_name": "",
-                "ok_status": true,
+                "status": true,
                 "modified": [],
-                "error_message": null
+                "message": "do_nothing"
             }
         ],
         "fail": [
             {
                 "project_name": "",
-                "ok_status": false,
+                "status": null,
                 "modified": [],
-                "error_message": "AssertionError\n"
+                "message": "AssertionError\n"
             }
         ],
         "move_a": [
             {
                 "project_name": "",
-                "ok_status": true,
+                "status": false,
                 "modified": [
                     {
                         "file_name": "file_a.cfg",
@@ -31,7 +31,7 @@ $ ick run --json
                         "diff_stat": "+3-0"
                     }
                 ],
-                "error_message": null
+                "message": "move_a"
             }
         ]
     }

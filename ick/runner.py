@@ -40,7 +40,7 @@ class HighLevelResult:
     rule: Any
     project: Any
     modifications: Any
-    finished: Any
+    finished: Finished
 
 
 @dataclass
@@ -173,7 +173,7 @@ class Runner:
             response = self._run_one(rule_instance, repo, project)
             if not isinstance(response[-1], Finished):
                 raise AssertionError(f"Last response is not Finished: {response[-1].__class__.__name__}")
-            if response[-1].error:
+            if response[-1].status is None:
                 expected_path = outp / "output.txt"
                 if not expected_path.exists():
                     result.message = f"Test crashed, but {expected_path} doesn't exist so that seems unintended:\n{response[-1].message}"
@@ -186,6 +186,8 @@ class Runner:
                     result.diff = moreorless.unified_diff(expected, response[-1].message, "output.txt")
                     result.message = "Different output found"
                 return
+
+            # TODO check message for status=False but no modifications
 
             for r in response[:-1]:
                 assert isinstance(r, Modified)
@@ -258,7 +260,7 @@ class Runner:
             buf = io.StringIO()
             traceback.print_tb(tb, file=buf)
             print(repr(e), file=buf)
-            resp = [Finished(rule_instance.rule_config.qualname, error=True, message=buf.getvalue())]
+            resp = [Finished(rule_instance.rule_config.qualname, status=None, message=buf.getvalue())]
         return resp
 
     @ktrace()

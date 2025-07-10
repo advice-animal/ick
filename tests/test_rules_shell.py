@@ -59,7 +59,7 @@ def test_smoke_not_found(tmp_path: Path) -> None:
 
     assert len(resp) == 1
     assert isinstance(resp[0], Finished)
-    assert resp[0].error
+    assert resp[0].status is None
     assert "xargs: /bin/zzyzx: No such file or directory" in resp[0].message
 
 
@@ -81,7 +81,7 @@ def test_smoke_failure(tmp_path: Path) -> None:
 
     assert len(resp) == 1
     assert isinstance(resp[0], Finished)
-    assert resp[0].error
+    assert resp[0].status is None
     assert "returned non-zero exit status" in resp[0].message
 
 
