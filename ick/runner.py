@@ -186,34 +186,45 @@ class Runner:
                     result.diff = moreorless.unified_diff(expected, response[-1].message, "output.txt")
                     result.message = "Different output found"
                 return
-
-            # TODO check message for status=False but no modifications
-
-            for r in response[:-1]:
-                assert isinstance(r, Modified)
-                if r.new_bytes is None:
-                    if r.filename in files_to_check:
-                        result.message = f"Missing removal of {r.filename!r}"
-                        return
-                else:
-                    if r.filename not in files_to_check:
-                        result.message = f"Unexpected new file: {r.filename!r}"
-                        return
-                    outf = outp / r.filename
-                    if outf.read_bytes() != r.new_bytes:
-                        result.diff = unified_diff(
-                            outf.read_text(),
-                            r.new_bytes.decode(),
-                            r.filename,
-                        )
-                        result.message = f"{r.filename!r} (modified) differs"
-                        return
-                    files_to_check.remove(r.filename)
-
-            for unchanged_file in files_to_check:
-                if (inp / unchanged_file).read_bytes() != (outp / unchanged_file).read_bytes():
-                    result.message = f"{unchanged_file!r} (unchanged) differs"
+            elif response[-1].status is False and len(response) == 1:
+                expected_path = outp / "fail.txt"
+                if not expected_path.exists():
+                    result.message = f"Test failed, but {expected_path} doesn't exist so that seems unintended:\n{response[-1].message}"
                     return
+
+                expected = expected_path.read_text()
+                if expected == response[-1].message:
+                    result.success = True
+                else:
+                    result.diff = moreorless.unified_diff(expected, response[-1].message, "fail.txt")
+                    result.message = "Different output found"
+                return
+            else:
+                for r in response[:-1]:
+                    assert isinstance(r, Modified)
+                    if r.new_bytes is None:
+                        if r.filename in files_to_check:
+                            result.message = f"Missing removal of {r.filename!r}"
+                            return
+                    else:
+                        if r.filename not in files_to_check:
+                            result.message = f"Unexpected new file: {r.filename!r}"
+                            return
+                        outf = outp / r.filename
+                        if outf.read_bytes() != r.new_bytes:
+                            result.diff = unified_diff(
+                                outf.read_text(),
+                                r.new_bytes.decode(),
+                                r.filename,
+                            )
+                            result.message = f"{r.filename!r} (modified) differs"
+                            return
+                        files_to_check.remove(r.filename)
+
+                for unchanged_file in files_to_check:
+                    if (inp / unchanged_file).read_bytes() != (outp / unchanged_file).read_bytes():
+                        result.message = f"{unchanged_file!r} (unchanged) differs"
+                        return
 
         result.success = True
 
