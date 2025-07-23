@@ -132,7 +132,14 @@ def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:
     return conf
 
 
-def one_repo_config(url: str) -> RulesConfig:
+def one_repo_config(repo: str) -> RulesConfig:
+    """Create a configuration for just one repo.
+
+    `repo`: either a file path or a URL.
+    """
     conf = RulesConfig()
-    conf.ruleset = [Ruleset(url=url)]
+    if Path(repo).exists():
+        conf.ruleset = [Ruleset(path=repo)]
+    else:
+        conf.ruleset = [Ruleset(url=repo)]
     return conf

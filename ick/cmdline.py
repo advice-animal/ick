@@ -29,7 +29,7 @@ from .types_project import maybe_repo
 @click.option("--trace", type=click.File(mode="w"), help="Trace output filename")
 @click.option("--isolated-repo", is_flag=True, help="Isolate from user-level config", envvar="ICK_ISOLATED_REPO")
 @click.option("--target", default=".", help="Directory to modify")  # TODO path, existing
-@click.option("--rules-repo", help="ad-hoc rules repo to use")
+@click.option("--rules-repo", help="ad-hoc rules repo to use, either a URL or directory")
 @click.pass_context
 def main(
     ctx: click.Context,
