@@ -23,7 +23,7 @@ own, a rules repo provided by someone else, or even a local directory.  Ick lets
 you use rules from a number of sources at once.
 
 For this tutorial, we'll be using two repos.  The first will stand in for your
-code, the code you want to analyze or modify with ick.  To start, clone this
+code: the code you want to analyze or modify with ick.  To start, clone this
 dead-simple repo:
 
 <!-- [[[cog
@@ -49,7 +49,7 @@ This repo only has a few files:
 ```
 <!-- [[[end]]] (sum: Hby/Xig7nS) -->
 
-The simple rule we'll demonstrate moves isort settings from an isort.cfg file
+The simple rule we'll demonstrate moves isort settings from the isort.cfg file
 into the pyproject.toml file.  That rule is in our [second repo][tutrules], but
 you don't need to clone it.  We'll refer to it with the `--rule-repo` option for
 ick.

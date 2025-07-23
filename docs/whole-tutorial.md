@@ -23,7 +23,7 @@ own, a rules repo provided by someone else, or even a local directory.  Ick lets
 you use rules from a number of sources at once.
 
 For this tutorial, we'll be using two repos.  The first will stand in for your
-code, the code you want to analyze or modify with ick.  To start, clone this
+code: the code you want to analyze or modify with ick.  To start, clone this
 dead-simple repo:
 
 <!-- [[[cog
