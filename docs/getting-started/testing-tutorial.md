@@ -1,8 +1,9 @@
-<!-- splitme -->
+<!-- splitme2 -->
 
-## Testing tutorial
+# Testing tutorial
 
-This continues where the previous [Tutorial](tutorial.html) left off.
+This continues where the previous [Writing rules
+tutorial](writing-tutorial.html) left off.
 
 One of the chief problems with writing codemods is being able to succinctly test
 them.  Because `ick` is built around *modifying* *sets* of files, the tests for

@@ -6,7 +6,7 @@
         import os
         from cog_helpers import *
         set_source_root("docs/data/tutorial")
-        cd_temp(pretend="/tmp/foo")
+        cd_temp(pretend="/tmp/tut")
         os.environ["ICK_ISOLATED_REPO"] = "1"
     ]]]
     [[[end]]] (sum: 1B2M2Y8Asg)
@@ -18,236 +18,78 @@ Ick coordinates the running of automated rules on your code and other files.
 Rules can check for conformance, or can transform your files to apply needed
 modifications.
 
-Rules can be written in any language and use any tooling you want.  Rules can be
-sourced from many places: your code's repo, a rules repo of your own, a rules
-repo provided by someone else, or even a local directory.  Ick lets you use
-rules from a number of sources at once.
+Rules can be sourced from many places: your code's repo, a rules repo of your
+own, a rules repo provided by someone else, or even a local directory.  Ick lets
+you use rules from a number of sources at once.
 
-A key idea of ick rules is that they can be run without ick.  This can simplify
-the testing and development of rules, and means that ick can run rules that
-weren't written specifically for ick.
+For this tutorial, we'll be using two repos.  The first will stand in for your
+code: the code you want to analyze or modify with ick.  To start, clone this
+dead-simple repo:
 
-
-## Setting up a local rule
-
-Let's say you have a situation you want to improve, like moving config
-incrementally from individual files into one big file, like `isort.cfg` ->
-`pyproject.toml`.
-
-To start simply, create an empty directory at `/tmp/foo`.  This directory will
-hold the rule and the code the rule is working on.  Of course you can use a
-different path or an existing git repo, just adjust the path examples here.
-
-NOTE: If you run this from within an existing git repo, it is possible that your
-tutorial rule will make changes to its contents.  Although it defaults to a
-dry-run mode (sometimes), you should still be careful and not do this in your
-only copy of it.
-
-[BTW: it seems odd that this directory has to be a git repo. Why can't ick
-work in a plain-old directory?] [In this tutorial, it isn't a git repo. What
-changed?]
-
-Ick currently needs to find "projects" to operate in. It identifies them by
-well-known file names.  For this tutorial create an empty file named
-"pyproject.toml" to convince ick this is a Python project.  This will also be a
-file our rule will modify later:
-
-<!-- [[[cog show_cmd("touch pyproject.toml") ]]] -->
+<!-- [[[cog
+        show_cmd(
+            "git clone https://github.com/advice-animal/ick-tutorial-sample-1",
+            "cd ick-tutorial-sample-1",
+        )
+    ]]] -->
 ```console
-$ touch pyproject.toml
+$ git clone https://github.com/advice-animal/ick-tutorial-sample-1
+Cloning into 'ick-tutorial-sample-1'...
+$ cd ick-tutorial-sample-1
 ```
-<!-- [[[end]]] (sum: FH1pLb1W5x)  -->
+<!-- [[[end]]] (sum: RimKp2Mp9W) -->
 
-Ick reads `ick.toml` files to find rules.  A ruleset is a location to find
-rules.  In `/tmp/foo` create an `ick.toml` file to say that the current
-directory has rules:
+This repo only has a few files:
 
-<!-- [[[cog copy_file("ick.toml", show=True) ]]] -->
-```toml
-[[ruleset]]
-path = "."
-```
-<!-- [[[end]]] (sum: 6O1Kj+DdqE) -->
-
-If you run `ick list-rules`, it won't find any yet:
-
-<!-- [[[cog show_cmd("ick list-rules") ]]] -->
+<!-- [[[cog show_tree(".") ]]]-->
 ```console
-$ ick list-rules
+├── README.md
+├── isort.cfg
+└── pyproject.toml
 ```
-<!-- [[[end]]] (sum: nCRewJbc+z) -->
+<!-- [[[end]]] (sum: Hby/Xig7nS) -->
 
+The simple rule we'll demonstrate moves isort settings from the isort.cfg file
+into the pyproject.toml file.  That rule is in our [second repo][tutrules], but
+you don't need to clone it.  We'll refer to it with the `--rule-repo` option for
+ick.
 
-## Creating a rule definition
+[tutrules]: https://github.com/advice-animal/ick-tutorial-rules-1
 
-[TODO: why did we need a ruleset definition if we are going to put explicit rule
-definitions in ick.toml anyway? Maybe `[[ruleset]] path = "."` should be a
-default that always applies.]
+Ick can show us the rules available:
 
-Next, we can append to `ick.toml` to define a rule:
-
-<!-- [[[cog copy_file("ick2.toml", "ick.toml", show=True) ]]] -->
-```toml
-[[ruleset]]
-path = "."
-
-[[rule]]
-impl = "python"
-name = "move_isort_cfg"
-# scope = "project"
-project_types = ["python"]
-```
-<!-- [[[end]]] (sum: oNIFtGdtuN) -->
-
-The `impl` setting means we will implement the rule with Python code.
-Setting `scope` to `project` means the rule will be invoked at the project
-level instead of on individual files (but that doesn't work yet, so it's
-commented out).
-
-Ick can look for projects of certain types.  Setting `project_types` here means
-the rule will be invoked on projects that ick determines are Python projects.
-
-If you run `list-rules` again, the rule appears, but with an indication that
-there's no implementation:
-
-<!-- [[[cog show_cmd("ick list-rules") ]]] -->
+<!-- [[[cog show_cmd("ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 list-rules") ]]] -->
 ```console
-$ ick list-rules
+$ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 list-rules
 LATER
 =====
-* move_isort_cfg  *** Couldn't find implementation /tmp/foo/move_isort_cfg.py
+* ick-tutorial-rules-1/move_isort_cfg
 ```
-<!-- [[[end]]] (sum: g4EOTtk/5/) -->
+<!-- [[[end]]] (sum: dE4lCr/W8Q) -->
 
+If we run the rules, ick is cautious and shows diff stats of what would change,
+but no files are changed:
 
-## Implementing the rule
-
-To implement the rule, create a Python file matching the rule name:
-
-<!-- [[[cog copy_file("move_isort_cfg.py", show=True) ]]] -->
-```python
-# This file is /tmp/foo/move_isort_cfg.py
-
-from pathlib import Path
-
-import imperfect
-import tomlkit
-
-if __name__ == "__main__":
-    cfg = Path("isort.cfg")
-    toml = Path("pyproject.toml")
-    if cfg.exists() and toml.exists():
-        # The main aim is to reduce the number of files by one
-        with open(cfg) as f:
-            cfg_data = imperfect.parse_string(f.read())
-        with open(toml) as f:
-            toml_data = tomlkit.load(f)
-        isort_table = toml_data.setdefault("tool", {}).setdefault("isort", {})
-        isort_table.update(cfg_data["settings"])
-        toml.write_text(tomlkit.dumps(toml_data))
-        cfg.unlink()
-```
-<!-- [[[end]]] (sum: Tq3NfSIvon) -->
-
-The details of this implementation aren't important.  The key thing to note is
-this is Python code that uses third-party packages to read the `isort.cfg` file
-and write the `pyproject.toml` file.  When you write rules you can use any code
-you want to accomplish your transformations.
-
-Note in particular that there's no special protocol, flags, or output required.
-The rule can just modify files.  The order of modification/delete also doesn't
-matter.
-
-Ick runs rules in a temporary copy of your repo working tree.  If the rule
-raises an exception, the user will be alerted without actually changing their
-real working tree.
-
-If you want to provide more context for why this change is useful, simply
-`print(...)` it to stdout:
-
-```python
-print("You can move the isort config into pyproject.toml to have fewer")
-print("files in the root of your repo.  See http://go/unified-config")
-```
-
-If you don't modify files and exit 0, anything you print is ignored.
-
-The `ick run` command will run the rule. But if we try it now it will fail
-trying to import those third-party dependencies:
-
-<!-- [[[cog show_cmd("ick run") ]]] -->
+<!-- [[[cog show_cmd("ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run") ]]] -->
 ```console
-$ ick run
--> move_isort_cfg ERROR
-     Traceback (most recent call last):
-       File "/tmp/foo/move_isort_cfg.py", line 5, in <module>
-         import imperfect
-     ModuleNotFoundError: No module named 'imperfect'
-```
-<!-- [[[end]]] (sum: bJhojfmIai) -->
-
-We need to tell `ick` about the dependencies the rule needs.
-
-
-## Configuring dependencies
-
-Python rules can declare the dependencies they need.  Ick will create a
-virtualenv for each rule and install the dependencies automatically.
-
-You can declare those in the `ick.toml` config file. Update it with a `deps`
-line like this:
-
-<!-- [[[cog show_file("ick3.toml", start=r"\[\[rule\]\]", end="deps") ]]] -->
-```toml
-[[rule]]
-impl = "python"
-deps = ["imperfect", "tomlkit"]
-```
-<!-- [[[end]]] (sum: 8A2PIE+z09) -->
-<!-- [[[cog copy_file("ick3.toml", "ick.toml") ]]] -->
-<!-- [[[end]]] (sum: 1B2M2Y8Asg) -->
-
-
-Now `ick run` shows that the rule ran:
-
-<!-- [[[cog show_cmd("ick run") ]]] -->
-```console
-$ ick run
--> move_isort_cfg OK
-```
-<!-- [[[end]]] (sum: CQwDezy1z7) -->
-
-But the rule did nothing because there is no `isort.cfg` file in `/tmp/foo`.
-Create one:
-
-<!-- [[[cog copy_file("isort.cfg", show=True) ]]] -->
-```ini
-[settings]
-line_length = 88
-multi_line_output = 3
-```
-<!-- [[[end]]] (sum: CXcy2s50F3) -->
-
-Now `ick run` shows a dry-run summary of the changes that would be made:
-
-<!-- [[[cog show_cmd("ick run") ]]] -->
-```console
-$ ick run
--> move_isort_cfg FAIL
-     move_isort_cfg
+$ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run
+-> ick-tutorial-rules-1/move_isort_cfg FAIL
+     ick-tutorial-rules-1/move_isort_cfg
      isort.cfg +0-3
-     pyproject.toml +3-0
+     pyproject.toml +4-0
 ```
-<!-- [[[end]]] (sum: NMU6ekvaPt) -->
+<!-- [[[end]]] (sum: qSK6rw+zOQ)  -->
 
-Passing the `--patch` option displays the full patch of the changes that would
-be made:
+This shows that isort.cfg would have three lines deleted, and pyproject.toml
+would have four lines added.
 
-<!-- [[[cog show_cmd("ick run --patch") ]]] -->
+To see the full diff, use the `--patch` option:
+
+<!-- [[[cog show_cmd("ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --patch") ]]] -->
 ```console
-$ ick run --patch
--> move_isort_cfg FAIL
-     move_isort_cfg
+$ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --patch
+-> ick-tutorial-rules-1/move_isort_cfg FAIL
+     ick-tutorial-rules-1/move_isort_cfg
 diff --git isort.cfg isort.cfg
 deleted file mode 100644
 index fbab120..0000000
@@ -258,35 +100,26 @@ index fbab120..0000000
 -line_length = 88
 -multi_line_output = 3
 diff --git pyproject.toml pyproject.toml
-index e69de29..089c824 100644
+index 196dd31..da0bf3d 100644
 --- pyproject.toml
 +++ pyproject.toml
-@@ -0,0 +1,3 @@
+@@ -1,3 +1,7 @@
+ [project]
+ name = "tutorial-sample"
+ description = "A simple bare-bones repo for a tutorial"
++
 +[tool.isort]
 +line_length = "88"
 +multi_line_output = "3"
 ```
-<!-- [[[end]]] (sum: zy/3zowNaD) -->
+<!-- [[[end]]] (sum: g+G7Su3elm)  -->
+
+[WHAT ELSE SHOULD GO HERE?]
 
 
-## Reducing execution
+## Writing rules
 
-As written, our rule would run for any Python project, but it will run when
-*any* file in the project changes.  We can be smarter than this since there are
-just two files we care about.  We might read both, and might write one and
-delete the other, so we specify them as both input and output:
+Next up if you interested: how to write rules, demonstrated in the [Writing
+rules Tutorial](writing-tutorial.html).
 
-```toml
-inputs = ["pyproject.toml", "isort.cfg"]
-outputs = ["pyproject.toml", "isort.cfg"]
-```
-
-It's safe to omit `inputs` and `outputs`, but the rule will run more often than
-it needs to.
-
-## Testing
-
-Be sure to continue the journey with the [Testing Tutorial](testing-tutorial.html),
-which lets you ensure that your rules still work as time goes on.
-
-<!-- splitme -->
+<!-- splitme1 -->
