@@ -1,5 +1,6 @@
 [[ruleset]]
 path = "."
+prefix = "rule"
 
 
 [[rule]]
@@ -28,3 +29,4 @@ name = "fail"
 # scope = "project"
 project_types = ["python"]
 hours = 2
+url = "url"

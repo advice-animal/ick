@@ -27,7 +27,7 @@ from ick_protocol import Finished, Modified, Scope
 
 from .base_rule import BaseRule
 from .clone_aside import CloneAside
-from .config import RuleConfig, RuntimeConfig
+from .config import RuntimeConfig
 from .config.rule_repo import discover_rules, get_impl
 from .project_finder import find_projects
 from .types_project import Project, Repo, maybe_repo
@@ -38,11 +38,16 @@ LOG = getLogger(__name__)
 # TODO temporary; this should go in protocol and be better typed...
 @dataclass
 class HighLevelResult:
+    """
+    Capture the result of running ick in a structured way.
+
+    rule is the qualified name of the rule
+    """
+
     rule: str
     project: str
     modifications: Sequence[Modified]
     finished: Finished
-    config: RuleConfig
 
 
 @dataclass
@@ -245,7 +250,7 @@ class Runner:
                 responses = self._run_one(impl, self.repo, Project(self.repo, ".", "repo", ""))
                 mod = [m for m in responses if isinstance(m, Modified)]
                 assert isinstance(responses[-1], Finished)
-                yield HighLevelResult(qualname, ".", mod, responses[-1], impl.rule_config)
+                yield HighLevelResult(qualname, ".", mod, responses[-1])
             else:
                 for p in self.projects:
                     if impl.rule_config.project_types and p.typ not in impl.rule_config.project_types:
@@ -254,7 +259,7 @@ class Runner:
                     responses = self._run_one(impl, self.repo, p)
                     mod = [m for m in responses if isinstance(m, Modified)]
                     assert isinstance(responses[-1], Finished)
-                    yield HighLevelResult(qualname, p.subdir, mod, responses[-1], impl.rule_config)
+                    yield HighLevelResult(qualname, p.subdir, mod, responses[-1])
 
     def _run_one(self, rule_instance, repo, project) -> list[HighLevelResult]:  # type: ignore[no-untyped-def] # FIX ME
         try:
@@ -327,7 +332,7 @@ class Runner:
             }
             rules[config.qualname] = rule
 
-        print(json.dumps({"data": rules}, indent=4))
+        print(json.dumps({"rules": rules}, indent=4))
 
 
 def pl(noun: str, count: int) -> str:

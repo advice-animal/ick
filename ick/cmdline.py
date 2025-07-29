@@ -71,7 +71,7 @@ def find_projects(ctx: click.Context) -> None:
 
 
 @main.command()
-@click.option("--json", "json_flag", is_flag=True, help="Outputs json containing info on the rules")
+@click.option("--json", "json_flag", is_flag=True, help="Outputs json with rules info by qualname (can be used with run --json)")
 @click.argument("filters", nargs=-1)
 @click.pass_context
 def list_rules(ctx: click.Context, json_flag: bool, filters: list[str]) -> None:
@@ -104,7 +104,7 @@ def test_rules(ctx: click.Context, filters: list[str]) -> None:
 @click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, on by default sometimes")
 @click.option("-p", "--patch", is_flag=True, help="Show patch instead of applying")
 @click.option("--yolo", is_flag=True, help="Yolo mode enables modifying external state")
-@click.option("--json", "json_flag", is_flag=True, help="Outputs json indicating if a rule caused modifications")
+@click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by rule qualname (can be used with list-rules --json)")
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
 @click.argument("filters", nargs=-1)
 @click.pass_context
