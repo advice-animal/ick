@@ -6,7 +6,11 @@ $ ick run --json
                 "project_name": "",
                 "status": true,
                 "modified": [],
-                "message": "do_nothing"
+                "message": "do_nothing",
+                "contact": null,
+                "url": null,
+                "risk": "high",
+                "urgency": "later"
             }
         ],
         "fail": [
@@ -14,7 +18,11 @@ $ ick run --json
                 "project_name": "",
                 "status": null,
                 "modified": [],
-                "message": "AssertionError\n"
+                "message": "AssertionError\n",
+                "contact": null,
+                "url": null,
+                "risk": "high",
+                "urgency": "later"
             }
         ],
         "move_a": [
@@ -31,7 +39,11 @@ $ ick run --json
                         "diff_stat": "+3-0"
                     }
                 ],
-                "message": "move_a"
+                "message": "move_a",
+                "contact": null,
+                "url": null,
+                "risk": "high",
+                "urgency": "later"
             }
         ]
     }

@@ -161,6 +161,10 @@ def run(
                 "modified": modifications,
                 # The meaning of this field depends on the status field above
                 "message": result.finished.message,
+                "contact": result.config.contact,
+                "url": result.config.url,
+                "risk": result.config.risk.value,
+                "urgency": result.config.urgency.value,
             }
             if result.rule not in results:
                 results[result.rule] = [output]
@@ -169,7 +173,8 @@ def run(
 
         elif patch:
             for mod in result.modifications:
-                echo_color_precomputed_diff(mod.diff)
+                if mod.diff:
+                    echo_color_precomputed_diff(mod.diff)
         elif ctx.obj.settings.dry_run:
             for mod in result.modifications:
                 print("    ", mod.filename, mod.diffstat)
