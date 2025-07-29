@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import collections
 import io
+import json
 import re
 import sys
 import traceback
@@ -309,6 +310,24 @@ class Runner:
             print("=" * len(str(urgency_label.name)))
             for rule in rules:
                 print(f"* {rule}")
+
+    @ktrace()
+    def echo_rules_json(self) -> None:
+        rules = {}
+        for impl in self.iter_rule_impl():
+            impl.prepare()
+            config = impl.rule_config
+            rule = {
+                "duration": config.hours,
+                "description": config.description,
+                "urgency": str(config.urgency.name),
+                "risk": str(config.risk.name),
+                "contact": config.contact,
+                "url": config.url,
+            }
+            rules[config.qualname] = rule
+
+        print(json.dumps({"data": rules}, indent=4))
 
 
 def pl(noun: str, count: int) -> str:

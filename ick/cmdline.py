@@ -71,15 +71,19 @@ def find_projects(ctx: click.Context) -> None:
 
 
 @main.command()
-@click.pass_context
+@click.option("--json", "json_flag", is_flag=True, help="Outputs json containing info on the rules")
 @click.argument("filters", nargs=-1)
-def list_rules(ctx: click.Context, filters: list[str]) -> None:
+@click.pass_context
+def list_rules(ctx: click.Context, json_flag: bool, filters: list[str]) -> None:
     """
     Lists rules applicable to the current repo
     """
     apply_filters(ctx, filters)
     r = Runner(ctx.obj, ctx.obj.repo)
-    r.echo_rules()
+    if json_flag:
+        r.echo_rules_json()
+    else:
+        r.echo_rules()
 
 
 @main.command()
@@ -161,10 +165,6 @@ def run(
                 "modified": modifications,
                 # The meaning of this field depends on the status field above
                 "message": result.finished.message,
-                "contact": result.config.contact,
-                "url": result.config.url,
-                "risk": result.config.risk.value,
-                "urgency": result.config.urgency.value,
             }
             if result.rule not in results:
                 results[result.rule] = [output]
