@@ -197,7 +197,7 @@ def apply_filters(ctx: click.Context, filters: list[str]) -> None:
         # support .get and the choices are [] catching the exception or getattr
         # which is what I can fit on one line.
         urgency = Urgency[filters[0].upper()]
-        ctx.obj.filter_config.urgency_filter = urgency
+        ctx.obj.filter_config.min_urgency = urgency
 
     else:
         ctx.obj.filter_config.name_filter_re = "|".join(advice_name_re(name) for name in filters)
