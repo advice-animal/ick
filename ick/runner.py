@@ -78,6 +78,7 @@ class Runner:
         for rule in self.rules:
             if rule.urgency < self.rtc.filter_config.min_urgency:
                 continue
+
             if not name_filter(rule.qualname):
                 continue
 
