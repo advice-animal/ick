@@ -99,6 +99,7 @@ class RuleConfig(Struct):
 
     description: Optional[str] = None
     contact: Optional[str] = None
+    url: Optional[str] = None
 
 
 @ktrace()

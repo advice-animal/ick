@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import collections
 import io
+import json
 import re
 import sys
 import traceback
@@ -14,7 +15,7 @@ from logging import getLogger
 from pathlib import Path
 from shutil import copytree
 from tempfile import TemporaryDirectory
-from typing import Any, Iterable
+from typing import Iterable, Sequence
 
 import moreorless
 from keke import ktrace
@@ -37,9 +38,15 @@ LOG = getLogger(__name__)
 # TODO temporary; this should go in protocol and be better typed...
 @dataclass
 class HighLevelResult:
-    rule: Any
-    project: Any
-    modifications: Any
+    """
+    Capture the result of running ick in a structured way.
+
+    rule is the qualified name of the rule
+    """
+
+    rule: str
+    project: str
+    modifications: Sequence[Modified]
     finished: Finished
 
 
@@ -308,6 +315,24 @@ class Runner:
             print("=" * len(str(urgency_label.name)))
             for rule in rules:
                 print(f"* {rule}")
+
+    @ktrace()
+    def echo_rules_json(self) -> None:
+        rules = {}
+        for impl in self.iter_rule_impl():
+            impl.prepare()
+            config = impl.rule_config
+            rule = {
+                "duration": config.hours,
+                "description": config.description,
+                "urgency": str(config.urgency.name),
+                "risk": str(config.risk.name),
+                "contact": config.contact,
+                "url": config.url,
+            }
+            rules[config.qualname] = rule
+
+        print(json.dumps({"rules": rules}, indent=4))
 
 
 def pl(noun: str, count: int) -> str:

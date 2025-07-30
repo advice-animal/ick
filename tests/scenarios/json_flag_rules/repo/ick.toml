@@ -1,0 +1,32 @@
+[[ruleset]]
+path = "."
+prefix = "rule"
+
+
+[[rule]]
+impl = "python"
+deps = ["imperfect", "tomlkit"]
+name = "move_a"
+# scope = "project"
+project_types = ["python"]
+inputs = ["pyproject.toml", "isort.cfg"]
+outputs = ["pyproject.toml", "isort.cfg"]
+description = "Description for move_a"
+urgency = "now"
+
+
+[[rule]]
+impl = "python"
+name = "do_nothing"
+# scope = "project"
+project_types = ["python"]
+risk = "low"
+contact = "john"
+
+[[rule]]
+impl = "python"
+name = "fail"
+# scope = "project"
+project_types = ["python"]
+hours = 2
+url = "url"

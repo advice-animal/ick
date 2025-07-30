@@ -71,15 +71,19 @@ def find_projects(ctx: click.Context) -> None:
 
 
 @main.command()
-@click.pass_context
+@click.option("--json", "json_flag", is_flag=True, help="Outputs json with rules info by qualname (can be used with run --json)")
 @click.argument("filters", nargs=-1)
-def list_rules(ctx: click.Context, filters: list[str]) -> None:
+@click.pass_context
+def list_rules(ctx: click.Context, json_flag: bool, filters: list[str]) -> None:
     """
     Lists rules applicable to the current repo
     """
     apply_filters(ctx, filters)
     r = Runner(ctx.obj, ctx.obj.repo)
-    r.echo_rules()
+    if json_flag:
+        r.echo_rules_json()
+    else:
+        r.echo_rules()
 
 
 @main.command()
@@ -100,7 +104,7 @@ def test_rules(ctx: click.Context, filters: list[str]) -> None:
 @click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, on by default sometimes")
 @click.option("-p", "--patch", is_flag=True, help="Show patch instead of applying")
 @click.option("--yolo", is_flag=True, help="Yolo mode enables modifying external state")
-@click.option("--json", "json_flag", is_flag=True, help="Outputs json indicating if a rule caused modifications")
+@click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by rule qualname (can be used with list-rules --json)")
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
 @click.argument("filters", nargs=-1)
 @click.pass_context
@@ -169,7 +173,8 @@ def run(
 
         elif patch:
             for mod in result.modifications:
-                echo_color_precomputed_diff(mod.diff)
+                if mod.diff:
+                    echo_color_precomputed_diff(mod.diff)
         elif ctx.obj.settings.dry_run:
             for mod in result.modifications:
                 print("    ", mod.filename, mod.diffstat)

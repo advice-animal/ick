@@ -1,0 +1,29 @@
+$ ick list-rules --json
+{
+    "rules": {
+        "rule/do_nothing": {
+            "duration": null,
+            "description": null,
+            "urgency": "LATER",
+            "risk": "LOW",
+            "contact": "john",
+            "url": null
+        },
+        "rule/fail": {
+            "duration": 2,
+            "description": null,
+            "urgency": "LATER",
+            "risk": "HIGH",
+            "contact": null,
+            "url": "url"
+        },
+        "rule/move_a": {
+            "duration": null,
+            "description": "Description for move_a",
+            "urgency": "NOW",
+            "risk": "HIGH",
+            "contact": null,
+            "url": null
+        }
+    }
+}
