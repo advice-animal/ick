@@ -37,6 +37,9 @@ DEFAULT_PROJECT_MARKERS = {
     "java": [
         "build.gradle",
     ],
+    "go": [
+        "go.mod",
+    ],
     # Since autodetected projects can't contain other projects, this caused
     # problems (docker-compose.yml at the root of the repo is fairly common).
     # "docker": [
