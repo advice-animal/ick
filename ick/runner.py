@@ -66,10 +66,10 @@ class Runner:
         # TODO there's a var on repo to store this...
         self.projects: list[Project] = find_projects(repo, repo.zfiles, self.rtc.main_config)
 
-    def iter_rule_impl(self, ignore_minimum_urgency: bool = False) -> Iterable[BaseRule]:
+    def iter_rule_impl(self) -> Iterable[BaseRule]:
         name_filter = re.compile(self.rtc.filter_config.name_filter_re).fullmatch
         for rule in self.rules:
-            if not ignore_minimum_urgency and rule.urgency < self.rtc.filter_config.min_urgency:
+            if rule.urgency < self.rtc.filter_config.min_urgency:
                 continue
 
             if not name_filter(rule.qualname):
@@ -231,7 +231,7 @@ class Runner:
 
     def iter_tests(self) -> Iterable[tuple[BaseRule, tuple[str, ...]]]:
         # Yields (impl, test_paths) for projects in test dir
-        for impl in self.iter_rule_impl(ignore_minimum_urgency=True):
+        for impl in self.iter_rule_impl():
             test_path = impl.rule_config.test_path
             yield impl, tuple(test_path.glob("*/"))  # type: ignore[union-attr,arg-type] # FIX ME
 
@@ -284,7 +284,7 @@ class Runner:
     @ktrace()
     def echo_rules(self) -> None:
         rules_by_urgency = collections.defaultdict(list)
-        for impl in self.iter_rule_impl(ignore_minimum_urgency=True):
+        for impl in self.iter_rule_impl():
             impl.prepare()
             duration = ""
             if impl.rule_config.hours is not None:
