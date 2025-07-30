@@ -41,12 +41,13 @@ def test_project_finder_marker_can_have_slashes() -> None:
 
 
 def test_project_finder_types() -> None:
-    sample_string = "a/pyproject.toml\0a/tests/pyproject.toml\0b/build.gradle\0"
+    sample_string = "a/pyproject.toml\0a/tests/pyproject.toml\0b/build.gradle\0c/go.mod\0"
     projects = find_projects(Repo(Path()), sample_string, MainConfig.DEFAULT)  # type: ignore[attr-defined] # FIX ME
 
-    # These two make the assertion failures easier to read
+    # These three make the assertion failures easier to read
     projects[0].repo = "FAKE"  # type: ignore[assignment]
     projects[1].repo = "FAKE"  # type: ignore[assignment]
+    projects[2].repo = "FAKE"  # type: ignore[assignment]
 
     assert to_builtins(projects[0]) == {
         "subdir": "a/",
@@ -58,5 +59,11 @@ def test_project_finder_types() -> None:
         "subdir": "b/",
         "marker_filename": "build.gradle",
         "typ": "java",
+        "repo": "FAKE",
+    }
+    assert to_builtins(projects[2]) == {
+        "subdir": "c/",
+        "marker_filename": "go.mod",
+        "typ": "go",
         "repo": "FAKE",
     }
