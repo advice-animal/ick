@@ -147,9 +147,29 @@ Let's say you have a situation you want to improve, like moving config
 incrementally from individual files into one big file, like `isort.cfg` ->
 `pyproject.toml`.
 
-To start simply, create an empty directory at `/tmp/foo`.  This directory will
-hold the rule and the code the rule is working on.  Of course you can use a
-different path or an existing git repo, just adjust the path examples here.
+To start simply, create an empty directory at `/tmp/foo` and run `git init` in
+it.  This directory will hold the rule and the code the rule is working on.  Of
+course you can use a different path or an existing git repo, just adjust the
+path examples here.  (If this is your very first time using git, you will need
+to set up `user.name` and `user.email` even if you don't intend to make commits
+-- ick makes some internally).
+
+<!-- [[[cog show_cmd("git init") ]]] -->
+```console
+$ git init
+Initialized empty Git repository in /tmp/foo/.git/
+```
+<!-- [[[end]]] (sum: 6Y4SWdDp8J) -->
+<!-- [[[cog show_cmd("git config --global user.name Lester") ]]] -->
+```console
+$ git config --global user.name Lester
+```
+<!-- [[[end]]] (sum: TiqxsAe3Ox) -->
+<!-- [[[cog show_cmd("git config --global user.email tester@example.org") ]]] -->
+```console
+$ git config --global user.email tester@example.org
+```
+<!-- [[[end]]] (sum: Aq+1j0Q8Rg) -->
 
 NOTE: If you run this from within an existing git repo, it is possible that your
 tutorial rule will make changes to its contents.  Although it defaults to a
@@ -170,6 +190,33 @@ $ touch pyproject.toml
 Ick reads `ick.toml` files to find rules.  A ruleset is a location to find
 rules.  In `/tmp/foo` create an `ick.toml` file to say that the current
 directory has rules:
+
+<!-- [[[cog show_cmd("touch ick.toml") ]]] -->
+```console
+$ touch ick.toml
+```
+<!-- [[[end]]] (sum: 7SdjPOnXe3) -->
+
+And make sure it is tracked by git and your repo has at least one commit.
+Although most changes get replicated, we only trust the filenames that git
+knows about when determining initial projects and rule locations.
+
+<!-- [[[cog show_cmd("git add *.toml") ]]] -->
+```console
+$ git add *.toml
+```
+<!-- [[[end]]] (sum: O7GybN3A3+) -->
+<!-- [[[cog show_cmd("git commit -m 'add marker files'") ]]] -->
+```console
+$ git commit -m 'add marker files'
+[main (root-commit) 9e1d59c] add marker files
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 ick.toml
+ create mode 100644 pyproject.toml
+```
+<!-- [[[end]]] (sum: 5vY/wdddIb) -->
+
+(the contents don't have to be committed though)
 
 <!-- [[[cog copy_file("ick.toml", show=True) ]]] -->
 ```toml
