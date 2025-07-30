@@ -13,7 +13,7 @@ _T = TypeVar("_T")
 
 
 class Project(Struct):
-    repo: Repo
+    repo: BaseRepo
     subdir: str
     typ: str
     marker_filename: str
@@ -42,7 +42,7 @@ class Repo(BaseRepo):
         self.zfiles = run_cmd(["git", "ls-files", "-z"], cwd=self.root)
 
 
-def maybe_repo(path: Path, enter_context: Callable[[ContextManager[_T]], _T], for_testing: bool = False) -> Repo:
+def maybe_repo(path: Path, enter_context: Callable[[ContextManager[_T]], _T], for_testing: bool = False) -> BaseRepo:
     # TODO subdir-as-a-project?
     if (path / ".git").exists():
         return Repo(path)
