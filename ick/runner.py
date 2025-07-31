@@ -172,7 +172,7 @@ class Runner:
             tp = Path(td)
             copytree(inp, tp, dirs_exist_ok=True)
 
-            repo = maybe_repo(tp, stack.enter_context)
+            repo = maybe_repo(tp, stack.enter_context, for_testing=True)
 
             project = Project(repo, "", "python", "invalid.bin")
             files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))

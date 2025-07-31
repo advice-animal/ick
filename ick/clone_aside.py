@@ -20,6 +20,8 @@ LOG = getLogger(__name__)
 class CloneAside:
     def __init__(self, orig_path: Path) -> None:
         self.orig_path = Path(orig_path)
+        if not (orig_path / ".git").exists():
+            raise Exception("Not currently in a git repo")
         self.head_commit = run_cmd(["git", "rev-parse", "HEAD"], cwd=orig_path)
         self.head_commit = self.head_commit.strip()
         self.head = head(orig_path)

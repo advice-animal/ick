@@ -6,5 +6,6 @@ Getting Started
    :hidden:
 
    tutorial
+   writing-tutorial
    testing-tutorial
 

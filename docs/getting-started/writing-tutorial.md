@@ -23,9 +23,27 @@ Let's say you have a situation you want to improve, like moving config
 incrementally from individual files into one big file, like `isort.cfg` ->
 `pyproject.toml`.
 
-To start simply, create an empty directory at `/tmp/foo`.  This directory will
-hold the rule and the code the rule is working on.  Of course you can use a
-different path or an existing git repo, just adjust the path examples here.
+To start simply, create an empty directory at `/tmp/foo` and run `git init` in
+it.  This directory will hold the rule and the code the rule is working on.  Of
+course you can use a different path or an existing git repo, just adjust the
+path examples here.  (If this is your very first time using git, you will need
+to set up `user.name` and `user.email` even if you don't intend to make commits
+-- ick makes some internally).
+
+<!-- [[[cog
+    show_cmd(
+        "git init -b main",
+        "git config user.name Lester",
+        "git config user.email tester@example.org",
+    )
+]]] -->
+```console
+$ git init -b main
+Initialized empty Git repository in /tmp/foo/.git/
+$ git config user.name Lester
+$ git config user.email tester@example.org
+```
+<!-- [[[end]]] (sum: JwXvBR+v6j) -->
 
 NOTE: If you run this from within an existing git repo, it is possible that your
 tutorial rule will make changes to its contents.  Although it defaults to a
@@ -37,15 +55,39 @@ well-known file names.  For this tutorial create an empty file named
 "pyproject.toml" to convince ick this is a Python project.  This will also be a
 file our rule will modify later:
 
-<!-- [[[cog show_cmd("touch pyproject.toml") ]]] -->
+<!-- [[[cog
+    show_cmd(
+        "touch pyproject.toml",
+        "touch ick.toml",
+    )
+]]] -->
 ```console
 $ touch pyproject.toml
+$ touch ick.toml
 ```
-<!-- [[[end]]] (sum: FH1pLb1W5x)  -->
+<!-- [[[end]]] (sum: uwo5KWfZTZ) -->
 
 Ick reads `ick.toml` files to find rules.  A ruleset is a location to find
 rules.  In `/tmp/foo` create an `ick.toml` file to say that the current
 directory has rules:
+
+And make sure it is tracked by git and your repo has at least one commit.
+Although most changes get replicated, we only trust the filenames that git
+knows about when determining initial projects and rule locations.
+
+<!-- [[[cog
+    show_cmd(
+        "git add *.toml",
+        "git commit -q -m 'add marker files'",
+    )
+]]] -->
+```console
+$ git add *.toml
+$ git commit -q -m 'add marker files'
+```
+<!-- [[[end]]] (sum: 6pox+ud36n) -->
+
+(the contents don't have to be committed though)
 
 <!-- [[[cog copy_file("ick.toml", show=True) ]]] -->
 ```toml

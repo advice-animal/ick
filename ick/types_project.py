@@ -13,7 +13,7 @@ _T = TypeVar("_T")
 
 
 class Project(Struct):
-    repo: Repo
+    repo: BaseRepo
     subdir: str
     typ: str
     marker_filename: str
@@ -29,24 +29,30 @@ class Project(Struct):
         return filenames
 
 
-class Repo(Struct):
+class BaseRepo(Struct):
     root: Path
-    # TODO restrict to a subdir
     projects: Sequence[Project] = ()
     zfiles: str = ""
+
+
+class Repo(BaseRepo):
+    # TODO restrict to a subdir
 
     def __post_init__(self) -> None:
         self.zfiles = run_cmd(["git", "ls-files", "-z"], cwd=self.root)
 
 
-def maybe_repo(path: Path, enter_context: Callable[[ContextManager[_T]], _T]) -> Repo:
+def maybe_repo(path: Path, enter_context: Callable[[ContextManager[_T]], _T], for_testing: bool = False) -> BaseRepo:
     # TODO subdir-as-a-project?
     if (path / ".git").exists():
         return Repo(path)
-    else:
+    elif for_testing:
         td = enter_context(TemporaryDirectory())  # type: ignore[arg-type] # FIX ME
         run_cmd(["git", "init"], cwd=td)  # type: ignore[arg-type] # FIX ME
         copytree(path, td, dirs_exist_ok=True)  # type: ignore[arg-type] # FIX ME
         run_cmd(["git", "add", "-N", "."], cwd=td)  # type: ignore[arg-type] # FIX ME
         run_cmd(["git", "commit", "-a", "--allow-empty", "-m", "init"], cwd=td)  # type: ignore[arg-type] # FIX ME
         return Repo(Path(td))  # type: ignore[arg-type] # FIX ME
+    else:
+        # Basically pretends to be empty, but if you try to clone_aside it will raise
+        return BaseRepo(path)
