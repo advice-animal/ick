@@ -176,7 +176,7 @@ class Runner:
 
             project = Project(repo, "", "python", "invalid.bin")
             files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
-            files_to_check = {f for f in files_to_check if (outp / f).is_file()}
+            files_to_check = {f for f in files_to_check if (outp / f).is_file() and f not in ["output.txt", "fail.txt"]}
 
             response = self._run_one(rule_instance, repo, project)
             if not isinstance(response[-1], Finished):
