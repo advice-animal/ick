@@ -154,22 +154,20 @@ path examples here.  (If this is your very first time using git, you will need
 to set up `user.name` and `user.email` even if you don't intend to make commits
 -- ick makes some internally).
 
-<!-- [[[cog show_cmd("git init") ]]] -->
+<!-- [[[cog
+    show_cmd(
+        "git init",
+        "git config user.name Lester",
+        "git config user.email tester@example.org",
+    )
+]]] -->
 ```console
 $ git init
 Initialized empty Git repository in /tmp/foo/.git/
+$ git config user.name Lester
+$ git config user.email tester@example.org
 ```
-<!-- [[[end]]] (sum: 6Y4SWdDp8J) -->
-<!-- [[[cog show_cmd("git config --global user.name Lester") ]]] -->
-```console
-$ git config --global user.name Lester
-```
-<!-- [[[end]]] (sum: TiqxsAe3Ox) -->
-<!-- [[[cog show_cmd("git config --global user.email tester@example.org") ]]] -->
-```console
-$ git config --global user.email tester@example.org
-```
-<!-- [[[end]]] (sum: Aq+1j0Q8Rg) -->
+<!-- [[[end]]] (sum: fMRCzgQxGu) -->
 
 NOTE: If you run this from within an existing git repo, it is possible that your
 tutorial rule will make changes to its contents.  Although it defaults to a
@@ -181,40 +179,37 @@ well-known file names.  For this tutorial create an empty file named
 "pyproject.toml" to convince ick this is a Python project.  This will also be a
 file our rule will modify later:
 
-<!-- [[[cog show_cmd("touch pyproject.toml") ]]] -->
+<!-- [[[cog
+    show_cmd(
+        "touch pyproject.toml",
+        "touch ick.toml",
+    )
+]]] -->
 ```console
 $ touch pyproject.toml
+$ touch ick.toml
 ```
-<!-- [[[end]]] (sum: FH1pLb1W5x)  -->
+<!-- [[[end]]] (sum: uwo5KWfZTZ) -->
 
 Ick reads `ick.toml` files to find rules.  A ruleset is a location to find
 rules.  In `/tmp/foo` create an `ick.toml` file to say that the current
 directory has rules:
 
-<!-- [[[cog show_cmd("touch ick.toml") ]]] -->
-```console
-$ touch ick.toml
-```
-<!-- [[[end]]] (sum: 7SdjPOnXe3) -->
-
 And make sure it is tracked by git and your repo has at least one commit.
 Although most changes get replicated, we only trust the filenames that git
 knows about when determining initial projects and rule locations.
 
-<!-- [[[cog show_cmd("git add *.toml") ]]] -->
+<!-- [[[cog
+    show_cmd(
+        "git add *.toml",
+        "git commit -q -m 'add marker files'",
+    )
+]]] -->
 ```console
 $ git add *.toml
+$ git commit -q -m 'add marker files'
 ```
-<!-- [[[end]]] (sum: O7GybN3A3+) -->
-<!-- [[[cog show_cmd("git commit -m 'add marker files'") ]]] -->
-```console
-$ git commit -m 'add marker files'
-[main (root-commit) 9e1d59c] add marker files
- 2 files changed, 0 insertions(+), 0 deletions(-)
- create mode 100644 ick.toml
- create mode 100644 pyproject.toml
-```
-<!-- [[[end]]] (sum: 5vY/wdddIb) -->
+<!-- [[[end]]] (sum: 6pox+ud36n) -->
 
 (the contents don't have to be committed though)
 
