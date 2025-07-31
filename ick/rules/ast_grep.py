@@ -5,14 +5,12 @@ import platformdirs
 
 from ick_protocol import Success
 
-from ..base_rule import BaseRule, ExecWork
+from ..base_rule import BaseRule
 from ..config import RuleConfig
 from ..venv import PythonEnv
 
 
 class Rule(BaseRule):
-    work_cls = ExecWork
-
     def __init__(self, rule_config: RuleConfig) -> None:
         if not rule_config.replace:
             rule_config.success = Success.NO_OUTPUT
@@ -44,4 +42,4 @@ class Rule(BaseRule):
         self.command_env = os.environ.copy()
 
     def prepare(self):  # type: ignore[no-untyped-def] # FIX ME
-        self.venv.prepare()  # type: ignore[no-untyped-call] # FIX ME
+        return self.venv.prepare()  # type: ignore[no-untyped-call] # FIX ME

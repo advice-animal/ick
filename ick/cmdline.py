@@ -186,6 +186,7 @@ def run(
                 else:
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.write_bytes(mod.new_bytes)
+                print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
 
     if json_flag:
         print(json.dumps({"results": results}, indent=4))

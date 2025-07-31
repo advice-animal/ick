@@ -4,5 +4,5 @@ path = "."
 [[rule]]
 impl = "python"
 name = "move_isort_cfg"
-# scope = "project"
+scope = "project"
 project_types = ["python"]
