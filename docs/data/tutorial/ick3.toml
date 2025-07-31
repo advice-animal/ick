@@ -5,5 +5,5 @@ path = "."
 impl = "python"
 deps = ["imperfect", "tomlkit"]
 name = "move_isort_cfg"
-# scope = "project"
+scope = "project"
 project_types = ["python"]

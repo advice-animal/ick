@@ -8,7 +8,7 @@ import tomlkit
 from msgspec.json import decode as json_decode
 from msgspec.json import encode as json_encode
 
-from ..base_rule import BaseRule, ExecWork
+from ..base_rule import BaseRule
 from ..config import RuleConfig
 
 
@@ -50,8 +50,6 @@ def merge(d1, d2):  # type: ignore[no-untyped-def] # FIX ME
 
 
 class Rule(BaseRule):
-    work_cls = ExecWork
-
     def __init__(self, rule_config: RuleConfig) -> None:
         super().__init__(rule_config)
         self.command_parts = [sys.executable, "-m", __name__]
@@ -60,9 +58,6 @@ class Rule(BaseRule):
         }
         if "PYTHONPATH" in os.environ:
             self.command_env["PYTHONPATH"] = os.environ["PYTHONPATH"]
-
-    def prepare(self):  # type: ignore[no-untyped-def] # FIX ME
-        pass
 
 
 if __name__ == "__main__":
