@@ -156,18 +156,18 @@ to set up `user.name` and `user.email` even if you don't intend to make commits
 
 <!-- [[[cog
     show_cmd(
-        "git init",
+        "git init -b main",
         "git config user.name Lester",
         "git config user.email tester@example.org",
     )
 ]]] -->
 ```console
-$ git init
+$ git init -b main
 Initialized empty Git repository in /tmp/foo/.git/
 $ git config user.name Lester
 $ git config user.email tester@example.org
 ```
-<!-- [[[end]]] (sum: fMRCzgQxGu) -->
+<!-- [[[end]]] (sum: JwXvBR+v6j) -->
 
 NOTE: If you run this from within an existing git repo, it is possible that your
 tutorial rule will make changes to its contents.  Although it defaults to a
