@@ -7,7 +7,7 @@ from pathlib import Path
 from msgspec.json import decode as json_decode
 from msgspec.json import encode as json_encode
 
-from ..base_rule import BaseRule, ExecWork
+from ..base_rule import BaseRule
 from ..config import RuleConfig
 
 
@@ -34,8 +34,6 @@ def main(filenames):  # type: ignore[no-untyped-def] # FIX ME
 
 
 class Rule(BaseRule):
-    work_cls = ExecWork
-
     def __init__(self, rule_config: RuleConfig) -> None:
         super().__init__(rule_config)
         self.command_parts = [sys.executable, "-m", __name__]

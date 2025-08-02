@@ -1,16 +1,16 @@
+from __future__ import annotations
+
 import os
 from pathlib import Path
 
 import platformdirs
 
-from ..base_rule import BaseRule, ExecWork
+from ..base_rule import BaseRule
 from ..config import RuleConfig
 from ..venv import PythonEnv
 
 
 class Rule(BaseRule):
-    work_cls = ExecWork
-
     def __init__(self, rule_config: RuleConfig) -> None:
         super().__init__(rule_config)
         # TODO validate path / rule.name ".py" exists
@@ -31,5 +31,5 @@ class Rule(BaseRule):
 
         self.command_env = os.environ.copy()
 
-    def prepare(self) -> None:
-        self.venv.prepare()  # type: ignore[no-untyped-call] # FIX ME
+    def prepare(self) -> bool:
+        return self.venv.prepare()  # type: ignore[no-untyped-call] # FIX ME

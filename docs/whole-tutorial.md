@@ -73,12 +73,11 @@ but no files are changed:
 <!-- [[[cog show_cmd("ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run") ]]] -->
 ```console
 $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run
--> ick-tutorial-rules-1/move_isort_cfg FAIL
-     ick-tutorial-rules-1/move_isort_cfg
-     isort.cfg +0-3
-     pyproject.toml +4-0
+-> ick-tutorial-rules-1/move_isort_cfg OK
+     pyproject.toml +5-0
+     isort.cfg +1-3
 ```
-<!-- [[[end]]] (sum: qSK6rw+zOQ)  -->
+<!-- [[[end]]] (sum: yReK0mLGhM)  -->
 
 This shows that isort.cfg would have three lines deleted, and pyproject.toml
 would have four lines added.
@@ -88,21 +87,15 @@ To see the full diff, use the `--patch` option:
 <!-- [[[cog show_cmd("ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --patch") ]]] -->
 ```console
 $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --patch
--> ick-tutorial-rules-1/move_isort_cfg FAIL
-     ick-tutorial-rules-1/move_isort_cfg
-diff --git isort.cfg isort.cfg
-deleted file mode 100644
-index fbab120..0000000
---- isort.cfg
-+++ /dev/null
+-> ick-tutorial-rules-1/move_isort_cfg OK
+--- a/isort.cfg
++++ b/isort.cfg
 @@ -1,3 +0,0 @@
 -[settings]
 -line_length = 88
 -multi_line_output = 3
-diff --git pyproject.toml pyproject.toml
-index 196dd31..da0bf3d 100644
---- pyproject.toml
-+++ pyproject.toml
+--- a/pyproject.toml
++++ b/pyproject.toml
 @@ -1,3 +1,7 @@
  [project]
  name = "tutorial-sample"
@@ -112,7 +105,7 @@ index 196dd31..da0bf3d 100644
 +line_length = "88"
 +multi_line_output = "3"
 ```
-<!-- [[[end]]] (sum: g+G7Su3elm)  -->
+<!-- [[[end]]] (sum: pRsyXPoNgU)  -->
 
 [WHAT ELSE SHOULD GO HERE?]
 
@@ -245,10 +238,10 @@ path = "."
 [[rule]]
 impl = "python"
 name = "move_isort_cfg"
-# scope = "project"
+scope = "project"
 project_types = ["python"]
 ```
-<!-- [[[end]]] (sum: oNIFtGdtuN) -->
+<!-- [[[end]]] (sum: 2R7CGqC2ZG) -->
 
 The `impl` setting means we will implement the rule with Python code.
 Setting `scope` to `project` means the rule will be invoked at the project
@@ -384,12 +377,9 @@ Now `ick run` shows a dry-run summary of the changes that would be made:
 <!-- [[[cog show_cmd("ick run") ]]] -->
 ```console
 $ ick run
--> move_isort_cfg FAIL
-     move_isort_cfg
-     isort.cfg +0-3
-     pyproject.toml +3-0
+-> move_isort_cfg OK
 ```
-<!-- [[[end]]] (sum: NMU6ekvaPt) -->
+<!-- [[[end]]] (sum: CQwDezy1z7) -->
 
 Passing the `--patch` option displays the full patch of the changes that would
 be made:
@@ -397,27 +387,9 @@ be made:
 <!-- [[[cog show_cmd("ick run --patch") ]]] -->
 ```console
 $ ick run --patch
--> move_isort_cfg FAIL
-     move_isort_cfg
-diff --git isort.cfg isort.cfg
-deleted file mode 100644
-index fbab120..0000000
---- isort.cfg
-+++ /dev/null
-@@ -1,3 +0,0 @@
--[settings]
--line_length = 88
--multi_line_output = 3
-diff --git pyproject.toml pyproject.toml
-index e69de29..089c824 100644
---- pyproject.toml
-+++ pyproject.toml
-@@ -0,0 +1,3 @@
-+[tool.isort]
-+line_length = "88"
-+multi_line_output = "3"
+-> move_isort_cfg OK
 ```
-<!-- [[[end]]] (sum: zy/3zowNaD) -->
+<!-- [[[end]]] (sum: cPJ9ilFfpe) -->
 
 
 ## Reducing execution

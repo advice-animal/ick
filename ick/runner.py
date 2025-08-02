@@ -4,12 +4,8 @@ import collections
 import io
 import json
 import re
-import sys
-import traceback
-from concurrent.futures import ThreadPoolExecutor
 from contextlib import ExitStack
 from dataclasses import dataclass
-from fnmatch import fnmatch
 from glob import glob
 from logging import getLogger
 from pathlib import Path
@@ -18,15 +14,14 @@ from tempfile import TemporaryDirectory
 from typing import Iterable, Sequence
 
 import moreorless
+from feedforward import Run, Step
 from keke import ktrace
 from moreorless import unified_diff
 from rich import print
-from vmodule import VLOG_1
 
-from ick_protocol import Finished, Modified, Scope
+from ick_protocol import Finished, Modified
 
 from .base_rule import BaseRule
-from .clone_aside import CloneAside
 from .config import RuntimeConfig
 from .config.rule_repo import discover_rules, get_impl
 from .project_finder import find_projects
@@ -101,34 +96,24 @@ class Runner:
             buffered_output.write(text)
             buffered_output.write("\n")
 
-        with ThreadPoolExecutor() as tpe:
-            final_status = 0
-            for rule_instance, test_paths in self.iter_tests():
-                outstanding = {}
-                print(f"  [bold]{rule_instance.rule_config.qualname}[/bold]: ", end="")
-                rule_instance.prepare()
-                if not test_paths:
-                    print("<no-test>", end="")
-                    buf_print(
-                        f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
-                    )
-                else:
-                    for test_path in test_paths:
-                        result = TestResult(rule_instance, test_path)
-                        fut = tpe.submit(self._perform_test, rule_instance, test_path, result)
-                        outstanding[fut] = result
+        # Run is already parallel, so execute this singly so we can operate on
+        # self's instance vars.
 
-                success = True
-                for fut in outstanding.keys():
-                    result = outstanding[fut]
-                    try:
-                        fut.result()
-                    except Exception as e:
-                        result.success = False
-                        typ, value, tb = sys.exc_info()
-                        # This should be combined with how we actually run things...
-                        result.traceback = "".join(traceback.format_tb(tb))
-                        result.message = repr(e)
+        final_status = 0
+        for rule_instance, test_paths in self.iter_tests():
+            success = True
+            print(f"  [bold]{rule_instance.rule_config.qualname}[/bold]: ", end="")
+            if not test_paths:
+                print("<no-test>", end="")
+                buf_print(
+                    f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
+                )
+            else:
+                for test_path in test_paths:
+                    result = TestResult(rule_instance, test_path)
+                    # Not guarded because in user code won't raise here, it
+                    # will surface as a HLR failure.
+                    self._perform_test(rule_instance, test_path, result)
 
                     if result.success:
                         print(".", end="")
@@ -146,17 +131,17 @@ class Runner:
                         buf_print(result.message)
                         buf_print(result.diff)
 
-                if success:
-                    print(" [green]PASS[/]")
-                else:
-                    print(" [red]FAIL[/]")
+            if success:
+                print(" [green]PASS[/]")
+            else:
+                print(" [red]FAIL[/]")
 
-            if buffered_output.tell():
-                print()
-                print("DETAILS")
-                print(buffered_output.getvalue())
+        if buffered_output.tell():
+            print()
+            print("DETAILS")
+            print(buffered_output.getvalue())
 
-            return final_status
+        return final_status
 
     def _perform_test(self, rule_instance, test_path, result: TestResult) -> None:  # type: ignore[no-untyped-def] # FIX ME
         inp = test_path / "input"
@@ -174,14 +159,14 @@ class Runner:
 
             repo = maybe_repo(tp, stack.enter_context, for_testing=True)
 
-            project = Project(repo, "", "python", "invalid.bin")
+            x = next(self.run(test_impl=rule_instance, test_repo=repo))
+            response = x.modifications
+
             files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
             files_to_check = {f for f in files_to_check if (outp / f).is_file()}
 
-            response = self._run_one(rule_instance, repo, project)
-            if not isinstance(response[-1], Finished):
-                raise AssertionError(f"Last response is not Finished: {response[-1].__class__.__name__}")
-            if response[-1].status is None:
+            if x.finished.status is None:
+                # Error state
                 expected_path = outp / "output.txt"
                 if not expected_path.exists():
                     result.message = f"Test crashed, but {expected_path} doesn't exist so that seems unintended:\n{response[-1].message}"
@@ -194,21 +179,23 @@ class Runner:
                     result.diff = moreorless.unified_diff(expected, response[-1].message, "output.txt")
                     result.message = "Different output found"
                 return
-            elif response[-1].status is False and len(response) == 1:
+            elif x.finished.status is False and not x.modifications:
+                # Didn't match expectation
                 expected_path = outp / "fail.txt"
                 if not expected_path.exists():
-                    result.message = f"Test failed, but {expected_path} doesn't exist so that seems unintended:\n{response[-1].message}"
+                    result.message = f"Test failed, but {expected_path} doesn't exist so that seems unintended:\n{x.finished.message}"
                     return
 
                 expected = expected_path.read_text()
-                if expected == response[-1].message:
+                if expected == x.finished.message:
                     result.success = True
                 else:
-                    result.diff = moreorless.unified_diff(expected, response[-1].message, "fail.txt")
+                    result.diff = moreorless.unified_diff(expected, x.finished.message, "fail.txt")
                     result.message = "Different output found"
                 return
             else:
-                for r in response[:-1]:
+                # Mainly 0 exit
+                for r in response:
                     assert isinstance(r, Modified)
                     if r.new_bytes is None:
                         if r.filename in files_to_check:
@@ -242,51 +229,44 @@ class Runner:
             test_path = impl.rule_config.test_path
             yield impl, tuple(test_path.glob("*/"))  # type: ignore[union-attr,arg-type] # FIX ME
 
-    def run(self) -> Iterable[HighLevelResult]:
-        for impl in self.iter_rule_impl():
-            qualname = impl.rule_config.qualname
+    def run(self, test_impl=None, test_repo=None, status_callback=None, done_callback=None) -> Iterable[HighLevelResult]:
+        # TODO deliberate in a flag:
+        run = Run(status_callback=status_callback, done_callback=done_callback, deliberate=True, parallelism=1)
+        if test_impl:
+            assert test_repo
+            self.repo = test_repo
+            project = Project(test_repo, "", "python", "invalid.bin")
+            test_impl.add_steps_to_run([project], run)
+        else:
+            for impl in self.iter_rule_impl():
+                impl.add_steps_to_run(self.projects, run)
 
-            impl.prepare()
-            if impl.rule_config.scope == Scope.REPO:
-                responses = self._run_one(impl, self.repo, Project(self.repo, ".", "repo", ""))
-                mod = [m for m in responses if isinstance(m, Modified)]
-                assert isinstance(responses[-1], Finished)
-                yield HighLevelResult(qualname, ".", mod, responses[-1])
+        run.add_step(Step())  # Final sink
+
+        # TODO parallelize or show a progress bar, this takes a while...
+        repo_contents: dict[str, bytes] = {}
+        # TODO the version that includes dirty files
+        for f in self.repo.zfiles.split("\0"):
+            if not f:
+                continue
+            p = self.repo.root / f
+            # TODO symlinks, empty dirs?
+            if p.is_file():
+                repo_contents[f] = p.read_bytes()
+
+        run.run_to_completion(repo_contents)
+        for s in run._steps[:-1]:
+            if s.cancelled:
+                # This should also encompass exit codes other than 0 and 99
+                # print(f"{s} failed:")
+                # print(f"  {s.cancel_reason}")
+                yield HighLevelResult(s.qualname, s.match_prefix, [], Finished("a", False, s.cancel_reason))
             else:
-                for p in self.projects:
-                    if impl.rule_config.project_types and p.typ not in impl.rule_config.project_types:
-                        LOG.log(VLOG_1, "Skipping run on %s because it is not among %s", p, impl.rule_config.project_types)
-                        continue
-                    responses = self._run_one(impl, self.repo, p)
-                    mod = [m for m in responses if isinstance(m, Modified)]
-                    assert isinstance(responses[-1], Finished)
-                    yield HighLevelResult(qualname, p.subdir, mod, responses[-1])
+                # if any(e == 99 for e in s.exit_codes):
+                #     ...
 
-    def _run_one(self, rule_instance, repo, project) -> list[HighLevelResult]:  # type: ignore[no-untyped-def] # FIX ME
-        try:
-            resp = []
-            with CloneAside(repo.root) as tmp:
-                with rule_instance.work_on_project(tmp) as work:
-                    work.rule.command_env.update(self.ick_env_vars)
-                    for h in rule_instance.list().rule_names:
-                        # TODO only if files have some contents
-                        filenames = project.relative_filenames()
-                        if project.subdir:
-                            work.project_path += "/" + project.subdir
-
-                        # TODO %.py different than *.py once we go parallel
-                        if rule_instance.rule_config.inputs:
-                            filenames = [f for f in filenames if any(fnmatch(f, x) for x in rule_instance.rule_config.inputs)]
-
-                        # Note: work.run will return early if filenames is empty and we're in single-file mode
-                        resp.extend(work.run(rule_instance.rule_config.qualname, filenames))
-        except Exception as e:
-            typ, value, tb = sys.exc_info()
-            buf = io.StringIO()
-            traceback.print_tb(tb, file=buf)
-            print(repr(e), file=buf)
-            resp = [Finished(rule_instance.rule_config.qualname, status=None, message=buf.getvalue())]
-        return resp
+                changes = s.compute_diff_messages()
+                yield HighLevelResult(s.qualname, s.match_prefix, changes[:-1], changes[-1])
 
     @ktrace()
     def echo_rules(self) -> None:
@@ -340,3 +320,12 @@ def pl(noun: str, count: int) -> str:
     if count == 1:
         return noun
     return noun + "s"
+
+
+def _demo_status_callback(run) -> None:
+    print("%4d/%4d " % (run._finalized_idx + 1, len(run._steps)) + " ".join(step.emoji() for step in run._steps))
+
+
+def _demo_done_callback(run) -> None:
+    print(" " * 10 + " ".join("%2d" % (next(step.gen_counter) - 1) for step in run._steps))
+    print(f"Total time: {run._end_time - run._start_time:.2f}s")

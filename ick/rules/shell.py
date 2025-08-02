@@ -3,13 +3,11 @@ from __future__ import annotations
 import os
 import shlex
 
-from ..base_rule import BaseRule, ExecWork
+from ..base_rule import BaseRule
 from ..config import RuleConfig
 
 
 class Rule(BaseRule):
-    work_cls = ExecWork
-
     def __init__(self, rule_config: RuleConfig) -> None:
         super().__init__(rule_config)
         if rule_config.command:
@@ -23,6 +21,3 @@ class Rule(BaseRule):
 
         # TODO
         self.command_env = os.environ.copy()
-
-    def prepare(self) -> None:
-        pass

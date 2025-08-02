@@ -19,6 +19,7 @@ class PythonEnv:
     def __init__(self, env_path: Path, deps: list[str] | None) -> None:
         self.env_path = env_path
         self.deps = deps or []
+        self._cached_health = None
 
     def bin(self, prog) -> Path:  # type: ignore[no-untyped-def] # FIX ME
         """
@@ -33,29 +34,53 @@ class PythonEnv:
         return self.env_path / "deps.txt"
 
     def health_check(self) -> bool:
-        py = self.bin("python")
-        if not py.exists():
-            return False
-        try:
-            _, returncode = run_cmd_status([py, "--version"], check=False)
-        except PermissionError:
-            return False
-        if returncode != 0:
-            return False
+        # Both None (we don't know) and False (we know it's not working) should
+        # cause us to check again...
+        if not self._cached_health:
+            py = self.bin("python")
+            if not py.exists():
+                self._cached_health = False
+                return self._cached_health
+            try:
+                _, returncode = run_cmd_status([py, "--version"], check=False)
+            except PermissionError:
+                self._cached_health = False
+                return self._cached_health
+            if returncode != 0:
+                self._cached_health = False
+                return self._cached_health
 
-        # Eek, this could happen outside the lock, so be defensive against
-        # concurrent modification more than usual
-        try:
-            deps = self._deps_path().read_text()
-        except OSError:
-            return False
-        return deps == json.dumps(self.deps)
+            # Eek, this could happen outside the lock, so be defensive against
+            # concurrent modification more than usual
+            try:
+                deps = self._deps_path().read_text()
+            except OSError:
+                self._cached_health = False
+                return self._cached_health
+            self._cached_health = deps == json.dumps(self.deps)
 
-    def prepare(self):  # type: ignore[no-untyped-def] # FIX ME
+        assert self._cached_health is not None
+        return self._cached_health
+
+    def prepare(self, blocking=True):  # type: ignore[no-untyped-def] # FIX ME
+        """
+        Attempt to set up this venv.
+
+        Returns True if it's ready to go.
+        Returns False if it's not ready, but we think some other thread is working on it.
+        Blocks if we're that thread, then returns True.
+        """
         if self.health_check():
             return True
 
-        with FileLock(self.env_path.with_suffix(".lock")):
+        with FileLock(self.env_path.with_suffix(".lock"), blocking=blocking) as lock:
+            if not lock.is_locked:
+                return False
+
+            # Double check that we still need to set it up.
+            if self.health_check():
+                return True
+
             uv = find_uv()
 
             if self.env_path.exists():
@@ -78,6 +103,7 @@ class PythonEnv:
             run_cmd(
                 [uv, "venv", "--python", python_exe, self.env_path],
                 env=env,
+                timeout=10,
             )
 
             # A bit silly to create a venv with no deps, but handle it gracefully
@@ -92,3 +118,4 @@ class PythonEnv:
                     env=env,
                 )
             self._deps_path().write_text(json.dumps(self.deps))
+        return True

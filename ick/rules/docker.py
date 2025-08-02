@@ -1,14 +1,12 @@
 import os
 import shlex
 
-from ..base_rule import BaseRule, ExecWork
+from ..base_rule import BaseRule
 from ..config import RuleConfig
 from ..sh import run_cmd
 
 
 class Rule(BaseRule):
-    work_cls = ExecWork
-
     def __init__(self, rule_config: RuleConfig) -> None:
         super().__init__(rule_config)
         if isinstance(self.rule_config.command, str):
