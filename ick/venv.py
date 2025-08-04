@@ -118,4 +118,5 @@ class PythonEnv:
                     env=env,
                 )
             self._deps_path().write_text(json.dumps(self.deps))
+            self._cached_health = None
         return True
