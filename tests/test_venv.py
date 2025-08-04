@@ -24,6 +24,7 @@ def test_env_happy_path(tmp_path: Path) -> None:
     os.replace(evil_python, pybin)
     assert pybin.exists()
     assert not os.access(pybin, os.X_OK)
+    p._cached_health = None
     assert not p.health_check()
 
     pybin.chmod(0o755)
