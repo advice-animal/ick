@@ -49,7 +49,13 @@ class GenericPreparedStep(Step):
         self.extra_env = extra_env
         self.append_filenames = append_filenames
         self.rule_prepare = rule_prepare
-        self.messages = []
+        # dict key is gen, (keys, ...) and for these to match precisely we
+        # should have output_state gens[self.index] == gen for all the listed
+        # keys; if we have none of them then we should skip that message.
+        #
+        # dict value is output, exit code and we decide what the aggregate code
+        # is at the end.
+        self.batch_messages: dict[tuple[int, tuple[str, ...]], tuple[str, int]] = {}
         self.rule_status = True  # Success
 
     def match(self, key):
@@ -80,12 +86,15 @@ class GenericPreparedStep(Step):
 
             # Then the ones we're being asked to do
             filenames = []
+            batch_key = {}
+            batch_value = None
             for n in notifications:
                 if n.state.value is ERASURE:
                     continue
                 relative_filename = n.key[len(self.match_prefix) :]
                 materialize(d, relative_filename, n.state.value)
                 filenames.append(relative_filename)
+                batch_key[n.key] = n.state.gens[self.index]
 
             # nice_cmd = " ".join(map(str, self.cmdline))
             if self.append_filenames:
@@ -106,15 +115,13 @@ class GenericPreparedStep(Step):
                 self.cancel(str(e))
                 return
             except subprocess.CalledProcessError as e:
+                msg = ""
                 if e.stdout:
-                    self.messages.append(e.stdout)
+                    msg += e.stdout
                 if e.stderr:
-                    self.messages.append(e.stderr)
+                    msg += e.stderr
 
-                if e.returncode == 99:
-                    self.rule_status = False
-                else:
-                    self.rule_status = None
+                batch_value = (msg, e.returncode)
 
             expected = {n.key[len(self.match_prefix) :]: n.state.value for n in notifications if n.state.value is not ERASURE}
             changed, new, remv = analyze_dir(d, expected)
@@ -124,11 +131,14 @@ class GenericPreparedStep(Step):
                 relative_filename = n.key[len(self.match_prefix) :]
                 if relative_filename in changed:
                     yield self.update_notification(n, next_gen, new_value=Path(d, relative_filename).read_bytes())
+                    batch_key[n.key] = next_gen
                 elif relative_filename in remv:
                     yield self.update_notification(n, next_gen, new_value=ERASURE)
+                    batch_key[n.key] = next_gen
 
             brand_new_gens = self.update_generations((0,) * len(notifications[0].state.gens), next_gen)
             for name in new:
+                batch_key[name] = next_gen
                 yield Notification(
                     key=name,
                     state=State(
@@ -136,6 +146,8 @@ class GenericPreparedStep(Step):
                         value=Path(d, name).read_bytes(),
                     ),
                 )
+            if batch_value:
+                self.batch_messages[tuple(batch_key.items())] = batch_value
 
     def compute_diff_messages(self):
         assert not self.cancelled
@@ -166,14 +178,44 @@ class GenericPreparedStep(Step):
                 )
             elif k not in self.accepted_state:
                 # Well then...
-                changes.append(Modified(rule_name=self.qualname, filename=k, new_bytes=self.output_state[k].value))
+                diff = moreorless.unified_diff("", self.output_state[k].value.decode(), k)
+                diffstat = "+%d-%d" % (diff.count("\n+"), diff.count("\n-"))
+                changes.append(
+                    Modified(rule_name=self.qualname, filename=k, new_bytes=self.output_state[k].value, diff=diff, diffstat=diffstat)
+                )
 
-        if self.rule_status and changes:
+        # Keep only the messages that still apply...
+        msgs = []
+        disclaimer = None
+        rc = set()
+        for key_generations, v in self.batch_messages.items():
+            if all(self.output_state[k].gens[self.index] == g for k, g in key_generations):
+                # Keep, fully applies!
+                msgs.append(v[0])
+                rc.add(v[1])
+            elif not any(self.output_state[k].gens[self.index] == g for k, g in key_generations):
+                # Drop, none applies
+                pass
+            else:
+                msgs.append(v[0])
+                rc.add(v[1])
+                disclaimer = "These messages only partially apply; set to non-eager or batch size of 1 to make more precise\n\n"
+
+        if rc - {99, 0}:
+            # Error, consider showing the code...
+            self.rule_status = None
+        elif 99 in rc or changes:
             # As documented in ick_protocol, it's a fail if there are changes...
             self.rule_status = False
+        else:
+            # Success
+            self.rule_status = True
+
+        if disclaimer:
+            msgs.insert(0, disclaimer)
 
         changes.append(
-            Finished(self.qualname, status=self.rule_status, message="".join(self.messages)),
+            Finished(self.qualname, status=self.rule_status, message="".join(msgs)),
         )
         return changes
 
@@ -230,7 +272,7 @@ class BaseRule:
     def prepare(self) -> bool:
         return True  # no setup required
 
-    def add_steps_to_run(self, projects: Any, run: Run) -> None:
+    def add_steps_to_run(self, projects: Any, env: dict[str, str], run: Run) -> None:
         qualname = self.rule_config.qualname
 
         if self.rule_config.scope == Scope.FILE:
@@ -241,7 +283,7 @@ class BaseRule:
                         patterns=self.rule_config.inputs,
                         project_path=p.subdir,
                         cmdline=self.command_parts,
-                        extra_env=self.command_env,
+                        extra_env=env | self.command_env,
                         append_filenames=True,
                         rule_prepare=self.prepare,
                     )
@@ -253,7 +295,7 @@ class BaseRule:
                     patterns=self.rule_config.inputs or ("*",),
                     project_path="",
                     cmdline=self.command_parts,
-                    extra_env=self.command_env,
+                    extra_env=env | self.command_env,
                     append_filenames=False,
                     rule_prepare=self.prepare,
                     eager=False,

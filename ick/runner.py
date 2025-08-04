@@ -236,10 +236,10 @@ class Runner:
             assert test_repo
             self.repo = test_repo
             project = Project(test_repo, "", "python", "invalid.bin")
-            test_impl.add_steps_to_run([project], run)
+            test_impl.add_steps_to_run([project], self.ick_env_vars, run)
         else:
             for impl in self.iter_rule_impl():
-                impl.add_steps_to_run(self.projects, run)
+                impl.add_steps_to_run(self.projects, self.ick_env_vars, run)
 
         run.add_step(Step())  # Final sink
 
