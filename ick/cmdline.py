@@ -17,7 +17,7 @@ from ._regex_translate import advice_name_re
 from .config import RuntimeConfig, Settings, load_main_config, load_rules_config, one_repo_config
 from .git import find_repo_root
 from .project_finder import find_projects as find_projects_fn
-from .runner import Runner
+from .runner import Runner, _demo_done_callback, _demo_status_callback
 from .types_project import maybe_repo
 
 
@@ -106,6 +106,7 @@ def test_rules(ctx: click.Context, filters: list[str]) -> None:
 @click.option("--yolo", is_flag=True, help="Yolo mode enables modifying external state")
 @click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by rule qualname (can be used with list-rules --json)")
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
+@click.option("--emojis", is_flag=True, help="Show a waterfall of emojis as work is being done")
 @click.argument("filters", nargs=-1)
 @click.pass_context
 def run(
@@ -115,6 +116,7 @@ def run(
     yolo: bool,
     json_flag: bool,
     skip_update: bool,
+    emojis: bool,
     filters: list[str],
 ) -> None:
     """
@@ -138,9 +140,15 @@ def run(
     # DO THE NEEDFUL
 
     results = {}
+    kwargs: dict[str, str] = {}
+
+    # TODO boring progress bar default
+    if emojis:
+        kwargs["status_callback"] = _demo_status_callback
+        kwargs["done_callback"] = _demo_done_callback
 
     r = Runner(ctx.obj, ctx.obj.repo)
-    for result in r.run():
+    for result in r.run(**kwargs):
         if not json_flag:
             where = f"on {result.project} " if result.project else ""
             print(f"-> [bold]{result.rule}[/bold] {where}", end="")
