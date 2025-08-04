@@ -73,11 +73,11 @@ but no files are changed:
 <!-- [[[cog show_cmd("ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run") ]]] -->
 ```console
 $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run
--> ick-tutorial-rules-1/move_isort_cfg OK
+-> ick-tutorial-rules-1/move_isort_cfg FAIL
      pyproject.toml +5-0
      isort.cfg +1-3
 ```
-<!-- [[[end]]] (sum: yReK0mLGhM)  -->
+<!-- [[[end]]] (sum: Ap8jhKLTlm)  -->
 
 This shows that isort.cfg would have three lines deleted, and pyproject.toml
 would have four lines added.
@@ -87,7 +87,7 @@ To see the full diff, use the `--patch` option:
 <!-- [[[cog show_cmd("ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --patch") ]]] -->
 ```console
 $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --patch
--> ick-tutorial-rules-1/move_isort_cfg OK
+-> ick-tutorial-rules-1/move_isort_cfg FAIL
 --- a/isort.cfg
 +++ b/isort.cfg
 @@ -1,3 +0,0 @@
@@ -105,7 +105,7 @@ $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --p
 +line_length = "88"
 +multi_line_output = "3"
 ```
-<!-- [[[end]]] (sum: pRsyXPoNgU)  -->
+<!-- [[[end]]] (sum: NSXvn3onvy)  -->
 
 [WHAT ELSE SHOULD GO HERE?]
 

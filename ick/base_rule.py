@@ -168,6 +168,10 @@ class GenericPreparedStep(Step):
                 # Well then...
                 changes.append(Modified(rule_name=self.qualname, filename=k, new_bytes=self.output_state[k].value))
 
+        if self.rule_status and changes:
+            # As documented in ick_protocol, it's a fail if there are changes...
+            self.rule_status = False
+
         changes.append(
             Finished(self.qualname, status=self.rule_status, message="".join(self.messages)),
         )
