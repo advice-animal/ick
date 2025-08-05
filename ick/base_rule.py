@@ -214,6 +214,10 @@ class GenericPreparedStep(Step):
         if disclaimer:
             msgs.insert(0, disclaimer)
 
+        if self.rule_status and changes:
+            # As documented in ick_protocol, it's a fail if there are changes...
+            self.rule_status = False
+
         changes.append(
             Finished(self.qualname, status=self.rule_status, message="".join(msgs)),
         )
