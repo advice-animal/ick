@@ -1,41 +1,43 @@
-import subprocess
 from pathlib import Path
+
+from feedforward import Notification, State
 
 from ick.config import RuleConfig
 from ick.rules.pygrep import Rule
-from ick_protocol import Finished, Modified
+from ick.types_project import Project
+
+
+class FakeRun:
+    def __init__(self):
+        self.steps = []
+
+    def add_step(self, step):
+        self.steps.append(step)
 
 
 def test_pygrep_works(tmp_path: Path) -> None:
-    pygrep = Rule(
-        RuleConfig(
-            name="foo",
-            impl="pygrep",
-            search="hello",
-            replace="bar",
+    conf = RuleConfig(
+        name="foo",
+        impl="pygrep",
+        search="hello",
+        replace="bar",
+        inputs=["*.sh"],
+    )
+    rule = Rule(conf)
+
+    run = FakeRun()
+    projects = [Project(None, "my_subdir/", "shell", "bash.sh")]
+    rule.add_steps_to_run(projects, {}, run)
+
+    assert len(run.steps) == 1
+
+    run.steps[0].index = 0
+    rv = list(run.steps[0].process(1, [Notification(key="my_subdir/demo.sh", state=State(gens=(0,), value=b"xhello\n"))]))
+    assert len(rv) == 1
+    assert rv[0] == Notification(
+        key="my_subdir/demo.sh",
+        state=State(
+            gens=(1,),
+            value=b"xbar\n",
         ),
-    )
-    subprocess.check_call(["git", "init"], cwd=tmp_path)
-    (tmp_path / "foo.py").write_text("xhello\n")
-    subprocess.check_call(["git", "add", "-N", "."], cwd=tmp_path)
-    subprocess.check_call(["git", "commit", "-a", "-msync"], cwd=tmp_path)
-
-    with pygrep.work_on_project(tmp_path) as work:
-        resp = list(work.run("pygrep", ["foo.py"]))
-
-    assert len(resp) == 2
-    resp[0].diff = "X"
-    assert resp[0] == Modified(
-        rule_name="pygrep",
-        filename="foo.py",
-        new_bytes=b"xbar\n",
-        additional_input_filenames=(),
-        diffstat="+1-1",
-        diff="X",
-    )
-
-    assert resp[1] == Finished(
-        rule_name="pygrep",
-        status=False,
-        message="pygrep",
     )

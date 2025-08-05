@@ -1,13 +1,21 @@
-import subprocess
-from pathlib import Path
+
+from feedforward import Notification, State
 
 from ick.config import RuleConfig
 from ick.rules.merge_toml import Rule
-from ick_protocol import Finished, Modified
+from ick.types_project import Project
 
 
-def test_merge_toml_works(tmp_path: Path) -> None:
-    merge_toml = Rule(
+class FakeRun:
+    def __init__(self):
+        self.steps = []
+
+    def add_step(self, step):
+        self.steps.append(step)
+
+
+def test_merge_toml_works() -> None:
+    rule = Rule(
         RuleConfig(
             name="foo",
             impl="merge_toml",
@@ -15,29 +23,25 @@ def test_merge_toml_works(tmp_path: Path) -> None:
 [foo]
 baz = 99
 """,
+            inputs=["*.toml"],
         ),
     )
-    subprocess.check_call(["git", "init"], cwd=tmp_path)
-    (tmp_path / "foo.toml").write_text("# doc comment\n[foo]\nbar = 0\nbaz = 1\nfloof = 2\n")
-    subprocess.check_call(["git", "add", "-N", "."], cwd=tmp_path)
-    subprocess.check_call(["git", "commit", "-a", "-msync"], cwd=tmp_path)
+    assert rule.prepare()
 
-    with merge_toml.work_on_project(tmp_path) as work:
-        resp = list(work.run("merge_toml", ["foo.toml"]))
+    run = FakeRun()
+    projects = [Project(None, "my_subdir/", "python", "demo.py")]
+    rule.add_steps_to_run(projects, {}, run)
 
-    assert len(resp) == 2
-    resp[0].diff = "X"
-    assert resp[0] == Modified(
-        rule_name="merge_toml",
-        filename="foo.toml",
-        new_bytes=b"# doc comment\n[foo]\nbar = 0\nbaz = 99\nfloof = 2\n",
-        additional_input_filenames=(),
-        diffstat="+1-1",
-        diff="X",
+    assert len(run.steps) == 1
+    run.steps[0].index = 0
+    rv = list(
+        run.steps[0].process(
+            1,
+            [Notification(key="my_subdir/demo.toml", state=State(gens=(0,), value=b"# doc comment\n[foo]\nbar = 0\nbaz = 1\nfloof = 2\n"))],
+        )
     )
-
-    assert resp[1] == Finished(
-        rule_name="merge_toml",
-        status=False,
-        message="merge_toml",
+    assert len(rv) == 1
+    assert rv[0] == Notification(
+        key="my_subdir/demo.toml",
+        state=State(gens=(1,), value=b"# doc comment\n[foo]\nbar = 0\nbaz = 99\nfloof = 2\n"),
     )
