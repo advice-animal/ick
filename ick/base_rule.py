@@ -157,7 +157,7 @@ class GenericPreparedStep(Step):
         assert self.outputs_final
 
         changes = []
-        for k in set(self.accepted_state) | set(self.output_state):
+        for k in sorted(set(self.accepted_state) | set(self.output_state)):
             if k in self.accepted_state and k in self.output_state:
                 # Diff but be careful of erasures...
                 a = self.accepted_state[k].value
