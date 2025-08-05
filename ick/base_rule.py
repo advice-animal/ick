@@ -123,6 +123,7 @@ class GenericPreparedStep(Step):
                     msg += e.stderr
 
                 batch_value = (msg, e.returncode)
+                print(f"LOOK {e.returncode=}: {msg=}")
             else:
                 batch_value = (stdout, 0)
 

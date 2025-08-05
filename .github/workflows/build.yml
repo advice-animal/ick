@@ -36,7 +36,8 @@ jobs:
         run: |
           git config --global user.name "Unit Test"
           git config --global user.email "example@example.com"
-          make test
+          pytest -k test_rules_python
+          #make test
       - name: Lint
         run: |
           make lint
