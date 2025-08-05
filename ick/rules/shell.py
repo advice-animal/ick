@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import shlex
 
 from ..base_rule import BaseRule
@@ -17,7 +16,4 @@ class Rule(BaseRule):
                 self.command_parts = rule_config.command
         else:
             assert rule_config.data
-            self.command_parts = ["/bin/bash", "-c", rule_config.data.strip(), "placeholder"]
-
-        # TODO
-        self.command_env = os.environ.copy()
+            self.command_parts = ["/bin/bash", "-c", rule_config.data.strip()]

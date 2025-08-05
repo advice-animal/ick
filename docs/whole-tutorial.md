@@ -76,6 +76,7 @@ $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run
 -> ick-tutorial-rules-1/move_isort_cfg FAIL
      pyproject.toml +5-0
      isort.cfg +1-3
+     pyproject.toml +5-0
 ```
 <!-- [[[end]]] (sum: Ap8jhKLTlm)  -->
 
@@ -104,6 +105,12 @@ $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --p
 +[tool.isort]
 +line_length = "88"
 +multi_line_output = "3"
+--- a/isort.cfg
++++ b/isort.cfg
+@@ -1,3 +0,0 @@
+-[settings]
+-line_length = 88
+-multi_line_output = 3
 ```
 <!-- [[[end]]] (sum: NSXvn3onvy)  -->
 
