@@ -25,3 +25,20 @@ def bucket(items, key):  # type: ignore[no-untyped-def] # FIX ME
         k = key(i)
         d.setdefault(k, []).append(i)
     return d
+
+
+def diffstat(diff_text: str) -> str:
+    # A typical diff stars with the lines
+    #
+    # --- a
+    # +++ b
+    #
+    # Only the + line needs to subtract one; this approximate.
+    added = diff_text.count("\n+") - 1
+    removed = diff_text.count("\n-")
+    s = ""
+    if added:
+        s += f"+{added}"
+    if removed:
+        s += f"-{removed}"
+    return s
