@@ -14,6 +14,7 @@ class Rule(BaseRule):
     def __init__(self, rule_config: RuleConfig) -> None:
         super().__init__(rule_config)
         # TODO validate path / rule.name ".py" exists
+        assert rule_config.qualname != ""
         venv_key = rule_config.qualname
         venv_path = Path(platformdirs.user_cache_dir("ick", "advice-animal"), "envs", venv_key)
         self.venv = PythonEnv(venv_path, self.rule_config.deps)

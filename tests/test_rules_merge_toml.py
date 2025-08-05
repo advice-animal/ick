@@ -1,11 +1,9 @@
-
 from feedforward import Notification, State
+from helpers import FakeRun
 
 from ick.config import RuleConfig
 from ick.rules.merge_toml import Rule
 from ick.types_project import Project
-
-from helpers import FakeRun
 
 
 def test_merge_toml_works() -> None:

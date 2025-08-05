@@ -1,12 +1,11 @@
 from pathlib import Path
 
 import pytest
+from helpers import FakeRun
 
 from ick.config import RuleConfig
 from ick.rules.shell import Rule
 from ick.types_project import Project
-
-from helpers import FakeRun
 
 
 @pytest.mark.parametrize(

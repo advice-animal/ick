@@ -101,6 +101,10 @@ class RuleConfig(Struct):
     contact: Optional[str] = None
     url: Optional[str] = None
 
+    def __post_init__(self) -> None:
+        if not self.qualname:
+            self.qualname = self.name
+
 
 @ktrace()
 def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:

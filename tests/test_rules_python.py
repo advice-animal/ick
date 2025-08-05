@@ -1,12 +1,12 @@
+from inspect import cleandoc
 from pathlib import Path
 
 from feedforward import Notification, State
+from helpers import FakeRun
 
 from ick.config import RuleConfig
 from ick.rules.python import Rule
 from ick.types_project import Project
-
-from helpers import FakeRun
 
 
 def test_python_works(tmp_path: Path) -> None:
@@ -15,13 +15,13 @@ def test_python_works(tmp_path: Path) -> None:
             name="foo",
             impl="python",
             inputs=["*.py"],
-            data="""\
-import sys
-import attrs
-for f in sys.argv[1:]:
-    with open(f, "w") as fo:
-        fo.write("new\\n")
-""",
+            data=cleandoc("""
+                import sys
+                import attrs
+                for f in sys.argv[1:]:
+                    with open(f, "w") as fo:
+                        fo.write("new\\n")
+                """),
             deps=["attrs"],
         ),
     )
@@ -29,6 +29,7 @@ for f in sys.argv[1:]:
     run = FakeRun()
     projects = [Project(None, "my_subdir/", "python", "demo.py")]
     rule.add_steps_to_run(projects, {}, run)
+    rule.prepare()
 
     assert len(run.steps) == 1
 
