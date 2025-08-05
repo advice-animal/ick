@@ -74,11 +74,10 @@ but no files are changed:
 ```console
 $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run
 -> ick-tutorial-rules-1/move_isort_cfg FAIL
-     pyproject.toml +5-0
-     isort.cfg +1-3
-     pyproject.toml +5-0
+     isort.cfg -3
+     pyproject.toml +4
 ```
-<!-- [[[end]]] (sum: Ap8jhKLTlm)  -->
+<!-- [[[end]]] (sum: C7CcJHeFxD)   -->
 
 This shows that isort.cfg would have three lines deleted, and pyproject.toml
 would have four lines added.
@@ -105,14 +104,8 @@ $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --p
 +[tool.isort]
 +line_length = "88"
 +multi_line_output = "3"
---- a/isort.cfg
-+++ b/isort.cfg
-@@ -1,3 +0,0 @@
--[settings]
--line_length = 88
--multi_line_output = 3
 ```
-<!-- [[[end]]] (sum: NSXvn3onvy)  -->
+<!-- [[[end]]] (sum: NSXvn3onvy)   -->
 
 [WHAT ELSE SHOULD GO HERE?]
 
