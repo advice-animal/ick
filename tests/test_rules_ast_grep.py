@@ -1,11 +1,9 @@
-
 from feedforward import Notification, State
+from helpers import FakeRun
 
 from ick.config import RuleConfig
 from ick.rules.ast_grep import Rule
 from ick.types_project import Project
-
-from helpers import FakeRun
 
 
 def test_ast_grep_works() -> None:

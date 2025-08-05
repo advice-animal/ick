@@ -1,12 +1,11 @@
 from pathlib import Path
 
 from feedforward import Notification, State
+from helpers import FakeRun
 
 from ick.config import RuleConfig
 from ick.rules.pygrep import Rule
 from ick.types_project import Project
-
-from helpers import FakeRun
 
 
 def test_pygrep_works(tmp_path: Path) -> None:
