@@ -73,7 +73,7 @@ class GenericPreparedStep(Step):
     def _gravitational_constant(self):
         return 1
 
-    @ktrace("self.qualname", "self.project_path", "next_gen")
+    @ktrace("self.qualname", "self.match_prefix", "next_gen")
     def process(self, next_gen: int, notifications):
         notifications = list(notifications)
         # TODO name better, pick a good one...
@@ -284,7 +284,7 @@ class BaseRule:
                 run.add_step(
                     GenericPreparedStep(
                         qualname=qualname,
-                        patterns=self.rule_config.inputs,
+                        patterns=self.rule_config.inputs,  # Don't default, let it raise
                         project_path=p.subdir,
                         cmdline=self.command_parts,
                         extra_env=env | self.command_env,
@@ -292,23 +292,40 @@ class BaseRule:
                         rule_prepare=self.prepare,
                     )
                 )
-        else:
+        elif self.rule_config.scope == Scope.PROJECT:
+            # TODO when nested projects are supported, this can process the
+            # same file multiple times; but that's better than not handling
+            # project-relative paths.  There's some work to do here once they
+            # can nest.
+            for p in projects:
+                run.add_step(
+                    GenericPreparedStep(
+                        qualname=qualname,
+                        # Default to wanting all files, but allow specifying that
+                        # you want _no_ files as empty list.
+                        patterns=("*",) if self.rule_config.inputs is None else self.rule_config.inputs,
+                        project_path=p.subdir,
+                        cmdline=self.command_parts,
+                        extra_env=env | self.command_env,
+                        append_filenames=False,
+                        rule_prepare=self.prepare,
+                        eager=False,
+                        batch_size=9999,  # TODO: -1 once ff 0.8 final is out
+                    )
+                )
+        else:  # REPO
             run.add_step(
                 GenericPreparedStep(
                     qualname=qualname,
-                    patterns=self.rule_config.inputs or ("*",),
+                    # Default to wanting all files, but allow specifying that
+                    # you want _no_ files as empty list.
+                    patterns=("*",) if self.rule_config.inputs is None else self.rule_config.inputs,
                     project_path="",
                     cmdline=self.command_parts,
                     extra_env=env | self.command_env,
                     append_filenames=False,
                     rule_prepare=self.prepare,
                     eager=False,
+                    batch_size=9999,  # TODO: -1 once ff 0.8 final is out
                 )
             )
-            # run.add_step(GenericPreparedStep(
-            #     patterns = self.rule.rule_config.inputs,
-            #     project=None,
-            #     cmdline=self.command_parts,
-            #     extra_env=self.command_env,
-            #     append_filenames=False,
-            # ))
