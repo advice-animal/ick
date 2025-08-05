@@ -6,7 +6,7 @@ $ ick run --json
                 "project_name": "",
                 "status": true,
                 "modified": [],
-                "message": "do_nothing"
+                "message": "did nothing\n"
             }
         ],
         "fail": [
@@ -23,15 +23,15 @@ $ ick run --json
                 "status": false,
                 "modified": [
                     {
-                        "file_name": "file_a.cfg",
-                        "diff_stat": "+0-3"
+                        "file_name": "file_b.toml",
+                        "diff_stat": "+3"
                     },
                     {
-                        "file_name": "file_b.toml",
-                        "diff_stat": "+3-0"
+                        "file_name": "file_a.cfg",
+                        "diff_stat": "-3"
                     }
                 ],
-                "message": "move_a"
+                "message": ""
             }
         ]
     }
