@@ -146,6 +146,18 @@ def run(
     if emojis:
         kwargs["status_callback"] = _demo_status_callback
         kwargs["done_callback"] = _demo_done_callback
+    elif not json_flag and sys.stderr.isatty():
+        bar = None
+
+        def progressbar_status(run):
+            nonlocal bar
+            if not bar:
+                bar = click.progressbar(length=len(run._steps), label="Running...")
+                ctx.with_resource(bar)
+            bar.update(run._finalized_idx)
+
+        kwargs["status_callback"] = progressbar_status
+        kwargs["done_callback"] = lambda _: print("\n")
 
     r = Runner(ctx.obj, ctx.obj.repo)
     for result in r.run(**kwargs):
