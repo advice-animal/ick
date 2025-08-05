@@ -17,6 +17,7 @@ from ick_protocol import Finished, ListResponse, Modified, Scope
 
 from .config import RuleConfig
 from .sh import run_cmd
+from .util import diffstat
 
 LOG = getLogger(__name__)
 
@@ -171,17 +172,14 @@ class GenericPreparedStep(Step):
                     # Should really say /dev/null input
                     diff = moreorless.unified_diff(a.decode(), "", k)
 
-                diffstat = "+%d-%d" % (diff.count("\n+"), diff.count("\n-"))
-
                 changes.append(
-                    Modified(rule_name=self.qualname, filename=k, new_bytes=None if b is ERASURE else b, diff=diff, diffstat=diffstat)
+                    Modified(rule_name=self.qualname, filename=k, new_bytes=None if b is ERASURE else b, diff=diff, diffstat=diffstat(diff))
                 )
             elif k not in self.accepted_state:
                 # Well then...
                 diff = moreorless.unified_diff("", self.output_state[k].value.decode(), k)
-                diffstat = "+%d-%d" % (diff.count("\n+"), diff.count("\n-"))
                 changes.append(
-                    Modified(rule_name=self.qualname, filename=k, new_bytes=self.output_state[k].value, diff=diff, diffstat=diffstat)
+                    Modified(rule_name=self.qualname, filename=k, new_bytes=self.output_state[k].value, diff=diff, diffstat=diffstat(diff))
                 )
 
         # Keep only the messages that still apply...
