@@ -231,7 +231,7 @@ class Runner:
 
     def run(self, test_impl=None, test_repo=None, status_callback=None, done_callback=None) -> Iterable[HighLevelResult]:
         # TODO deliberate in a flag:
-        run = Run(status_callback=status_callback, done_callback=done_callback, deliberate=True, parallelism=1)
+        run = Run(status_callback=status_callback, done_callback=done_callback)
         if test_impl:
             assert test_repo
             self.repo = test_repo
