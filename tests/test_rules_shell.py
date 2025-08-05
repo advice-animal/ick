@@ -6,13 +6,7 @@ from ick.config import RuleConfig
 from ick.rules.shell import Rule
 from ick.types_project import Project
 
-
-class FakeRun:
-    def __init__(self):
-        self.steps = []
-
-    def add_step(self, step):
-        self.steps.append(step)
+from helpers import FakeRun
 
 
 @pytest.mark.parametrize(
