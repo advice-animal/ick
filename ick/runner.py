@@ -246,7 +246,7 @@ class Runner:
         # TODO parallelize or show a progress bar, this takes a while...
         repo_contents: dict[str, bytes] = {}
         # TODO the version that includes dirty files
-        for f in self.repo.zfiles.split("\0"):
+        for f in sorted(self.repo.zfiles.split("\0")):
             if not f:
                 continue
             p = self.repo.root / f

@@ -10,8 +10,10 @@ from ick.types_project import Project
 class FakeRun:
     def __init__(self):
         self.steps = []
+
     def add_step(self, step):
         self.steps.append(step)
+
 
 @pytest.mark.parametrize(
     "cmd",
@@ -31,7 +33,7 @@ def test_smoke_single_file(cmd: str | list[str], tmp_path: Path) -> None:
 
     run = FakeRun()
     projects = [Project(None, "my_subdir", "shell", "bash.sh")]
-    rule.add_steps_to_run(projects, run)
+    rule.add_steps_to_run(projects, {}, run)
 
     assert len(run.steps) == 1
     assert run.steps[0].cmdline == ["sed-like", "-e", "s/hello/HELLO/g"]
