@@ -163,7 +163,7 @@ class Runner:
             response = x.modifications
 
             files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
-            files_to_check = {f for f in files_to_check if (outp / f).is_file()}
+            files_to_check = {f for f in files_to_check if (outp / f).is_file()} - {"fail.txt", "output.txt"}
 
             if x.finished.status is None:
                 # Error state
