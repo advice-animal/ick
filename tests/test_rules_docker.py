@@ -2,14 +2,17 @@ import subprocess
 import sys
 from pathlib import Path
 
+from feedforward import Notification, State
 import pytest
 
 from ick.config import RuleConfig
 from ick.rules.docker import Rule
-from ick_protocol import Finished, Modified
+from ick.types_project import Project
+
+from helpers import FakeRun
 
 
-@pytest.mark.skipif(sys.platform == "darwin", reason="GHA can't test docker")
+#@pytest.mark.skipif(sys.platform == "darwin", reason="GHA can't test docker")
 def test_basic_docker(tmp_path: Path) -> None:
     docker_rule = Rule(
         RuleConfig(
@@ -19,28 +22,14 @@ def test_basic_docker(tmp_path: Path) -> None:
             command="alpine:3.14 /bin/sh -c 'echo dist >> .gitignore'",
         ),
     )
-    subprocess.check_call(["git", "init"], cwd=tmp_path)
-    (tmp_path / ".gitignore").write_text("*.pyc\n")
-    subprocess.check_call(["git", "add", ".gitignore"], cwd=tmp_path)
-    subprocess.check_call(["git", "commit", "-a", "-msync"], cwd=tmp_path)
 
-    docker_rule.prepare()
-    with docker_rule.work_on_project(tmp_path) as work:
-        resp = list(work.run("foo", [".gitignore"]))
+    run = FakeRun()
+    projects = [Project(None, "my_subdir/", "shell", "bash.sh")]
+    docker_rule.add_steps_to_run(projects, {}, run)
 
-    assert len(resp) == 2
-    resp[0].diff = "X"
-    assert resp[0] == Modified(
-        rule_name="foo",
-        filename=".gitignore",
-        new_bytes=b"*.pyc\ndist\n",
-        additional_input_filenames=(),
-        diffstat="+1-0",
-        diff="X",
-    )
+    assert len(run.steps) == 1
 
-    assert resp[1] == Finished(
-        rule_name="foo",
-        status=False,
-        message="foo",
-    )
+    run.steps[0].index = 0
+    rv = list(run.steps[0].process(1, [Notification(key="my_subdir/demo.sh", state=State(gens=(0,), value=b"xhello\n"))]))
+    assert len(rv) == 1
+    assert rv[0] == 17
