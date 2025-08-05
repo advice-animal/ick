@@ -1,17 +1,17 @@
 $ ick run --patch
 -> i_have_no_tests OK
 -> move_isort_cfg FAIL
---- a/isort.cfg
-+++ b/isort.cfg
-@@ -1,3 +0,0 @@
--[settings]
--line_length = 88
--multi_line_output = 3
 --- a/pyproject.toml
 +++ b/pyproject.toml
 @@ -0,0 +1,3 @@
 +[tool.isort]
 +line_length = "88"
 +multi_line_output = "3"
+--- a/isort.cfg
++++ b/isort.cfg
+@@ -1,3 +0,0 @@
+-[settings]
+-line_length = 88
+-multi_line_output = 3
 -> show_ick_vars FAIL
      ICK_REPO_PATH=/CWD
