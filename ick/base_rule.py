@@ -107,7 +107,7 @@ class GenericPreparedStep(Step):
             env.update(self.extra_env)
 
             try:
-                run_cmd(
+                stdout = run_cmd(
                     cmd,
                     env=env,
                     cwd=d,
@@ -123,6 +123,8 @@ class GenericPreparedStep(Step):
                     msg += e.stderr
 
                 batch_value = (msg, e.returncode)
+            else:
+                batch_value = (stdout, 0)
 
             expected = {n.key[len(self.match_prefix) :]: n.state.value for n in notifications if n.state.value is not ERASURE}
             changed, new, remv = analyze_dir(d, expected)

@@ -1,20 +1,14 @@
 $ ick run --patch
 -> i_have_no_tests OK
 -> move_isort_cfg FAIL
-     move_isort_cfg
-diff --git isort.cfg isort.cfg
-deleted file mode 100644
-index fbab120..0000000
---- isort.cfg
-+++ /dev/null
+--- a/isort.cfg
++++ b/isort.cfg
 @@ -1,3 +0,0 @@
 -[settings]
 -line_length = 88
 -multi_line_output = 3
-diff --git pyproject.toml pyproject.toml
-index e69de29..089c824 100644
---- pyproject.toml
-+++ pyproject.toml
+--- a/pyproject.toml
++++ b/pyproject.toml
 @@ -0,0 +1,3 @@
 +[tool.isort]
 +line_length = "88"
