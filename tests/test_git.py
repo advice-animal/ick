@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from ick.git import find_repo_root, update_local_cache
 
 
@@ -12,7 +14,7 @@ def test_find_repo_root() -> None:
     assert find_repo_root(Path("/")) == Path("/")
 
 
-# This only works on some linux
+@pytest.mark.no_mock_platformdirs
 def test_update_local_cache(tmp_path, mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
     mock_run_cmd = mocker.patch("ick.git.run_cmd", autospec=True)
 
