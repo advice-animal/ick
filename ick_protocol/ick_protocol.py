@@ -28,6 +28,8 @@ modifications have dependencies, and multiple linters can run in the same
 process (regular LSP just has "format_file").
 """
 
+from __future__ import annotations
+
 from enum import Enum
 from typing import Optional, Sequence, Union
 
