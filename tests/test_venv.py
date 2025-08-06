@@ -15,7 +15,7 @@ def test_env_happy_path(tmp_path: Path) -> None:
     assert not pybin.exists()
     assert not p.health_check()
 
-    p.prepare()  # type: ignore[no-untyped-call] # FIX ME
+    p.prepare()
     assert pybin.exists()
     assert p.health_check()
 
@@ -32,15 +32,15 @@ def test_env_happy_path(tmp_path: Path) -> None:
     assert os.access(pybin, os.X_OK)
     assert not p.health_check()
 
-    p.prepare()  # type: ignore[no-untyped-call] # FIX ME
+    p.prepare()
     assert p.health_check()
 
     # cover one last line where prepare is a no-op
-    p.prepare()  # type: ignore[no-untyped-call] # FIX ME
+    p.prepare()
 
 
 def test_env_with_deps(tmp_path: Path) -> None:
     p = PythonEnv(tmp_path, ["ast-grep-cli"])
-    p.prepare()  # type: ignore[no-untyped-call] # FIX ME
+    p.prepare()
     assert p.bin("ast-grep").exists()
     subprocess.check_output([p.bin("ast-grep"), "--version"])

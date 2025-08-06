@@ -25,7 +25,7 @@ from .base_rule import BaseRule
 from .config import RuntimeConfig
 from .config.rule_repo import discover_rules, get_impl
 from .project_finder import find_projects
-from .types_project import Project, Repo, maybe_repo
+from .types_project import BaseRepo, Project, Repo, maybe_repo
 
 LOG = getLogger(__name__)
 
@@ -159,7 +159,7 @@ class Runner:
 
             repo = maybe_repo(tp, stack.enter_context, for_testing=True)
 
-            x = next(self.run(test_impl=rule_instance, test_repo=repo))
+            x = next(iter(self.run(test_impl=rule_instance, test_repo=repo)))
             response = x.modifications
 
             files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
@@ -229,9 +229,11 @@ class Runner:
             test_path = impl.rule_config.test_path
             yield impl, tuple(test_path.glob("*/"))  # type: ignore[union-attr,arg-type] # FIX ME
 
-    def run(self, test_impl=None, test_repo=None, status_callback=None, done_callback=None) -> Iterable[HighLevelResult]:
+    def run(
+        self, test_impl: BaseRule | None = None, test_repo: BaseRepo | None = None, status_callback=None, done_callback=None
+    ) -> Iterable[HighLevelResult]:
         # TODO deliberate in a flag:
-        run = Run(status_callback=status_callback, done_callback=done_callback)
+        run: Run[str, bytes] = Run(status_callback=status_callback, done_callback=done_callback)
         if test_impl:
             assert test_repo
             self.repo = test_repo
@@ -239,7 +241,7 @@ class Runner:
             test_impl.add_steps_to_run([project], self.ick_env_vars, run)
         else:
             for impl in self.iter_rule_impl():
-                impl.add_steps_to_run(self.projects, self.ick_env_vars, run)
+                impl.add_steps_to_run(self.projects, dict(self.ick_env_vars), run)
 
         run.add_step(Step())  # Final sink
 
@@ -322,10 +324,10 @@ def pl(noun: str, count: int) -> str:
     return noun + "s"
 
 
-def _demo_status_callback(run) -> None:
+def _demo_status_callback(run: Run[str, bytes]) -> None:
     print("%4d/%4d " % (run._finalized_idx + 1, len(run._steps)) + " ".join(step.emoji() for step in run._steps))
 
 
-def _demo_done_callback(run) -> None:
+def _demo_done_callback(run: Run[str, bytes]) -> None:
     print(" " * 10 + " ".join("%2d" % (next(step.gen_counter) - 1) for step in run._steps))
     print(f"Total time: {run._end_time - run._start_time:.2f}s")

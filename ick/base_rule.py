@@ -6,11 +6,11 @@ from fnmatch import fnmatch
 from logging import getLogger
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Callable, Iterable, Mapping, Sequence
 
 import moreorless
 from feedforward import Notification, Run, State, Step
-from feedforward.erasure import ERASURE
+from feedforward.erasure import ERASURE, Erasure
 from keke import ktrace
 
 from ick_protocol import Finished, ListResponse, Modified, Scope
@@ -22,24 +22,24 @@ from .util import diffstat
 LOG = getLogger(__name__)
 
 
-def materialize(path: str, filename: str, contents: bytes):
+def materialize(path: str, filename: str, contents: bytes) -> None:
     Path(path, filename).parent.mkdir(exist_ok=True, parents=True)
     Path(path, filename).write_bytes(contents)
 
 
-class GenericPreparedStep(Step):
+class GenericPreparedStep(Step[str, bytes | Erasure]):
     def __init__(
         self,
         qualname: str,
         patterns: Sequence[str],
         project_path: str,
-        cmdline,
+        cmdline: Sequence[str | Path],
         extra_env: dict[str, str],
         append_filenames: bool,
-        rule_prepare=None,
-        *args,
-        **kwargs,
-    ):
+        rule_prepare: Callable[[], None] | None = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.qualname = qualname
         # TODO figure out how extra_inputs factors in
@@ -57,25 +57,29 @@ class GenericPreparedStep(Step):
         # dict value is output, exit code and we decide what the aggregate code
         # is at the end.
         self.batch_messages: dict[tuple[int, tuple[str, ...]], tuple[str, int]] = {}
-        self.rule_status = True  # Success
+        self.rule_status: bool | None = True  # Success
 
-    def match(self, key):
-        return match_prefix_patterns(key, self.match_prefix, self.patterns)
+    def match(self, key: str) -> bool:
+        return match_prefix_patterns(key, self.match_prefix, self.patterns) is not None
 
-    def run_next_batch(self):
+    def run_next_batch(self) -> bool:
         # TODO document that we expect rule_prepare to handle a thundering herd (probably by returning False)
         if self.unprocessed_notifications and self.rule_prepare and not self.rule_prepare():
             return False
 
         return super().run_next_batch()
 
-    _g_files = {}
+    _g_files: dict[str, bytes] = {}
 
-    def _gravitational_constant(self):
+    def _gravitational_constant(self) -> int:
         return 1
 
     @ktrace("self.qualname", "self.match_prefix", "next_gen")
-    def process(self, next_gen: int, notifications):
+    def process(
+        self,
+        next_gen: int,
+        notifications: Iterable[Notification[str, bytes | Erasure]],
+    ) -> Iterable[Notification[str, bytes | Erasure]]:
         notifications = list(notifications)
         # TODO name better, pick a good one...
         with TemporaryDirectory() as d:
@@ -99,9 +103,9 @@ class GenericPreparedStep(Step):
 
             # nice_cmd = " ".join(map(str, self.cmdline))
             if self.append_filenames:
-                cmd = self.cmdline + filenames
+                cmd = list(self.cmdline) + filenames
             else:
-                cmd = self.cmdline
+                cmd = list(self.cmdline)
 
             env = os.environ.copy()
             env.update(self.extra_env)
@@ -152,11 +156,11 @@ class GenericPreparedStep(Step):
             if batch_value:
                 self.batch_messages[tuple(batch_key.items())] = batch_value
 
-    def compute_diff_messages(self):
+    def compute_diff_messages(self) -> list[Modified | Finished]:
         assert not self.cancelled
         assert self.outputs_final
 
-        changes = []
+        changes: list[Modified | Finished] = []
         for k in sorted(set(self.accepted_state) | set(self.output_state)):
             if k in self.accepted_state and k in self.output_state:
                 # Diff but be careful of erasures...
@@ -169,6 +173,7 @@ class GenericPreparedStep(Step):
                     diff = moreorless.unified_diff(a.decode(), b.decode(), k)
                 elif a is ERASURE:
                     # Should really say /dev/null input
+                    assert isinstance(b, bytes)
                     diff = moreorless.unified_diff("", b.decode(), k)
                 else:
                     # Should really say /dev/null input
@@ -179,6 +184,7 @@ class GenericPreparedStep(Step):
                 )
             elif k not in self.accepted_state:
                 # Well then...
+                assert isinstance(self.output_state[k].value, bytes)
                 diff = moreorless.unified_diff("", self.output_state[k].value.decode(), k)
                 changes.append(
                     Modified(rule_name=self.qualname, filename=k, new_bytes=self.output_state[k].value, diff=diff, diffstat=diffstat(diff))
@@ -224,7 +230,7 @@ class GenericPreparedStep(Step):
         return changes
 
 
-def analyze_dir(directory, expected: dict[str, bytes]):
+def analyze_dir(directory: str, expected: Mapping[str, bytes | Erasure]) -> tuple[set[str], set[str], set[str]]:
     # TODO dicts?
     changed = set()
     new = set()
@@ -246,7 +252,7 @@ def analyze_dir(directory, expected: dict[str, bytes]):
     return changed, new, remv
 
 
-def match_prefix_patterns(filename, prefix, patterns) -> Optional[str]:
+def match_prefix_patterns(filename: str, prefix: str, patterns: Sequence[str]) -> str | None:
     """
     Returns the prefix-removed filename if it matches, otherwise None.
     """
@@ -276,7 +282,7 @@ class BaseRule:
     def prepare(self) -> bool:
         return True  # no setup required
 
-    def add_steps_to_run(self, projects: Any, env: dict[str, str], run: Run) -> None:
+    def add_steps_to_run(self, projects: Any, env: Mapping[str, str | bytes], run: Run[str, bytes | Erasure]) -> None:
         qualname = self.rule_config.qualname
 
         if self.rule_config.scope == Scope.FILE:

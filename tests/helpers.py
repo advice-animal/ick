@@ -1,9 +1,13 @@
 """Helpers for tests."""
 
+from typing import Any
 
-class FakeRun:
-    def __init__(self):
-        self.steps = []
+from feedforward import Run, Step
 
-    def add_step(self, step):
+
+class FakeRun(Run[Any, Any]):
+    def __init__(self) -> None:
+        self.steps: list[Step[Any, Any]] = []
+
+    def add_step(self, step: Step[Any, Any]) -> None:
         self.steps.append(step)

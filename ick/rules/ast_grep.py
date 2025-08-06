@@ -41,5 +41,5 @@ class Rule(BaseRule):
         # TODO something from here is needed, maybe $HOME, but should be restricted
         self.command_env = os.environ.copy()
 
-    def prepare(self):  # type: ignore[no-untyped-def] # FIX ME
-        return self.venv.prepare()  # type: ignore[no-untyped-call] # FIX ME
+    def prepare(self) -> bool:
+        return self.venv.prepare()
