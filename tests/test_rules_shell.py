@@ -16,13 +16,14 @@ from ick.types_project import BaseRepo, Project
     ],
 )
 def test_smoke_single_file(cmd: str | list[str], tmp_path: Path) -> None:
-    conf = RuleConfig(
-        name="hello",
-        impl="shell",
-        command=cmd,
-        inputs=["*.md"],
+    rule = Rule(
+        RuleConfig(
+            name="hello",
+            impl="shell",
+            command=cmd,
+            inputs=["*.md"],
+        )
     )
-    rule = Rule(conf)
 
     run = FakeRun()
     projects = [Project(BaseRepo(Path("/tmp")), "my_subdir", "shell", "bash.sh")]
