@@ -5,7 +5,7 @@ from helpers import FakeRun
 
 from ick.config import RuleConfig
 from ick.rules.pygrep import Rule
-from ick.types_project import Project
+from ick.types_project import BaseRepo, Project
 
 
 def test_pygrep_works(tmp_path: Path) -> None:
@@ -19,7 +19,7 @@ def test_pygrep_works(tmp_path: Path) -> None:
     rule = Rule(conf)
 
     run = FakeRun()
-    projects = [Project(None, "my_subdir/", "shell", "bash.sh")]
+    projects = [Project(BaseRepo(Path("/tmp")), "my_subdir/", "shell", "bash.sh")]
     rule.add_steps_to_run(projects, {}, run)
 
     assert len(run.steps) == 1

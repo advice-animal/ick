@@ -6,7 +6,7 @@ from helpers import FakeRun
 
 from ick.config import RuleConfig
 from ick.rules.python import Rule
-from ick.types_project import Project
+from ick.types_project import BaseRepo, Project
 
 
 def test_python_works(tmp_path: Path) -> None:
@@ -27,7 +27,7 @@ def test_python_works(tmp_path: Path) -> None:
     )
 
     run = FakeRun()
-    projects = [Project(None, "my_subdir/", "python", "demo.py")]
+    projects = [Project(BaseRepo(Path("/tmp")), "my_subdir/", "python", "demo.py")]
     rule.add_steps_to_run(projects, {}, run)
     rule.prepare()
 

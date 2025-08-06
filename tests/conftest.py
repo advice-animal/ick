@@ -1,6 +1,8 @@
-from typing import Iterable
+from pathlib import Path
+from typing import Callable, Iterable
 
 import pytest
+from pytest_mock import MockerFixture
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -10,7 +12,11 @@ def set_loglevel() -> Iterable[None]:
 
 
 @pytest.fixture(autouse=True)
-def isolated_user_directories(request, tmp_path, mocker) -> None:
+def isolated_user_directories(
+    request: pytest.FixtureRequest,
+    tmp_path: Path,
+    mocker: MockerFixture,
+) -> None:
     """Automatically mock platformdirs to isolate cache and config.
 
     Use `@pytest.mark.no_mock_platformdirs` for the rare test that needs the
@@ -19,8 +25,8 @@ def isolated_user_directories(request, tmp_path, mocker) -> None:
     if request.node.get_closest_marker("no_mock_platformdirs"):
         return
 
-    def fake_platformdirs(kind):
-        def faker(*parts):
+    def fake_platformdirs(kind: str) -> Callable[..., Path]:
+        def faker(*parts: str) -> Path:
             d = tmp_path / kind
             for part in parts:
                 d = d / part
