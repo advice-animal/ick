@@ -19,7 +19,7 @@ class PythonEnv:
     def __init__(self, env_path: Path, deps: list[str] | None) -> None:
         self.env_path = env_path
         self.deps = deps or []
-        self._cached_health = None
+        self._cached_health: bool | None = None
 
     def bin(self, prog) -> Path:  # type: ignore[no-untyped-def] # FIX ME
         """
@@ -62,7 +62,7 @@ class PythonEnv:
         assert self._cached_health is not None
         return self._cached_health
 
-    def prepare(self, blocking=True):  # type: ignore[no-untyped-def] # FIX ME
+    def prepare(self, blocking: bool = True) -> bool:
         """
         Attempt to set up this venv.
 

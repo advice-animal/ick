@@ -3,10 +3,11 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import IO, Optional
+from typing import IO, Any, Optional
 
 import click
 import keke
+from feedforward import Run
 from moreorless.click import echo_color_precomputed_diff
 from rich import print
 from vmodule import vmodule_init
@@ -140,7 +141,7 @@ def run(
     # DO THE NEEDFUL
 
     results = {}
-    kwargs: dict[str, str] = {}
+    kwargs: dict[str, Any] = {}
 
     # TODO boring progress bar default
     if emojis:
@@ -149,7 +150,7 @@ def run(
     elif not json_flag and sys.stderr.isatty():
         bar = None
 
-        def progressbar_status(run):
+        def progressbar_status(run: Run[Any, Any]) -> None:
             nonlocal bar
             if not bar:
                 bar = click.progressbar(length=len(run._steps), label="Running...")

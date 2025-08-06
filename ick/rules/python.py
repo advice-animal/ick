@@ -33,4 +33,4 @@ class Rule(BaseRule):
         self.command_env = os.environ.copy()
 
     def prepare(self) -> bool:
-        return self.venv.prepare()  # type: ignore[no-untyped-call] # FIX ME
+        return self.venv.prepare()

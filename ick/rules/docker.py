@@ -25,5 +25,6 @@ class Rule(BaseRule):
         # TODO limit this to DOCKER_* and whatever it needs for finding config?
         self.command_env = os.environ.copy()
 
-    def prepare(self) -> None:
+    def prepare(self) -> bool:
         run_cmd(["docker", "pull", self.image_name], env=self.command_env)
+        return True

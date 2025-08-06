@@ -1,9 +1,11 @@
+from pathlib import Path
+
 from feedforward import Notification, State
 from helpers import FakeRun
 
 from ick.config import RuleConfig
 from ick.rules.merge_toml import Rule
-from ick.types_project import Project
+from ick.types_project import BaseRepo, Project
 
 
 def test_merge_toml_works() -> None:
@@ -21,7 +23,7 @@ baz = 99
     assert rule.prepare()
 
     run = FakeRun()
-    projects = [Project(None, "my_subdir/", "python", "demo.py")]
+    projects = [Project(BaseRepo(Path("/tmp")), "my_subdir/", "python", "demo.py")]
     rule.add_steps_to_run(projects, {}, run)
 
     assert len(run.steps) == 1
