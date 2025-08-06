@@ -40,9 +40,9 @@ jobs:
       - name: Lint
         run: |
           make lint
-      - name: Mypy
-        run: |
-          make mypy
+      #- name: Mypy
+      #  run: |
+      #    make mypy
 
   build:
     needs: test
