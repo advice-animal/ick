@@ -70,15 +70,20 @@ class Runner:
 
     def iter_rule_impl(self) -> Iterable[BaseRule]:
         name_filter = re.compile(self.rtc.filter_config.name_filter_re).fullmatch
+        rules_not_matched = 0
         for rule in self.rules:
             if rule.urgency < self.rtc.filter_config.min_urgency:
                 continue
 
             if not name_filter(rule.qualname):
+                rules_not_matched += 1
                 continue
 
             i = get_impl(rule)(rule)
             yield i
+
+        if rules_not_matched == len(self.rules):
+            print("[red]No rules matched the given filter[/red]")
 
     def test_rules(self) -> int:
         """
