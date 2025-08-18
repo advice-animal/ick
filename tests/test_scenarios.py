@@ -16,7 +16,7 @@ from click.testing import CliRunner
 from ick.cmdline import main
 
 SCENARIO_DIR = Path(__file__).parent / "scenarios"
-SCENARIOS = sorted(str(f.relative_to(SCENARIO_DIR)) for f in SCENARIO_DIR.glob("**/*.txt"))
+SCENARIOS = sorted(str(f.relative_to(SCENARIO_DIR)) for f in SCENARIO_DIR.glob("*/*.txt"))
 
 LOG_LINE_TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} ", re.M)
 LOG_LINE_NUMERIC_LINE_RE = re.compile(r"^([A-Z]+\s+[a-z_.]+:)\d+(?= )", re.M)
@@ -44,8 +44,8 @@ def test_scenario(filename, monkeypatch) -> None:  # type: ignore[no-untyped-def
     commands = load_scenario(path)
     update = bool(int(os.getenv("UPDATE_SCENARIOS", "0")))
 
-    runner = CliRunner()
-    with runner.isolated_filesystem():
+    cli_runner = CliRunner()
+    with cli_runner.isolated_filesystem():
         repo_data = path.parent / "repo"
         Path(".gitconfig").write_text(
             textwrap.dedent("""
@@ -71,7 +71,13 @@ def test_scenario(filename, monkeypatch) -> None:  # type: ignore[no-untyped-def
                 args = shlex.split(command.command[6:])
                 with monkeypatch.context() as m:
                     m.setenv("COLUMNS", "999")
-                    result = runner.invoke(main, args, catch_exceptions=False)
+                    m.setattr(
+                        "ick.runner.Runner._testing_replacements",
+                        {
+                            os.getcwd(): "/CWD",
+                        },
+                    )
+                    result = cli_runner.invoke(main, args, catch_exceptions=False)
                 output = result.output
                 if result.exit_code != 0:
                     output += f"(exit status: {result.exit_code})\n"

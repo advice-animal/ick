@@ -1,0 +1,12 @@
+- Scenarios are in directories under tests/scenarios
+- Each scenario is a text file:  tests/scenarios/*/*.txt
+- The text file is like a terminal session
+    - commands + output
+    - the current directory (everything up through /repo) is replaced with `/CWD`
+        - this also applies to the output of ick
+- Next to the text files is a `repo` directory
+    - it should be structured like a repo containing rules
+    - it has ick.toml
+    - it has tests
+        - the tests will only be run if you use `$ ick test-rules` in your
+            scenario
