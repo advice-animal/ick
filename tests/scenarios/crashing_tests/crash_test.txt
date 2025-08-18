@@ -1,6 +1,6 @@
 $ ick test-rules
 testing...
-  crashing_test: FF. FAIL
+  crashing_test: .FF FAIL
 
 DETAILS
 --------------------------------------------------------------------------------

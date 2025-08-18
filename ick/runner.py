@@ -112,7 +112,7 @@ class Runner:
                     f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
                 )
             else:
-                for test_path in test_paths:
+                for test_path in sorted(test_paths):
                     result = TestResult(rule_instance, test_path)
                     # Not guarded because in user code won't raise here, it
                     # will surface as a HLR failure.
