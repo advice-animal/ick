@@ -1,0 +1,31 @@
+$ ick test-rules
+testing...
+  crashing_test: FF. FAIL
+
+DETAILS
+--------------------------------------------------------------------------------
+testing crashing_test with with_wrong_output:
+
+Different output found
+--- a/output.txt
++++ b/output.txt
+@@ -1,4 +1,4 @@
+ Traceback (most recent call last):
+   File "/CWD/crashing_test.py", line 1, in <module>
+-    raise Exception("Nothing to see here")
+-Exception: Nothing to see here
++    raise Exception("Crash!")
++Exception: Crash!
+
+--------------------------------------------------------------------------------
+testing crashing_test with without_output:
+
+Test crashed, but /CWD/tests/crashing_test/without_output/output/output.txt doesn't exist so that seems unintended:
+Traceback (most recent call last):
+  File "/CWD/crashing_test.py", line 1, in <module>
+    raise Exception("Crash!")
+Exception: Crash!
+
+
+
+(exit status: 1)

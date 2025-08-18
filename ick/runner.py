@@ -58,6 +58,9 @@ class TestResult:
 
 
 class Runner:
+    # Strings to replace in outputs while running scenario tests.
+    _testing_replacements: dict[str, str] = {}
+
     def __init__(self, rtc: RuntimeConfig, repo: Repo) -> None:
         self.rtc = rtc
         self.rules = discover_rules(rtc)
@@ -165,32 +168,36 @@ class Runner:
             files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
             files_to_check = {f for f in files_to_check if (outp / f).is_file()} - {"fail.txt", "output.txt"}
 
+            actual_output = x.finished.message
+            for old, new in self._testing_replacements.items():
+                actual_output = actual_output.replace(old, new)
+
             if x.finished.status is None:
                 # Error state
                 expected_path = outp / "output.txt"
                 if not expected_path.exists():
-                    result.message = f"Test crashed, but {expected_path} doesn't exist so that seems unintended:\n{response[-1].message}"
+                    result.message = f"Test crashed, but {expected_path} doesn't exist so that seems unintended:\n{actual_output}"
                     return
 
                 expected = expected_path.read_text()
-                if expected == response[-1].message:
+                if expected == actual_output:
                     result.success = True
                 else:
-                    result.diff = moreorless.unified_diff(expected, response[-1].message, "output.txt")
+                    result.diff = moreorless.unified_diff(expected, actual_output, "output.txt")
                     result.message = "Different output found"
                 return
             elif x.finished.status is False and not x.modifications:
                 # Didn't match expectation
                 expected_path = outp / "fail.txt"
                 if not expected_path.exists():
-                    result.message = f"Test failed, but {expected_path} doesn't exist so that seems unintended:\n{x.finished.message}"
+                    result.message = f"Test failed, but {expected_path} doesn't exist so that seems unintended:\n{actual_output}"
                     return
 
                 expected = expected_path.read_text()
-                if expected == x.finished.message:
+                if expected == actual_output:
                     result.success = True
                 else:
-                    result.diff = moreorless.unified_diff(expected, x.finished.message, "fail.txt")
+                    result.diff = moreorless.unified_diff(expected, actual_output, "fail.txt")
                     result.message = "Different output found"
                 return
             else:
