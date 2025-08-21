@@ -282,11 +282,8 @@ class Runner:
         rules_by_urgency = collections.defaultdict(list)
         for impl in self.iter_rule_impl():
             impl.prepare()
-            duration = ""
-            if impl.rule_config.hours is not None:
-                duration = f" ({impl.rule_config.hours} {pl('hour', impl.rule_config.hours)})"
 
-            msg = f"{impl.rule_config.qualname}{duration}"
+            msg = f"[bold]{impl.rule_config.qualname}[/]"
             if impl.rule_config.description:
                 msg += f": {impl.rule_config.description}"
             if not impl.runnable:
@@ -301,7 +298,7 @@ class Runner:
             else:
                 first = False
 
-            print(urgency_label.name)
+            print(f"[bold]{urgency_label.name}[/]")
             print("=" * len(str(urgency_label.name)))
             for rule in rules:
                 print(f"* {rule}")
