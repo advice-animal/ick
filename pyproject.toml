@@ -1,6 +1,9 @@
 [tool.pytest.ini_options]
 # Don't accidentally find *_test.py files in the scenarios
 norecursedirs = ["tests/scenarios"]
+markers = [
+    "no_mock_platformdirs: disable the autouse isolated_user_directories fixture",
+]
 
 [tool.ruff]
 line-length = 140
