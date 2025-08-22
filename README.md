@@ -20,7 +20,7 @@ The traditional dev loop generally looks like this:
 ```
     /----------------\  push  /----------------\
     |  code          |------->|  integrate     |
-    |      build     |        |      test      |
+    |      build     |        |     test       |
     |          test  |        |        deploy  |
     \----------------/        \----------------/
 
@@ -33,13 +33,13 @@ on a longer term basis.  For that we really ought to keep track of things
 that aren't "right now" and aren't "today" but are "important, yet not urgent".
 
 ```
-    /----------------\  push  /----------------\ stable  /==================\
-    |  code          |------->|  integrate     |-------->| tech debt week   |
-    |      build     |        |      test      |         |  quantified proj |
-    |          test  |        |        deploy  |         |   bootcamp tasks |
-    \----------------/        \----------------/         |     deprecations |
-                                                         \==================/
-       inner loop                 outer loop               planning cycle
+    /----------------\  push  /----------------\  stable  /==================\
+    |  code          |------->|  integrate     |--------->| tech debt week   |
+    |      build     |        |     test       |          |  quantified proj |
+    |          test  |        |        deploy  |          |   bootcamp tasks |
+    \----------------/        \----------------/          |    deprecations  |
+                                                          \==================/
+       inner loop                 outer loop                 planning cycle
 ```
 
 Ick manages and runs rules to help you update repos on your timeline.
