@@ -8,5 +8,7 @@ Details of how to write rules for ick to run.  Start with the
 .. toctree::
    :hidden:
 
+   overview
    norms
+   how-rules-are-run
    testing
