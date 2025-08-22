@@ -102,9 +102,6 @@ class RuleConfig(Struct):
     url: Optional[str] = None
 
     def __post_init__(self) -> None:
-        if self.urgency == Urgency.NOT_SUPPORTED:
-            # Temporary alias until we can scrub "not-supported" from all rules.
-            self.urgency = Urgency.URGENT
         if not self.qualname:
             self.qualname = self.name
 
