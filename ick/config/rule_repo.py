@@ -51,7 +51,8 @@ def load_rule_repo(ruleset: Ruleset, *, skip_update: bool = False) -> RuleRepoCo
         # TODO config for a subdir within?
         repo_path = update_local_cache(ruleset.url, skip_update=skip_update)  # TODO
     else:
-        repo_path = Path(ruleset.base_path, ruleset.path).resolve()  # type: ignore[arg-type] # FIX ME
+        assert isinstance(ruleset.path, str)
+        repo_path = Path(ruleset.base_path or "", ruleset.path).resolve()
 
     rc = RuleRepoConfig(repo_path=repo_path)
 
