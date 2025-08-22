@@ -51,7 +51,6 @@ A single `[[rule]]` in an an ick.toml can be configured with the following attri
   - `"soon"`: Should be addressed soon
   - `"now"`: Don't put this off
   - `"urgent"`: The rule has identified your software is out of support
-  - `"not_supported"`: Old alias for "urgent", will be removed.
 - `order` (int): If a rule needs to run before another, define that here.
   Rules with lower orders will be run before rules with higher orders.
   Intended to be an integer from 0-100, and defaults to 50.

@@ -51,7 +51,6 @@ class Urgency(Enum):
     LATER = "later"
     SOON = "soon"
     NOW = "now"
-    NOT_SUPPORTED = "not-supported" # this needs to be removed.
     URGENT = "urgent"
 
     def __lt__(self, other):  # type: ignore[no-untyped-def] # FIX ME
