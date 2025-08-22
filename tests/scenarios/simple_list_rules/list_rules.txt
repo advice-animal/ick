@@ -1,9 +1,9 @@
 $ ick list-rules
+NOW
+===
+* hello: Say hello
+
 LATER
 =====
 * goodbye
 * shouty
-
-NOW
-===
-* hello: Say hello

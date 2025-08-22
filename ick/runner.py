@@ -292,7 +292,7 @@ class Runner:
                 rules_by_urgency[impl.rule_config.urgency].append(msg)
 
         first = True
-        for urgency_label, rules in sorted(rules_by_urgency.items()):
+        for urgency_label, rules in sorted(rules_by_urgency.items(), reverse=True):
             if not first:
                 print()
             else:
