@@ -42,11 +42,3 @@ prefix = "hh/"
 
 The `.local` one is in case the preceding one is provided by your employer, and
 you want to add to it to flag more things with your own (personal) checks.
-
-## Why just TOML?
-
-Because the repos I interact with already have a `pyproject.toml` which is a
-place for putting multiple tools' config without cluttering the root with more
-files.
-
-If other languages have a similar concept, PRs welcome.

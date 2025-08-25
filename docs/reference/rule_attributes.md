@@ -17,12 +17,13 @@ The following attributes can be set in an `ick.toml` or `pyproject.toml`.
 
 ## `[[rule]]` attributes
 
-A single `[[rule]]` in an an ick.toml can be configured with the following attributes:
+A single `[[rule]]` in an ick.toml can be configured with the following attributes:
 
 ### Required attributes
 
 - `name` (str): The name of the rule
-- `impl` (str): The language in which the rule will be written, see [impls] (TODO)
+- `impl` (str): The language in which the rule will be written, see [Rule
+    implementation languages](impls.html).
 
 ### Optional attributes
 
@@ -33,6 +34,7 @@ A single `[[rule]]` in an an ick.toml can be configured with the following attri
   - `"project"`: Runs the rule on the whole project.
   - `"repo"`: Runs the rule on the whole repository.
 - `command` (str | list[str]): The command to execute for this rule.
+- `data` (str): Direct data for the rule, such as Python or shell source.
 - `success` (str): How to determine if the rule execution was successful.
   Defaults to `"exit-status"`. Available options:
   - `"exit-status"`: Success is determined by the command's exit status
@@ -59,7 +61,6 @@ A single `[[rule]]` in an an ick.toml can be configured with the following attri
 
 #### Content processing
 
-- `data` (str): TODO
 - `search` (str): TODO
 - `replace` (str): TODO
 
