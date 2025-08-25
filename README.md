@@ -1,10 +1,11 @@
 # Ick
 
-<img align="right" src="https://raw.githubusercontent.com/advice-animal/ick/main/_static/ick.png" width="300" height="287">
+<img align="right" src="https://raw.githubusercontent.com/advice-animal/ick/main/_static/ick.png" width="200" height="191">
 
 Ick is lightweight polyglot automation for running language-specific
 tools (including auto-fixes) and letting developers know what they can improve.
 
+Full documentation at https://ick.readthedocs.io.
 
 ## The problem
 
