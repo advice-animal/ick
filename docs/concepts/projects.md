@@ -1,9 +1,9 @@
 # Projects
 
-Projects are detected by the presence of files at their root (or at least, at a
-known location relative to the root).
+Projects are detected by the presence of well-known "marker" files that identify
+the root of the project.
 
-There are some default types, but you can add to it, for example
+There are some default types, but you can add to it, for example:
 
 ```toml
 [project_root_markers]
@@ -19,8 +19,8 @@ sphinx = ["docs/conf.py"]
 sphinx = ["docs/conf.py"]
 ```
 
-which will consider the *parent* of where `conf.py` exists to be a `sphinx`
-project (likely in addition to a `python` project per default config).
+These instruct ick to consider the *parent* of where `conf.py` exists to be a
+`sphinx` project (likely in addition to a `python` project per default config).
 
 Projects aren't detected within higher-level projects, so if there happens to be
 a `pyproject.toml` in the root of your repo, you might want to specify

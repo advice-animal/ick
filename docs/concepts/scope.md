@@ -1,4 +1,15 @@
-# Scope
+# Scopes
+
+Rule scopes determine how rules are invoked on the repo content.
+
+Regardless of the scope, rules are run in temporary directories with copies of
+the files ick thinks it needs based on the scope and the `inputs` setting.  Your
+rule cannot access files other than those.
+
+You only have access to the files you specify as `input=` -- even specifying
+inefficient globs like `*.py` or `**/scripts/*` is better than leaving it unset
+which assumes every file gets read.
+
 
 ## File scope
 
@@ -8,20 +19,15 @@
 scope = "file"
 ```
 
-This is the default scope, and behaves closest to pre-commit. Rules with this
-scope operate in parallel on single files and presumably don't have any other
-files as input that would cause complex dependencies.  If you do need some other
-files, for example you know you'll need to read `pyproject.toml` at the root of
-the project, you can add that:
+This is the default scope. Rules with this scope can operate in parallel on
+single files and presumably don't have any other files as input that would cause
+complex dependencies.
 
-```toml
-[[hook]]
-...
-scope = "file"
-extra_inputs = ["pyproject.toml"]
-```
+Rules specify files of interest with their `inputs` setting.  The rule will be
+run with a list of file paths as command-line arguments.  Ick decides how many
+files to pass to each invocation of the rule.  Your rule may be run multiple
+times, each passed a different list of files.
 
-If `extra_inputs` are not present, the rules still runs.
 
 ## Repo
 
@@ -31,30 +37,16 @@ If `extra_inputs` are not present, the rules still runs.
 scope = "repo"
 ```
 
-This rule runs once per repo, with the working dir as the root of the repo.
-Intended mainly for editing dotfiles like `.gitignore`, `.mailmap`, etc.
+This rule runs once per repo, in a temporary directory with a copy of the repo.
+Use this scope if your rule needs to work across a number of different files at
+once.
+
 
 ## Project
 
-This rule runs once per detected [project](project.md) (see `ick list-projects`)
-and is the typical way you'll want to edit project metadata if you need to edit
-multiple files at once.
+This rule runs once per detected [project](projects.html) (see `ick
+list-projects`) and is the typical way you'll want to edit project metadata if
+you need to edit multiple files at once.
 
-You should only read the files you specify as `input=` -- even specifying
-inefficient globs like `*.py` or `**/scripts/*` is better than leaving it unset
-which assumes every file gets read.
-
-One example of a project-scoped rule would be ensuring that type stubs contain
-all the public names.  If there's a project in a subdir that is uv-installable
-(has a `pyproject.toml` with `name` and `version` at least), then you can do
-something like this:
-
-```toml
-[[rule]]
-
-name = "stubs-should-match"
-impl = "python"
-deps = ["./stubchecker"]
-command = ["stubchecker"]
-inputs = ["*.py", "*.pyi"]
-```
+Project scope is different than repo scope in the case of repos with multiple
+projects.
