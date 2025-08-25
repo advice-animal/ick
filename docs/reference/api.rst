@@ -1,4 +1,0 @@
-API Reference
-=============
-
-.. module:: ick

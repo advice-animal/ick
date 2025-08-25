@@ -7,7 +7,6 @@ Concepts
 
    rules
    scope
-   order
    projects
 
    what_came_before
