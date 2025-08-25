@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import textwrap
 from pathlib import Path
 
 import platformdirs
@@ -22,7 +23,7 @@ class Rule(BaseRule):
         self.command_parts = [self.venv.bin("python")]
 
         if rule_config.data:
-            self.command_parts.extend(["-c", rule_config.data])
+            self.command_parts.extend(["-c", textwrap.dedent(rule_config.data)])
         else:
             py_script = rule_config.script_path.with_suffix(".py")  # type: ignore[union-attr] # FIX ME
             if not py_script.exists():
