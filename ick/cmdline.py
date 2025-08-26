@@ -170,7 +170,7 @@ def run(
                 for line in result.finished.message.splitlines():
                     print("    ", line)
             elif result.finished.status is False:
-                print("[yellow]FAIL[/yellow]")
+                print("[yellow]NEEDS_WORK[/yellow]")
                 for line in result.finished.message.splitlines():
                     print("    ", line)
             else:
