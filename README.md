@@ -99,7 +99,7 @@ doesn't seem rewarding, and provide a way for language-agnostic discovery.
 
 ## More Details
 
-Each rule runs in parallel.  Best case, this means you get to use all youre
+Each rule runs in parallel.  Best case, this means you get to use all your
 cores and get a fully passing score.  We all want that.  But if your code has
 some fixes that we think you'd want, then subsequent rules get re-run.
 
