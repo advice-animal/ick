@@ -1,0 +1,29 @@
+$ ls
+i_have_no_tests.py
+ick.toml
+isort.cfg
+move_isort_cfg.py
+pyproject.toml
+tests
+$ cat isort.cfg
+[settings]
+line_length = 88
+multi_line_output = 3
+$ ick run --apply
+-> i_have_no_tests: OK
+-> move_isort_cfg: NEEDS_WORK
+   Change made: isort.cfg                      -3
+   Change made: pyproject.toml                 +3
+-> show_ick_vars: NEEDS_WORK
+     ICK_APPLY=1
+     ICK_REPO_PATH=/CWD
+$ ls
+i_have_no_tests.py
+ick.toml
+move_isort_cfg.py
+pyproject.toml
+tests
+$ cat pyproject.toml
+[tool.isort]
+line_length = "88"
+multi_line_output = "3"

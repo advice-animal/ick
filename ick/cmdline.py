@@ -102,9 +102,9 @@ def test_rules(ctx: click.Context, filters: list[str]) -> None:
 
 
 @main.command()
-@click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, on by default sometimes")
-@click.option("-p", "--patch", is_flag=True, help="Show patch instead of applying")
-@click.option("--yolo", is_flag=True, help="Yolo mode enables modifying external state")
+@click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, show stats (default)")
+@click.option("-p", "--patch", is_flag=True, help="Show patches of changes")
+@click.option("--apply", is_flag=True, help="Apply changes")
 @click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by rule qualname (can be used with list-rules --json)")
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
 @click.option("--emojis", is_flag=True, help="Show a waterfall of emojis as work is being done")
@@ -114,7 +114,7 @@ def run(
     ctx: click.Context,
     dry_run: bool,
     patch: bool,
-    yolo: bool,
+    apply: bool,
     json_flag: bool,
     skip_update: bool,
     emojis: bool,
@@ -123,20 +123,26 @@ def run(
     """
     Run the applicable rules to the current repo/path
 
-    If you don't provide filters, the default is a dry-run style mode for all rules.
+    The default is a dry run that shows stats of changes to files.
 
-    Otherwise, pass either a rule name, rule prefix, or an urgency string like
-    "now" to apply all necessary, successful ones in order.
+    Pass either a rule name, rule prefix, or an urgency string like
+    "now" to filter the rules.
+
+    Use --apply to apply rules' changes.
     """
 
+    num_provided = sum([dry_run, patch, apply])
+    if num_provided > 1:
+        print("Only one of --dry-run, --patch, and --apply can be provided")
+        sys.exit(1)
+    elif num_provided == 0:
+        dry_run = True
+
     ctx.obj.settings.dry_run = dry_run
-    ctx.obj.settings.yolo = yolo
+    ctx.obj.settings.apply = apply
     ctx.obj.settings.skip_update = skip_update
 
-    if len(filters) == 0:
-        ctx.obj.settings.dry_run = True  # force it
-    else:
-        apply_filters(ctx, filters)
+    apply_filters(ctx, filters)
 
     # DO THE NEEDFUL
 

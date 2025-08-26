@@ -1,0 +1,12 @@
+$ ick run --dry-run --apply
+Only one of --dry-run, --patch, and --apply can be provided
+(exit status: 1)
+$ ick run --dry-run --patch
+Only one of --dry-run, --patch, and --apply can be provided
+(exit status: 1)
+$ ick run --patch --apply
+Only one of --dry-run, --patch, and --apply can be provided
+(exit status: 1)
+$ ick run --dry-run --patch --apply
+Only one of --dry-run, --patch, and --apply can be provided
+(exit status: 1)

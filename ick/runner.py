@@ -68,6 +68,9 @@ class Runner:
         self.ick_env_vars = {
             "ICK_REPO_PATH": repo.root,
         }
+        if self.rtc.settings.apply:
+            self.ick_env_vars["ICK_APPLY"] = "1"
+
         # TODO there's a var on repo to store this...
         self.projects: list[Project] = find_projects(repo, repo.zfiles, self.rtc.main_config)
 
