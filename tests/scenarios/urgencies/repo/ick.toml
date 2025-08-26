@@ -1,0 +1,62 @@
+[[ruleset]]
+path = "."
+
+[[rule]]
+impl = "shell"
+name = "manual-rule"
+urgency = "manual"
+scope = "project"
+data = """
+echo Manual
+exit 99
+"""
+
+[[rule]]
+impl = "shell"
+name = "optional-rule"
+urgency = "optional"
+scope = "repo"
+data = """
+echo Optional
+exit 99
+"""
+
+[[rule]]
+impl = "shell"
+name = "later-rule"
+urgency = "later"
+scope = "project"
+data = """
+echo Later
+exit 99
+"""
+
+[[rule]]
+impl = "shell"
+name = "soon-rule"
+urgency = "soon"
+scope = "project"
+data = """
+echo Soon
+exit 99
+"""
+
+[[rule]]
+impl = "shell"
+name = "now-rule"
+urgency = "now"
+scope = "project"
+data = """
+echo Now
+exit 99
+"""
+
+[[rule]]
+impl = "shell"
+name = "urgent-rule"
+urgency = "urgent"
+scope = "project"
+data = """
+echo Urgent
+exit 99
+"""

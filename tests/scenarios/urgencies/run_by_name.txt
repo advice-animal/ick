@@ -1,0 +1,6 @@
+$ ick run soon-rule
+-> soon-rule: NEEDS_WORK
+     Soon
+$ ick run optional-rule
+-> optional-rule: NEEDS_WORK
+     Optional
