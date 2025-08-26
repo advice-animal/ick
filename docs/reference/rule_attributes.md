@@ -48,7 +48,7 @@ A single `[[rule]]` in an ick.toml can be configured with the following attribut
   - `"med"`: Medium risk level
   - `"low"`: Lowest risk level
 - `urgency` (str): The urgency level of the rule. Defaults to `"later"`. Available options:
-  - `"manual"`: The rule is not intended to be run automatically and should be run by choice.
+  - `"optional"`: The rule is optional and can be run if and when you like
   - `"later"`: Can be addressed later
   - `"soon"`: Should be addressed soon
   - `"now"`: Don't put this off
