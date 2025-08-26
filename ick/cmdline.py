@@ -163,8 +163,8 @@ def run(
     r = Runner(ctx.obj, ctx.obj.repo)
     for result in r.run(**kwargs):
         if not json_flag:
-            where = f"on {result.project} " if result.project else ""
-            print(f"-> [bold]{result.rule}[/bold] {where}", end="")
+            where = f" on {result.project}" if result.project else ""
+            print(f"-> [bold]{result.rule}[/bold]{where}: ", end="")
             if result.finished.status is None:
                 print("[red]ERROR[/red]")
                 for line in result.finished.message.splitlines():
