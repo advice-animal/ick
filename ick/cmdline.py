@@ -79,6 +79,7 @@ def list_rules(ctx: click.Context, json_flag: bool, filters: list[str]) -> None:
     """
     Lists rules applicable to the current repo
     """
+    ctx.obj.filter_config.min_urgency = min(Urgency)  # List all urgencies unless specified by filters
     apply_filters(ctx, filters)
     r = Runner(ctx.obj, ctx.obj.repo)
     if json_flag:
@@ -96,6 +97,7 @@ def test_rules(ctx: click.Context, filters: list[str]) -> None:
 
     With no filters, run tests in all rules.
     """
+    ctx.obj.filter_config.min_urgency = min(Urgency)  # Test all urgencies unless specified by filters
     apply_filters(ctx, filters)
     r = Runner(ctx.obj, ctx.obj.repo)
     sys.exit(r.test_rules())
@@ -142,7 +144,11 @@ def run(
     ctx.obj.settings.apply = apply
     ctx.obj.settings.skip_update = skip_update
 
-    apply_filters(ctx, filters)
+    if filters:
+        ctx.obj.filter_config.min_urgency = min(Urgency)
+        apply_filters(ctx, filters)
+    else:
+        ctx.obj.filter_config.min_urgency = Urgency.LATER
 
     # DO THE NEEDFUL
 
@@ -220,9 +226,6 @@ def run(
 
 
 def apply_filters(ctx: click.Context, filters: list[str]) -> None:
-    if ctx.info_name in ("test-rules", "list-rules"):
-        ctx.obj.filter_config.min_urgency = min(Urgency)  # Test and list rules from all urgencies unless specified by filters
-
     if not filters:
         pass
     elif len(filters) == 1 and getattr(Urgency, filters[0].upper(), None):

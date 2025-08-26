@@ -1,0 +1,36 @@
+# list-rules lists all urgencies
+$ ick list-rules
+URGENT
+======
+* urgent-rule
+
+NOW
+===
+* now-rule
+
+SOON
+====
+* soon-rule
+
+LATER
+=====
+* later-rule
+
+OPTIONAL
+========
+* manual-rule
+* optional-rule
+#
+# But a different urgency can be used as the minimum
+$ ick list-rules soon
+URGENT
+======
+* urgent-rule
+
+NOW
+===
+* now-rule
+
+SOON
+====
+* soon-rule

@@ -1,0 +1,33 @@
+# By default, run LATER or more urgent
+$ ick run
+-> later-rule: NEEDS_WORK
+     Later
+-> now-rule: NEEDS_WORK
+     Now
+-> soon-rule: NEEDS_WORK
+     Soon
+-> urgent-rule: NEEDS_WORK
+     Urgent
+# A different urgency can be supplied as a filter
+$ ick run soon
+-> now-rule: NEEDS_WORK
+     Now
+-> soon-rule: NEEDS_WORK
+     Soon
+-> urgent-rule: NEEDS_WORK
+     Urgent
+#
+# Note that rules are run alphabetically, so the order seems odd here:
+$ ick run optional
+-> later-rule: NEEDS_WORK
+     Later
+-> manual-rule: NEEDS_WORK
+     Manual
+-> now-rule: NEEDS_WORK
+     Now
+-> optional-rule: NEEDS_WORK
+     Optional
+-> soon-rule: NEEDS_WORK
+     Soon
+-> urgent-rule: NEEDS_WORK
+     Urgent
