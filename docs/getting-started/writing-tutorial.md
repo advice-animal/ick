@@ -16,7 +16,7 @@ any language and use any tooling you want.  A key idea of ick rules is that they
 can be run without ick.  This can simplify the testing and development of rules,
 and means that ick can run code that wasn't written specifically for ick.
 
-Rules can modify files, or check files for conformance to a policy, or both.
+Rules can modify files, or indicate that files should be changed manually (aka NEEDS WORK), or both.
 We'll start with a rule that modifies files.
 
 
