@@ -1,0 +1,3 @@
+$ ick run
+-> crash: ERROR
+     Oh NO!

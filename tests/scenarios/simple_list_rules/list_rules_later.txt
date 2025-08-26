@@ -1,0 +1,4 @@
+$ ick list-rules now
+NOW
+===
+* hello: Say hello
