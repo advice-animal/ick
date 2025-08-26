@@ -16,6 +16,9 @@ any language and use any tooling you want.  A key idea of ick rules is that they
 can be run without ick.  This can simplify the testing and development of rules,
 and means that ick can run code that wasn't written specifically for ick.
 
+Rules can modify files, or check files for conformance to a policy, or both.
+We'll start with a rule that modifies files.
+
 
 ## Setting up a local rule
 
@@ -127,12 +130,11 @@ project_types = ["python"]
 <!-- [[[end]]] (sum: 2R7CGqC2ZG) -->
 
 The `impl` setting means we will implement the rule with Python code.
-Setting `scope` to `project` means the rule will be invoked at the project
-level instead of on individual files (but that doesn't work yet, so it's
-commented out).
+Setting `scope` to `project` means the rule will be invoked once at the project
+level instead of on batches of individual files.
 
 Ick can look for projects of certain types.  Setting `project_types` here means
-the rule will be invoked on projects that ick determines are Python projects.
+the rule will be invoked on projects that ick considers Python projects.
 
 If you run `list-rules` again, the rule appears, but with an indication that
 there's no implementation:
@@ -289,6 +291,19 @@ outputs = ["pyproject.toml", "isort.cfg"]
 
 It's safe to omit `inputs` and `outputs`, but the rule will run more often than
 it needs to.
+
+
+## Checkers
+
+Rules don't have to modify files, they can examine files to check for
+conformance to a policy.  If your rule finds problems, it can print messages
+providing details, and then exit with a status code of 99.  If your rule exits
+with 99, ick summarize the rule as "NEEDS_WORK", otherwise it's "OK".
+
+Rules don't have to be pure codemods or pure checkers.  Your rule can make some
+modifications, and can also print messages and exit with 99 if there is more
+work to do.
+
 
 ## Testing
 
