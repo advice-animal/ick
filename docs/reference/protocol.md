@@ -16,15 +16,3 @@ protocol to report results where the additional input is mentioned.
     "msg": "demo/api.pyi is missing the exported name 'Foo'"
 }
 ```
-
-## Intent (and other flags)
-
-## Additional flags
-
-The default way things are run operates on copies, so is pretty similar to a
-dry run.  The big exception is if something relies on *changing* external
-state; these should be protected with `external_state = true` which requires
-either specifying one rule exactly by name, or passing the `--yolo` flag which
-is appended to the rule command.
-
-

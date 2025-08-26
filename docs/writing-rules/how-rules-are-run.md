@@ -28,9 +28,18 @@ When ick runs a rule, it takes these steps:
           this if you need information that isn't in file content, such as git
           remote information.
 
+        - `ICK_APPLY` exists (with a value of "1") if the rule is running with
+          the `--apply` option.  Use this if you rule modifies state outside the
+          files in the working tree.  Only modify that state if this variable
+          indicates that the rule is being applied.
+
     - Rules can make changes to the local copies of files, delete files, or
         create new files.  Any file that might be modified, created, or deleted
         must be declared in the rule's `output` setting.
+
+    - Rules can also make changes beyond the local copies of files.  They might
+        change settings in an external service, update databases, or anything at
+        all.  Only make these changes if `ICK_APPLY` is set.
 
 - When the rule has finished running, ick examines two results to determine what
     happened:
