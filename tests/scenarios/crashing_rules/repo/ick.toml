@@ -1,0 +1,11 @@
+[[ruleset]]
+path = "."
+
+[[rule]]
+impl = "shell"
+name = "crash"
+scope = "project"
+data = """
+echo Oh NO!
+exit 17
+"""
