@@ -1,6 +1,6 @@
 $ ick run --patch
 -> i_have_no_tests OK
--> move_isort_cfg FAIL
+-> move_isort_cfg NEEDS_WORK
 --- a/isort.cfg
 +++ b/isort.cfg
 @@ -1,3 +0,0 @@
@@ -13,5 +13,5 @@ $ ick run --patch
 +[tool.isort]
 +line_length = "88"
 +multi_line_output = "3"
--> show_ick_vars FAIL
+-> show_ick_vars NEEDS_WORK
      ICK_REPO_PATH=/CWD
