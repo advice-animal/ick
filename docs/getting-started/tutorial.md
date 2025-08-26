@@ -77,7 +77,7 @@ $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run
      isort.cfg -3
      pyproject.toml +4
 ```
-<!-- [[[end]]] (sum: JkJNNS1YCb)   -->
+<!-- [[[end]]] (sum: JkJNNS1YCb) -->
 
 This shows that isort.cfg would have three lines deleted, and pyproject.toml
 would have four lines added.
@@ -105,7 +105,7 @@ $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --p
 +line_length = "88"
 +multi_line_output = "3"
 ```
-<!-- [[[end]]] (sum: mmV1/OgZwB)   -->
+<!-- [[[end]]] (sum: mmV1/OgZwB) -->
 
 [WHAT ELSE SHOULD GO HERE?]
 
