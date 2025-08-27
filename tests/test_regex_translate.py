@@ -1,4 +1,16 @@
-from ick._regex_translate import zfilename_re
+import re
+
+from ick._regex_translate import rule_name_re, zfilename_re
+
+
+def test_advice_name_matching() -> None:
+    foo_match = re.compile(rule_name_re("foo")).fullmatch
+    assert foo_match("foo")
+    assert foo_match("foo/hello")
+    assert foo_match("foo/hello/goo")
+    assert not foo_match("food_truck")
+    assert not foo_match("py/foo")
+    assert not foo_match("py/foo/goo")
 
 
 def test_regex_matching_zfilenames() -> None:
