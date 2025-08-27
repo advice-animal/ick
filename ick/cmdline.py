@@ -104,8 +104,8 @@ def test_rules(ctx: click.Context, filters: list[str]) -> None:
 
 
 @main.command()
-@click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, show stats (default)")
-@click.option("-p", "--patch", is_flag=True, help="Show patches of changes")
+@click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, show counts of lines to change (default)")
+@click.option("-p", "--patch", is_flag=True, help="Show patches of changes to make")
 @click.option("--apply", is_flag=True, help="Apply changes")
 @click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by rule qualname (can be used with list-rules --json)")
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")

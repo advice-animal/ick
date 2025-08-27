@@ -29,8 +29,8 @@ When ick runs a rule, it takes these steps:
           remote information.
 
         - `ICK_APPLY` exists (with a value of "1") if the rule is running with
-          the `--apply` option.  Use this if you rule modifies state outside the
-          files in the working tree.  Only modify that state if this variable
+          the `--apply` option.  Use this if your rule makes changes outside the
+          files in the working tree.  Only make those changes if this variable
           indicates that the rule is being applied.
 
     - Rules can make changes to the local copies of files, delete files, or
@@ -39,7 +39,7 @@ When ick runs a rule, it takes these steps:
 
     - Rules can also make changes beyond the local copies of files.  They might
         change settings in an external service, update databases, or anything at
-        all.  Only make these changes if `ICK_APPLY` is set.
+        all.  Rules should only make these changes if `ICK_APPLY` is set.
 
 - When the rule has finished running, ick examines two results to determine what
     happened:
