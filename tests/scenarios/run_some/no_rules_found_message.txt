@@ -1,0 +1,2 @@
+$ ick run rule_that_doesnt_exist
+No rules found with urgency 'later' or greater that matches the pattern '^(rule_that_doesnt_exist$|rule_that_doesnt_exist/.*)$'.

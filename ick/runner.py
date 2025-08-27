@@ -83,7 +83,7 @@ class Runner:
             yield i
 
         if rules_matched == 0 and len(self.rules) > 0:
-            print(f"[red]No rules found with urgency `{self.rtc.filter_config.min_urgency.value}` or greater that matches the pattern`{self.rtc.filter_config.name_filter_re}`.[/red]")
+            print(f"[red]No rules found with urgency '{self.rtc.filter_config.min_urgency.value}' or greater that matches the pattern '{self.rtc.filter_config.name_filter_re}'.[/red]")
 
     def test_rules(self) -> int:
         """
