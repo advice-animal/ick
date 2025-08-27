@@ -76,6 +76,7 @@ class Runner:
 
     def iter_rule_impl(self) -> Iterable[BaseRule]:
         name_filter = re.compile(self.rtc.filter_config.name_filter_re).fullmatch
+        rules_matched = 0
         for rule in self.rules:
             if rule.urgency < self.rtc.filter_config.min_urgency:
                 continue
@@ -83,8 +84,12 @@ class Runner:
             if not name_filter(rule.qualname):
                 continue
 
+            rules_matched += 1
             i = get_impl(rule)(rule)
             yield i
+
+        if rules_matched == 0 and len(self.rules) > 0:
+            print(f"[red]No rules found with urgency '{self.rtc.filter_config.min_urgency.value}' or greater that matches the pattern '{self.rtc.filter_config.name_filter_re}'.[/red]")
 
     def test_rules(self) -> int:
         """
