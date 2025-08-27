@@ -2,11 +2,12 @@ import re
 from typing import Iterable
 
 
-def advice_name_re(prefix: str) -> str:
+def rule_name_re(prefix: str) -> str:
     """
-    returns a regular expression string that matches either prefix/ or prefix as the entire string.
+    Returns a regular expression string that matches either prefix/ or prefix
+    as the entire string.  The regex is used with re.fullmatch.
     """
-    return f"^{prefix}($|/)"
+    return f"^{prefix}($|/.*$)"
 
 
 def zfilename_re(opts: Iterable[str]) -> re.Pattern[str]:

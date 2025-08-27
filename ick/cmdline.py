@@ -14,7 +14,7 @@ from vmodule import vmodule_init
 
 from ick_protocol import Urgency
 
-from ._regex_translate import advice_name_re
+from ._regex_translate import rule_name_re
 from .config import RuntimeConfig, Settings, load_main_config, load_rules_config, one_repo_config
 from .git import find_repo_root
 from .project_finder import find_projects as find_projects_fn
@@ -236,7 +236,7 @@ def apply_filters(ctx: click.Context, filters: list[str]) -> None:
         ctx.obj.filter_config.min_urgency = urgency
 
     else:
-        ctx.obj.filter_config.name_filter_re = "|".join(advice_name_re(name) for name in filters)
+        ctx.obj.filter_config.name_filter_re = "|".join(rule_name_re(name) for name in filters)
 
 
 def verbose_init(v: int, verbose: Optional[int], vmodule: Optional[str]) -> None:

@@ -1,4 +1,4 @@
 $ ick run rule_that_doesnt_exist
-No rules found with urgency 'optional' or greater that matches the pattern '^rule_that_doesnt_exist($|/)'.
+No rules found with urgency 'optional' or greater that matches the pattern '^rule_that_doesnt_exist($|/.*$)'.
 $ ick run now
 No rules found with urgency 'now' or greater that matches the pattern '.*'.
