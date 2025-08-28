@@ -10,3 +10,6 @@
     - it has tests
         - the tests will only be run if you use `$ ick test-rules` in your
             scenario
+- If you've changed code and it will change scenarios:
+    - you can run the scenarios to auto-update them:
+        - `UPDATE_SCENARIOS=1 pytest -k scenario`
