@@ -400,13 +400,13 @@ $ ick run --patch
 As written, our rule would run for any Python project, but it will run when
 *any* file in the project changes.  We can be smarter than this since there are
 just two files we care about.  We might read both, and might write one and
-delete the other, so we specify them as both input:
+delete the other, so we specify them as inputs:
 
 ```toml
 inputs = ["pyproject.toml", "isort.cfg"]
 ```
 
-On `project` and `repo` scoped rules, it's safe to omit `inputs` and `outputs`, since ick will pull in every file by default. However, the rule will run more often than
+On `project` and `repo` scoped rules, it's safe to omit `inputs`, since ick will pull in every file by default. However, the rule will run more often than
 it needs to.
 
 ## Best Practices on How to Access Files in Rules
