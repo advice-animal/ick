@@ -22,6 +22,8 @@ Rules can be sourced from many places: your code's repo, a rules repo of your
 own, a rules repo provided by someone else, or even a local directory.  Ick lets
 you use rules from a number of sources at once.
 
+This is a TEST.
+
 For this tutorial, we'll be using two repos.  The first will stand in for your
 code: the code you want to analyze or modify with ick.  To start, clone this
 dead-simple repo:
