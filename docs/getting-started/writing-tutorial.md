@@ -283,15 +283,76 @@ $ ick run --patch
 As written, our rule would run for any Python project, but it will run when
 *any* file in the project changes.  We can be smarter than this since there are
 just two files we care about.  We might read both, and might write one and
-delete the other, so we specify them as both input and output:
+delete the other, so we specify them as inputs:
 
 ```toml
 inputs = ["pyproject.toml", "isort.cfg"]
-outputs = ["pyproject.toml", "isort.cfg"]
 ```
 
-It's safe to omit `inputs` and `outputs`, but the rule will run more often than
+On `project` and `repo` scoped rules, it's safe to omit `inputs`, since ick will pull in every file by default. However, the rule will run more often than
 it needs to.
+
+## Best Practices on How to Access Files in Rules
+
+Under the hood, `ick` takes all the files in your `inputs`, puts them into a temporary directory, and passes their names to the command line. This means they are all accessible via `sys.argv[1:]` and direct system paths like `Path("filename")`. Thanks to this functionality, the best practices on which method to use are very flexible. They largely revolve around what your rule would like to do. 
+
+If you want to perform the same function on many different types of files agnostic of filename, especially when you use globs, you can iterate over them like so:
+
+```toml
+[[rule]]
+name = "find_and_replace_in_many_types_of_files"
+inputs = ["*.py", "*.sh", "literally-anything"]
+```
+
+```python
+import sys
+
+from pathlib import Path
+from typing import List
+
+def main(filenames: List[str]):
+    for filename in filenames:
+        file = Path(filename)
+        # Do something cool to the file! The rule could double-check the filename too, but here we don't care. 
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
+```
+
+However, if your rule dives deeply into only a few files, your rule will be easier to read and debug if you access them directly. 
+```toml
+[[rule]]
+name = "check_tox_and_setup.py"
+inputs = ["tox.ini", "setup.py"]
+```
+
+```python
+from pathlib import Path
+
+def main():
+    tox_ini = Path("tox.ini").read_text()
+    setup_py = Path("setup.py").read_text()
+    # Do very specialized things on each file.
+
+if __name__ == "__main__":
+    main()
+```
+
+Clearly, this method is much cleaner than something like 
+```python
+def main(filenames: List[str]):
+    for filename in filenames:
+        if filename == "setup.py":
+            # setup.py-specific behavior
+
+        elif filename == "tox.ini":
+            # tox.ini-specific behavior
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
+```
+both work, but one looks much nicer!
 
 
 ## Checkers
