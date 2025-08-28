@@ -411,7 +411,7 @@ it needs to.
 
 ## Best Practices on How to Access Files in Rules
 
-Under the hood, `ick` takes all the files in your `inputs`, puts them into a temporary directory, and passes their names to the command line. This means they are all accessible via `sys.argv[1:]` and direct system paths like `Path("filename")`. Thanks to this functionality, the best practices on which method to use are very flexible. They largely revolve around what your rule would like to do. 
+Under the hood, `ick` takes all the files in your `inputs`, puts them into a temporary directory, and passes their names to the command line. This means they are all accessible as command-line arguments and direct system paths like "Dockerfile". Thanks to this functionality, the best practices on which method to use are very flexible. They largely revolve around what your rule would like to do. 
 
 If you want to perform the same function on many different types of files agnostic of filename, especially when you use globs, you can iterate over them like so:
 
@@ -436,7 +436,8 @@ if __name__ == "__main__":
     main(sys.argv[1:])
 ```
 
-However, if your rule dives deeply into only a few files, your rule will be easier to read and debug if you access them directly. 
+However, if your rule dives deeply into only a few files, your rule will be easier to read and debug if you access them using hardcoded paths.
+Remember that these files will only be accessible if they're listed in your `inputs`!
 ```toml
 [[rule]]
 name = "check_tox_and_setup.py"
