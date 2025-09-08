@@ -4,11 +4,11 @@ testing...
 
 DETAILS
 --------------------------------------------------------------------------------
-testing crashing_test with with_wrong_output:
+testing crashing_test with with_wrong_error:
 
 Different output found
---- a/output.txt
-+++ b/output.txt
+--- a/error.txt
++++ b/error.txt
 @@ -1,4 +1,4 @@
  Traceback (most recent call last):
    File "/CWD/crashing_test.py", line 1, in <module>
@@ -18,9 +18,9 @@ Different output found
 +Exception: Crash!
 
 --------------------------------------------------------------------------------
-testing crashing_test with without_output:
+testing crashing_test with without_error:
 
-Test crashed, but /CWD/tests/crashing_test/without_output/output/output.txt doesn't exist so that seems unintended:
+Test crashed, but /CWD/tests/crashing_test/without_error/output/error.txt doesn't exist so that seems unintended:
 Traceback (most recent call last):
   File "/CWD/crashing_test.py", line 1, in <module>
     raise Exception("Crash!")
