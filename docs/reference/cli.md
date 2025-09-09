@@ -65,7 +65,7 @@ ick list-rules python
 
 ### `run`
 
-Run the applicable rules to the current repository/path. By default, this performs a dry run that shows statistics of changes to files.
+Run the applicable rules on the current repository/path. By default, this performs a dry run that shows statistics of changes to files.
 
 ```bash
 ick run [OPTIONS] [FILTERS]...
@@ -73,10 +73,12 @@ ick run [OPTIONS] [FILTERS]...
 
 **Specific Options:**
 - `-n, --dry-run` - Dry run mode, show counts of lines to change (default)
-- `-p, --patch` - Show diff of what changes would be made (cannot be used with --apply)
-- `--apply` - Apply changes (cannot be used with --patch)
+- `-p, --patch` - Show diff of what changes would be made
+- `--apply` - Apply changes made by rule
 - `--json` - JSON output of modifications made by rule (doesn't apply changes)
 - `--skip-update` - When loading rules from a repo, don't pull if some version already exists locally
+
+Note: Only one of the flags `--dryrun`, `--patch`, and `--apply` can be used at a time.
 
 **Examples:**
 ```bash
