@@ -16,15 +16,15 @@ Each test for an ick rule consists of two directories:
 - `input/`: Contains the initial state of files before the rule runs
 - `output/`: Contains the expected state of files after the rule runs
 
-### Test for an expected exception using `error.txt`
+### Test for an expected exception using `output.txt`
 
 If you want an error/exception to occur during your test, write the exception verbatim to
-`output/error.txt`.
+`output/output.txt`.
 
-### Test for an expected stdout using `output.txt`
+### Test for an expected stdout using `fail.txt`
 
 If you if you expect your rule to exit with return code 99 and write to stdout (e.g. "Work is still needed on file ..."),
-write the expected stdout verbatim to `output/output.txt`.
+write the expected stdout verbatim to `output/fail.txt`.
 
 ### Test structure visualized
 
@@ -52,13 +52,13 @@ when you run `ick test-rules`.
 |   |   |   |   |   |-- foo.bar
 |   |   |   |   |-- output
 |   |   |   |   |   |-- foo.bar
-|   |   |   |   |   |-- output.txt
+|   |   |   |   |   |-- fail.txt
 |   |   |   |-- test_error
 |   |   |   |   |-- input
 |   |   |   |   |   |-- foo.bar
 |   |   |   |   |-- output
 |   |   |   |   |   |-- foo.bar
-|   |   |   |   |   |-- error.txt
+|   |   |   |   |   |-- output.txt
 |   |   |-- rule2
 |   |   |   |-- test_rule2
 |   |   |   |   |-- input
@@ -83,7 +83,7 @@ For each test, ick will:
 
 1. Copy the contents of `input/` to a temporary directory
 2. Run the rule on those files
-3. Compare the results with the contents of `output/`, including any expected errors in `error.txt` and stdouts in `output.txt`.
+3. Compare the results with the contents of `output/`, including any expected errors in `output.txt` and stdouts in `fail.txt`.
 
 If the files match exactly, the test passes. If there are any differences, the
 test fails and prints the diff.
