@@ -1,0 +1,24 @@
+$ ick test-rules
+testing...
+  needs_work: .FF FAIL
+
+DETAILS
+--------------------------------------------------------------------------------
+testing needs_work with with_wrong_output:
+
+Different output found
+--- a/output.txt
++++ b/output.txt
+@@ -1 +1 @@
+-Incorrect output message!
++This repo needs work!
+
+--------------------------------------------------------------------------------
+testing needs_work with without_output:
+
+Test failed, but /CWD/tests/needs_work/without_output/output/output.txt doesn't exist so that seems unintended:
+This repo needs work!
+
+
+
+(exit status: 1)

@@ -174,7 +174,7 @@ class Runner:
             response = x.modifications
 
             files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
-            files_to_check = {f for f in files_to_check if (outp / f).is_file()} - {"fail.txt", "output.txt"}
+            files_to_check = {f for f in files_to_check if (outp / f).is_file()} - {"output.txt", "error.txt"}
 
             actual_output = x.finished.message
             for old, new in self._testing_replacements.items():
@@ -182,7 +182,7 @@ class Runner:
 
             if x.finished.status is None:
                 # Error state
-                expected_path = outp / "output.txt"
+                expected_path = outp / "error.txt"
                 if not expected_path.exists():
                     result.message = f"Test crashed, but {expected_path} doesn't exist so that seems unintended:\n{actual_output}"
                     return
@@ -191,12 +191,12 @@ class Runner:
                 if expected == actual_output:
                     result.success = True
                 else:
-                    result.diff = moreorless.unified_diff(expected, actual_output, "output.txt")
+                    result.diff = moreorless.unified_diff(expected, actual_output, "error.txt")
                     result.message = "Different output found"
                 return
             elif x.finished.status is False and not x.modifications:
                 # Didn't match expectation
-                expected_path = outp / "fail.txt"
+                expected_path = outp / "output.txt"
                 if not expected_path.exists():
                     result.message = f"Test failed, but {expected_path} doesn't exist so that seems unintended:\n{actual_output}"
                     return
@@ -205,7 +205,7 @@ class Runner:
                 if expected == actual_output:
                     result.success = True
                 else:
-                    result.diff = moreorless.unified_diff(expected, actual_output, "fail.txt")
+                    result.diff = moreorless.unified_diff(expected, actual_output, "output.txt")
                     result.message = "Different output found"
                 return
             else:
