@@ -180,14 +180,27 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
                     diff = moreorless.unified_diff(a.decode(), "", k)
 
                 changes.append(
-                    Modified(rule_name=self.qualname, filename=k, new_bytes=None if b is ERASURE else b, diff=diff, diffstat=diffstat(diff))
+                    Modified(
+                        rule_name=self.qualname,
+                        filename=k,
+                        new_bytes=None if b is ERASURE else b,
+                        diff=diff,
+                        diffstat=diffstat(diff),
+                    )
                 )
             elif k not in self.accepted_state:
                 # Well then...
-                assert isinstance(self.output_state[k].value, bytes)
-                diff = moreorless.unified_diff("", self.output_state[k].value.decode(), k)
+                new_bytes = self.output_state[k].value
+                assert isinstance(new_bytes, bytes)
+                diff = moreorless.unified_diff("", new_bytes.decode(), k)
                 changes.append(
-                    Modified(rule_name=self.qualname, filename=k, new_bytes=self.output_state[k].value, diff=diff, diffstat=diffstat(diff))
+                    Modified(
+                        rule_name=self.qualname,
+                        filename=k,
+                        new_bytes=new_bytes,
+                        diff=diff,
+                        diffstat=diffstat(diff),
+                    )
                 )
 
         # Keep only the messages that still apply...
