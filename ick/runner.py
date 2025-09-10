@@ -20,7 +20,7 @@ from keke import ktrace
 from moreorless import unified_diff
 from rich import print
 
-from ick_protocol import Finished, Modified
+from ick_protocol import Finished, Modified, RuleStatus
 
 from .base_rule import BaseRule, GenericPreparedStep
 from .config import RuntimeConfig
@@ -184,7 +184,7 @@ class Runner:
             for old, new in self._testing_replacements.items():
                 actual_output = actual_output.replace(old, new)
 
-            if run.finished.status is None:
+            if run.finished.status is RuleStatus.ERROR:
                 # Error state
                 expected_path = outp / "error.txt"
                 if not expected_path.exists():
@@ -198,7 +198,7 @@ class Runner:
                     result.diff = moreorless.unified_diff(expected, actual_output, "error.txt")
                     result.message = "Different output found"
                 return
-            elif run.finished.status is False and not run.modifications:
+            elif run.finished.status is RuleStatus.NEEDS_WORK and not run.modifications:
                 # Didn't match expectation
                 expected_path = outp / "output.txt"
                 if not expected_path.exists():
@@ -288,7 +288,7 @@ class Runner:
                 # This should also encompass exit codes other than 0 and 99
                 # print(f"{s} failed:")
                 # print(f"  {s.cancel_reason}")
-                yield HighLevelResult(s.qualname, s.match_prefix, [], Finished("a", False, s.cancel_reason))
+                yield HighLevelResult(s.qualname, s.match_prefix, [], Finished("a", RuleStatus.NEEDS_WORK, s.cancel_reason))
             else:
                 # if any(e == 99 for e in s.exit_codes):
                 #     ...

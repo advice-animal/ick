@@ -12,7 +12,7 @@ from moreorless.click import echo_color_precomputed_diff
 from rich import print
 from vmodule import vmodule_init
 
-from ick_protocol import Urgency
+from ick_protocol import RuleStatus, Urgency
 
 from ._regex_translate import rule_name_re
 from .config import RuntimeConfig, Settings, load_main_config, load_rules_config, one_repo_config
@@ -177,15 +177,16 @@ def run(
         if not json_flag:
             where = f" on {result.project}" if result.project else ""
             print(f"-> [bold]{result.rule}[/bold]{where}: ", end="")
-            if result.finished.status is None:
+            if result.finished.status is RuleStatus.ERROR:
                 print("[red]ERROR[/red]")
                 for line in result.finished.message.splitlines():
                     print("    ", line)
-            elif result.finished.status is False:
+            elif result.finished.status is RuleStatus.NEEDS_WORK:
                 print("[yellow]NEEDS_WORK[/yellow]")
                 for line in result.finished.message.splitlines():
                     print("    ", line)
             else:
+                assert result.finished.status is RuleStatus.SUCCESS
                 print("[green]OK[/green]")
 
         if json_flag:

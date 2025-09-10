@@ -17,6 +17,9 @@ from .ick_protocol import (
     Risk as Risk,
 )
 from .ick_protocol import (
+    RuleStatus as RuleStatus,
+)
+from .ick_protocol import (
     Scope as Scope,
 )
 from .ick_protocol import (

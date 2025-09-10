@@ -1,8 +1,8 @@
 import subprocess
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable
 
-from ick_protocol import Finished, Modified, Msg
+from ick_protocol import Finished, Modified, Msg, RuleStatus
 
 from .sh import run_cmd
 
@@ -12,7 +12,7 @@ def get_diff_messages(msg: str, rule_name: str, workdir: Path) -> Iterable[Msg]:
     plus_count = None
     minus_count = None
     filename = ""
-    status: Optional[bool] = True  # all's ok
+    status = RuleStatus.SUCCESS  # all's ok
 
     def get_chunk() -> Msg:
         new_bytes: bytes | None = None
@@ -23,7 +23,7 @@ def get_diff_messages(msg: str, rule_name: str, workdir: Path) -> Iterable[Msg]:
             pass
 
         nonlocal status
-        status = False
+        status = RuleStatus.NEEDS_WORK
 
         return Modified(
             rule_name=rule_name,
