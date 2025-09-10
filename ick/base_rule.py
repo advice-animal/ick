@@ -13,7 +13,7 @@ from feedforward import Notification, Run, State, Step
 from feedforward.erasure import ERASURE, Erasure
 from keke import ktrace
 
-from ick_protocol import Finished, ListResponse, Modified, Scope
+from ick_protocol import Finished, ListResponse, Modified, RuleStatus, Scope
 
 from .config import RuleConfig
 from .sh import run_cmd
@@ -57,7 +57,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         # dict value is output, exit code and we decide what the aggregate code
         # is at the end.
         self.batch_messages: dict[tuple[int, tuple[str, ...]], tuple[str, int]] = {}
-        self.rule_status: bool | None = True  # Success
+        self.rule_status = RuleStatus.SUCCESS
 
     def match(self, key: str) -> bool:
         return match_prefix_patterns(key, self.match_prefix, self.patterns) is not None
@@ -222,20 +222,20 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
 
         if rc - {99, 0}:
             # Error, consider showing the code...
-            self.rule_status = None
+            self.rule_status = RuleStatus.ERROR
         elif 99 in rc or changes:
             # As documented in ick_protocol, it's a fail if there are changes...
-            self.rule_status = False
+            self.rule_status = RuleStatus.NEEDS_WORK
         else:
             # Success
-            self.rule_status = True
+            self.rule_status = RuleStatus.SUCCESS
 
         if disclaimer:
             msgs.insert(0, disclaimer)
 
         if self.rule_status and changes:
             # As documented in ick_protocol, it's a fail if there are changes...
-            self.rule_status = False
+            self.rule_status = RuleStatus.NEEDS_WORK
 
         changes.append(
             Finished(self.qualname, status=self.rule_status, message="".join(msgs)),

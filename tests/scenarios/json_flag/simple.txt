@@ -4,7 +4,7 @@ $ ick run --json
         "do_nothing": [
             {
                 "project_name": "",
-                "status": true,
+                "status": "success",
                 "modified": [],
                 "message": "did nothing\n"
             }
@@ -12,7 +12,7 @@ $ ick run --json
         "fail": [
             {
                 "project_name": "",
-                "status": null,
+                "status": "error",
                 "modified": [],
                 "message": "AssertionError\n"
             }
@@ -20,7 +20,7 @@ $ ick run --json
         "move_a": [
             {
                 "project_name": "",
-                "status": false,
+                "status": "needs-work",
                 "modified": [
                     {
                         "file_name": "file_a.cfg",
