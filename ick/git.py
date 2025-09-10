@@ -6,8 +6,6 @@ from logging import getLogger
 from pathlib import Path
 from urllib.parse import urlparse
 
-from click import ClickException
-
 from .sh import run_cmd
 
 LOG = getLogger(__name__)
@@ -65,13 +63,3 @@ def find_repo_root(path: Path) -> Path:
 
     # TODO what's the right fallback here?  I'd almost rather an exception.
     return path
-
-
-def head(path: Path) -> str:
-    """
-    Returns the current head (branch)
-    """
-    git_head_path = path / ".git" / "HEAD"
-    if not git_head_path.exists():
-        raise ClickException(f"Not a git repo: {path}")
-    return git_head_path.read_text().strip().split("/")[-1]
