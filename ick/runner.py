@@ -170,17 +170,17 @@ class Runner:
 
             repo = maybe_repo(tp, stack.enter_context, for_testing=True)
 
-            x = next(iter(self.run(test_impl=rule_instance, test_repo=repo)))
-            response = x.modifications
+            run = next(iter(self.run(test_impl=rule_instance, test_repo=repo)))
+            response = run.modifications
 
             files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
             files_to_check = {f for f in files_to_check if (outp / f).is_file()} - {"output.txt", "error.txt"}
 
-            actual_output = x.finished.message
+            actual_output = run.finished.message
             for old, new in self._testing_replacements.items():
                 actual_output = actual_output.replace(old, new)
 
-            if x.finished.status is None:
+            if run.finished.status is None:
                 # Error state
                 expected_path = outp / "error.txt"
                 if not expected_path.exists():
@@ -194,7 +194,7 @@ class Runner:
                     result.diff = moreorless.unified_diff(expected, actual_output, "error.txt")
                     result.message = "Different output found"
                 return
-            elif x.finished.status is False and not x.modifications:
+            elif run.finished.status is False and not run.modifications:
                 # Didn't match expectation
                 expected_path = outp / "output.txt"
                 if not expected_path.exists():
