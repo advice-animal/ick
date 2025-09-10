@@ -11,17 +11,18 @@ from logging import getLogger
 from pathlib import Path
 from shutil import copytree
 from tempfile import TemporaryDirectory
-from typing import Iterable, Sequence
+from typing import Any, Callable, Iterable, Sequence
 
 import moreorless
 from feedforward import Run, Step
+from feedforward.erasure import Erasure  # todo: export this properly from feedforward
 from keke import ktrace
 from moreorless import unified_diff
 from rich import print
 
 from ick_protocol import Finished, Modified
 
-from .base_rule import BaseRule
+from .base_rule import BaseRule, GenericPreparedStep
 from .config import RuntimeConfig
 from .config.rule_repo import discover_rules, get_impl
 from .project_finder import find_projects
@@ -50,7 +51,7 @@ class TestResult:
     """Capture the result of running a test in a structured way."""
 
     rule_instance: BaseRule
-    test_path: str
+    test_path: Path
     message: str = ""
     success: bool = False
     diff: str = ""
@@ -64,9 +65,9 @@ class Runner:
     def __init__(self, rtc: RuntimeConfig, repo: Repo) -> None:
         self.rtc = rtc
         self.rules = discover_rules(rtc)
-        self.repo = repo
+        self.repo: BaseRepo = repo
         self.ick_env_vars = {
-            "ICK_REPO_PATH": repo.root,
+            "ICK_REPO_PATH": str(repo.root),
         }
         if self.rtc.settings.apply:
             self.ick_env_vars["ICK_APPLY"] = "1"
@@ -85,11 +86,12 @@ class Runner:
                 continue
 
             rules_matched += 1
-            i = get_impl(rule)(rule)
-            yield i
+            yield get_impl(rule)(rule)
 
         if rules_matched == 0 and len(self.rules) > 0:
-            print(f"[red]No rules found with urgency '{self.rtc.filter_config.min_urgency.value}' or greater that matches the pattern '{self.rtc.filter_config.name_filter_re}'.[/red]")
+            print(
+                f"[red]No rules found with urgency '{self.rtc.filter_config.min_urgency.value}' or greater that matches the pattern '{self.rtc.filter_config.name_filter_re}'.[/red]"
+            )
 
     def test_rules(self) -> int:
         """
@@ -133,7 +135,9 @@ class Runner:
                         final_status = 1
                         print("[red]F[/]", end="")
                         buf_print(f"{'-' * 80}")
-                        rel_test_path = result.test_path.relative_to(result.rule_instance.rule_config.test_path)  # type: ignore[attr-defined] # FIX ME
+                        rule_test_path = result.rule_instance.rule_config.test_path
+                        assert rule_test_path is not None
+                        rel_test_path = result.test_path.relative_to(rule_test_path)
                         with_test = ""
                         if str(rel_test_path) != ".":
                             with_test = f" with [bold]{rel_test_path}[/]"
@@ -154,7 +158,7 @@ class Runner:
 
         return final_status
 
-    def _perform_test(self, rule_instance, test_path, result: TestResult) -> None:  # type: ignore[no-untyped-def] # FIX ME
+    def _perform_test(self, rule_instance: BaseRule, test_path: Path, result: TestResult) -> None:
         inp = test_path / "input"
         outp = test_path / "output"
         if not inp.exists():
@@ -238,17 +242,23 @@ class Runner:
 
         result.success = True
 
-    def iter_tests(self) -> Iterable[tuple[BaseRule, tuple[str, ...]]]:
+    def iter_tests(self) -> Iterable[tuple[BaseRule, tuple[Path, ...]]]:
         # Yields (impl, test_paths) for projects in test dir
         for impl in self.iter_rule_impl():
             test_path = impl.rule_config.test_path
-            yield impl, tuple(test_path.glob("*/"))  # type: ignore[union-attr,arg-type] # FIX ME
+            assert test_path is not None
+            yield impl, tuple(test_path.glob("*/"))
 
     def run(
-        self, test_impl: BaseRule | None = None, test_repo: BaseRepo | None = None, status_callback=None, done_callback=None
+        self,
+        *,
+        test_impl: BaseRule | None = None,
+        test_repo: BaseRepo | None = None,
+        status_callback: Callable[[Run[Any, Any]], None] | None = None,
+        done_callback: Callable[[Run[Any, Any]], None] | None = None,
     ) -> Iterable[HighLevelResult]:
         # TODO deliberate in a flag:
-        run: Run[str, bytes] = Run(status_callback=status_callback, done_callback=done_callback)
+        run: Run[str, bytes | Erasure] = Run(status_callback=status_callback, done_callback=done_callback)
         if test_impl:
             assert test_repo
             self.repo = test_repo
@@ -261,7 +271,7 @@ class Runner:
         run.add_step(Step())  # Final sink
 
         # TODO parallelize or show a progress bar, this takes a while...
-        repo_contents: dict[str, bytes] = {}
+        repo_contents: dict[str, bytes | Erasure] = {}
         # TODO the version that includes dirty files
         for f in sorted(self.repo.zfiles.split("\0")):
             if not f:
@@ -273,6 +283,7 @@ class Runner:
 
         run.run_to_completion(repo_contents)
         for s in run._steps[:-1]:
+            assert isinstance(s, GenericPreparedStep)
             if s.cancelled:
                 # This should also encompass exit codes other than 0 and 99
                 # print(f"{s} failed:")
