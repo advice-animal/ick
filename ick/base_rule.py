@@ -36,7 +36,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         cmdline: Sequence[str | Path],
         extra_env: dict[str, str],
         append_filenames: bool,
-        rule_prepare: Callable[[], None] | None = None,
+        rule_prepare: Callable[[], bool] | None = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -56,7 +56,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         #
         # dict value is output, exit code and we decide what the aggregate code
         # is at the end.
-        self.batch_messages: dict[tuple[int, tuple[str, ...]], tuple[str, int]] = {}
+        self.batch_messages: dict[tuple[tuple[str, int], ...], tuple[str, int]] = {}
         self.rule_status = RuleStatus.SUCCESS
 
     def match(self, key: str) -> bool:
@@ -99,6 +99,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
                 relative_filename = n.key[len(self.match_prefix) :]
                 materialize(d, relative_filename, n.state.value)
                 filenames.append(relative_filename)
+                assert self.index is not None
                 batch_key[n.key] = n.state.gens[self.index]
 
             # nice_cmd = " ".join(map(str, self.cmdline))
@@ -159,6 +160,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
     def compute_diff_messages(self) -> list[Modified | Finished]:
         assert not self.cancelled
         assert self.outputs_final
+        assert self.index is not None
 
         changes: list[Modified | Finished] = []
         for k in sorted(set(self.accepted_state) | set(self.output_state)):
@@ -282,7 +284,7 @@ class BaseRule:
         self.runnable = True
         self.status = ""
         self.command_parts: Sequence[str | Path] = []
-        self.command_env: Mapping[str, str | bytes] = {}
+        self.command_env: Mapping[str, str] = {}
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} name={self.rule_config.name!r}>"
@@ -295,7 +297,7 @@ class BaseRule:
     def prepare(self) -> bool:
         return True  # no setup required
 
-    def add_steps_to_run(self, projects: Any, env: Mapping[str, str | bytes], run: Run[str, bytes | Erasure]) -> None:
+    def add_steps_to_run(self, projects: Any, env: Mapping[str, str], run: Run[str, bytes | Erasure]) -> None:
         qualname = self.rule_config.qualname
 
         if self.rule_config.scope == Scope.FILE:
@@ -306,7 +308,7 @@ class BaseRule:
                         patterns=self.rule_config.inputs,  # Don't default, let it raise
                         project_path=p.subdir,
                         cmdline=self.command_parts,
-                        extra_env=env | self.command_env,
+                        extra_env={**env, **self.command_env},
                         append_filenames=True,
                         rule_prepare=self.prepare,
                     )
@@ -325,7 +327,7 @@ class BaseRule:
                         patterns=("*",) if self.rule_config.inputs is None else self.rule_config.inputs,
                         project_path=p.subdir,
                         cmdline=self.command_parts,
-                        extra_env=env | self.command_env,
+                        extra_env={**env, **self.command_env},
                         append_filenames=False,
                         rule_prepare=self.prepare,
                         eager=False,
@@ -341,7 +343,7 @@ class BaseRule:
                     patterns=("*",) if self.rule_config.inputs is None else self.rule_config.inputs,
                     project_path="",
                     cmdline=self.command_parts,
-                    extra_env=env | self.command_env,
+                    extra_env={**env, **self.command_env},
                     append_filenames=False,
                     rule_prepare=self.prepare,
                     eager=False,

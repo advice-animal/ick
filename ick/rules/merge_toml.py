@@ -54,7 +54,7 @@ class Rule(BaseRule):
         super().__init__(rule_config)
         self.command_parts = [sys.executable, "-m", __name__]
         self.command_env = {
-            "RULE_CONFIG": json_encode(rule_config, enc_hook=default),
+            "RULE_CONFIG": json_encode(rule_config, enc_hook=default).decode(),
         }
         if "PYTHONPATH" in os.environ:
             self.command_env["PYTHONPATH"] = os.environ["PYTHONPATH"]
