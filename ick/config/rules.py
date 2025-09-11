@@ -102,10 +102,6 @@ class RuleConfig(Struct):
     url: Optional[str] = None
 
     def __post_init__(self) -> None:
-        if self.urgency == Urgency.MANUAL:
-            # Temporary alias until we can scrub "manual" from all rules.
-            self.urgency = Urgency.OPTIONAL
-
         if not self.qualname:
             self.qualname = self.name
 
