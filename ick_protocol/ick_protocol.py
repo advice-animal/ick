@@ -48,7 +48,6 @@ class Risk(Enum):
 
 class Urgency(Enum):
     OPTIONAL = "optional"
-    MANUAL = "manual"  # short-term alias for OPTIONAL
     LATER = "later"
     SOON = "soon"
     NOW = "now"
