@@ -18,7 +18,6 @@ LATER
 
 OPTIONAL
 ========
-* manual-rule
 * optional-rule
 #
 # But a different urgency can be used as the minimum

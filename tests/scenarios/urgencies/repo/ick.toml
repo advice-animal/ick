@@ -3,16 +3,6 @@ path = "."
 
 [[rule]]
 impl = "shell"
-name = "manual-rule"
-urgency = "manual"
-scope = "project"
-data = """
-echo Manual
-exit 99
-"""
-
-[[rule]]
-impl = "shell"
 name = "optional-rule"
 urgency = "optional"
 scope = "repo"
