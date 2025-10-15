@@ -1,11 +1,8 @@
 import inspect
-import os
 from pathlib import Path
 from typing import Optional, Sequence
 
 from tomlkit import aot, document, item
-
-from ick_protocol.ick_protocol import Urgency
 
 
 def create_rule_file(rule_name: str, target_path: Path, impl: str) -> None:
@@ -31,7 +28,7 @@ def create_rule_file(rule_name: str, target_path: Path, impl: str) -> None:
             raise ValueError(f"Invalid impl: {impl}")
 
     rule_file.write_text(template)
-    print(f"Created rule implementation: {rule_file}")
+    print(f"Created rule implementation at {rule_file}")
 
 
 def write_rule_config_table(
@@ -39,7 +36,7 @@ def write_rule_config_table(
     rule_name: str,
     impl: str,
     inputs: Sequence[str],
-    urgency: Optional[Urgency] = None,
+    urgency: str,
     description: Optional[str] = None,
 ) -> None:
     ick_config_location = target_path / "ick.toml"
@@ -47,12 +44,10 @@ def write_rule_config_table(
     config_dict = {}
     config_dict["name"] = rule_name
     config_dict["impl"] = impl
+    config_dict["urgency"] = urgency
 
     if inputs:  # This could be an empty tuple
         config_dict["inputs"] = inputs
-
-    if urgency is not None:
-        config_dict["urgency"] = urgency.value
 
     if description is not None:
         config_dict["description"] = description
@@ -62,8 +57,12 @@ def write_rule_config_table(
     rule_table.append(item(config_dict))
     rule_doc.append("rule", rule_table)
 
+    # The best way to preserve existing formatting in the ick.toml file is to never touch it 
     with open(ick_config_location, "a") as f:
+        f.write("\n")
         f.write(rule_doc.as_string())
+
+    print(f"Created rule config at {ick_config_location}")
 
 
 def create_test_structure(target_path: Path, rule_name: str) -> None:
@@ -78,17 +77,17 @@ def create_test_structure(target_path: Path, rule_name: str) -> None:
     input_dir.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Created dummy test in: {input_dir} and {output_dir}")
+    print(f"Created dummy test with input and output in {main_test_dir}")
 
 
 def add_rule_structure(
     rule_name: str,
-    target_dir: str,
+    target_path: Path,
     impl: str,
-    inputs: Optional[Sequence[str]] = None,
-    urgency: Optional[Urgency] = None,
+    inputs: Sequence[str],
+    urgency: str,
     description: Optional[str] = None,
-):
+) -> None:
     """
     Generate the file structure for a new rule in the given target directory.
 
@@ -99,20 +98,7 @@ def add_rule_structure(
         urgency (Optional[Urgency]): The urgency level for the rule.
         description (Optional[str]): An optional description for the rule.
     """
-    # Find target directory and determine what structure already exists there
-    target_path = Path(target_dir)
-    if not target_path.exists():
-        abs_target_dir = os.path.abspath(target_dir)
-        if os.getcwd() in abs_target_dir:  # TODO Use ick rule repo root instead, and use actual posix path methods
-            os.makedirs(abs_target_dir)
-
-        else:
-            print(f"Error: target directory {target_dir} doesn't exist and doesn't look like a child of the current directory")
-            return
-
-    if not target_path.is_dir():
-        print(f"Error: '{target_dir}' already exists but is not a directory")
-        return
+    target_path.mkdir(parents=True, exist_ok=True)
 
     write_rule_config_table(
         target_path,
@@ -126,7 +112,3 @@ def add_rule_structure(
     create_rule_file(rule_name=rule_name, impl=impl, target_path=target_path)
 
     print(f"\nRule '{rule_name}' has been created successfully!")
-    print("Next steps:")
-    print(f"1. Edit {Path(target_dir) / f'{rule_name}.py'} to implement your rule logic")
-    print(f"2. Update the test files in {Path(target_dir) / 'tests' / rule_name / 'main'}")
-    print(f"3. Run the rule with: newt pave run {Path(target_dir).name}.{rule_name}")

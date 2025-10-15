@@ -138,7 +138,7 @@ def add_rule(
 
     add_rule_structure(
         rule_name=rule_name,
-        target_dir=target_directory,
+        target_path=Path(target_directory),
         impl=impl,
         inputs=inputs,
         urgency=urgency,
