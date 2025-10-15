@@ -12,6 +12,7 @@ from moreorless.click import echo_color_precomputed_diff
 from rich import print
 from vmodule import vmodule_init
 
+from ick.add_rule import add_rule_structure
 from ick_protocol import RuleStatus, Urgency
 
 from ._regex_translate import rule_name_re
@@ -101,6 +102,48 @@ def test_rules(ctx: click.Context, filters: list[str]) -> None:
     apply_filters(ctx, filters)
     r = Runner(ctx.obj, ctx.obj.repo)
     sys.exit(r.test_rules())
+
+
+@main.command()
+@click.pass_context
+@click.argument("rule_name", metavar="rule-name")
+@click.argument(
+    "target_directory", type=click.Path(exists=False, file_okay=False, dir_okay=True, path_type=str), metavar="target-directory"
+)
+@click.option("--impl", default="python", help="The impl config for the rule. Defaults to python")
+@click.option("--inputs", multiple=True, default=None, help="Input files for the rule (recommended)")
+@click.option(
+    "--urgency",
+    default=Urgency.LATER,
+    type=click.Choice(Urgency, case_sensitive=False),
+    help="Urgency level for the rule",
+)
+@click.option("--description", type=str, help="Description for the rule")
+def add_rule(
+    ctx: click.Context,
+    rule_name: str,
+    target_directory: str,
+    impl: str,
+    inputs: tuple[str],
+    urgency: str,
+    description: str,
+) -> None:
+    """
+    Generate the file structure for a new rule
+    """
+    # TODO: Check if rule qualname already exists using ctx.obj
+    if impl != "python":
+        print("Rule structure initialization for non-python rules is not implemented yet")
+        sys.exit(1)
+
+    add_rule_structure(
+        rule_name=rule_name,
+        target_dir=target_directory,
+        impl=impl,
+        inputs=inputs,
+        urgency=urgency,
+        description=description,
+    )
 
 
 @main.command()
