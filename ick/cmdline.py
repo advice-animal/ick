@@ -111,7 +111,7 @@ def test_rules(ctx: click.Context, filters: list[str]) -> None:
     "target_directory", type=click.Path(exists=False, file_okay=False, dir_okay=True, path_type=str), metavar="target-directory"
 )
 @click.option("--impl", default="python", help="The impl config for the rule. Defaults to python")
-@click.option("--inputs", multiple=True, default=None, help="Input files for the rule (recommended)")
+@click.option("--inputs", multiple=True, default=None, help="List of input files and glob patterns (recommended)")
 @click.option(
     "--urgency",
     default=Urgency.LATER,
@@ -125,11 +125,14 @@ def add_rule(
     target_directory: str,
     impl: str,
     inputs: tuple[str],
-    urgency: str,
+    urgency: Urgency,
     description: str,
 ) -> None:
     """
     Generate the file structure for a new rule
+
+    rule-name (TEXT): The name of the new rule\n
+    target-directory (PATH): The desired directory of the new rule.
     """
     # TODO: Check if rule qualname already exists using ctx.obj
     if impl != "python":
@@ -141,7 +144,7 @@ def add_rule(
         target_path=Path(target_directory),
         impl=impl,
         inputs=inputs,
-        urgency=urgency,
+        urgency=urgency.value,
         description=description,
     )
 

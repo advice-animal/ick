@@ -1,8 +1,7 @@
 import inspect
+import json
 from pathlib import Path
 from typing import Optional, Sequence
-
-from tomlkit import aot, document, item
 
 
 def create_rule_file(rule_name: str, target_path: Path, impl: str) -> None:
@@ -15,6 +14,8 @@ def create_rule_file(rule_name: str, target_path: Path, impl: str) -> None:
                     """
                     Main function for the {rule_name} rule.
                     This is a template implementation. Replace this with your actual rule logic.
+                    See how to write a rule at
+                    https://ick.readthedocs.io/en/latest/writing-rules/overview.html
                     """
                     pass
                 if __name__ == "__main__":
@@ -41,26 +42,29 @@ def write_rule_config_table(
 ) -> None:
     ick_config_location = target_path / "ick.toml"
 
-    config_dict = {}
-    config_dict["name"] = rule_name
-    config_dict["impl"] = impl
-    config_dict["urgency"] = urgency
+    # Build lines for the rule entry
+    rule_lines = [
+        "[[rule]]",
+        f'name = "{rule_name}"',
+        f'impl = "{impl}"',
+        f'urgency = "{urgency}"',
+    ]
 
-    if inputs:  # This could be an empty tuple
-        config_dict["inputs"] = inputs
+    if inputs:
+        rule_lines.append(f"inputs = {json.dumps(list(inputs))}")
 
-    if description is not None:
-        config_dict["description"] = description
+    if description:
+        rule_lines.append(f'description = "{description}"')
 
-    rule_table = aot()
-    rule_doc = document()
-    rule_table.append(item(config_dict))
-    rule_doc.append("rule", rule_table)
+    ick_rule_template = "\n".join(rule_lines) + "\n"
 
-    # The best way to preserve existing formatting in the ick.toml file is to never touch it 
+    # The best way to preserve existing formatting in the ick.toml file is to never touch it
+    preprend_newline = ick_config_location.exists() and not ick_config_location.read_text().endswith("\n\n")
     with open(ick_config_location, "a") as f:
-        f.write("\n")
-        f.write(rule_doc.as_string())
+        if preprend_newline:
+            f.write("\n")
+
+        f.write(ick_rule_template)
 
     print(f"Created rule config at {ick_config_location}")
 
@@ -90,13 +94,6 @@ def add_rule_structure(
 ) -> None:
     """
     Generate the file structure for a new rule in the given target directory.
-
-    Parameters:
-        rule_name (str): The name of the rule to create.
-        target_dir (str): Path to the directory in which to create the rule.
-        inputs (Optional[List[str]]): A list of input files (if any) that the rule will use.
-        urgency (Optional[Urgency]): The urgency level for the rule.
-        description (Optional[str]): An optional description for the rule.
     """
     target_path.mkdir(parents=True, exist_ok=True)
 
