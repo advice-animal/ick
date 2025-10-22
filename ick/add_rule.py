@@ -22,7 +22,8 @@ def create_rule_file(rule_name: str, target_path: Path, impl: str) -> None:
                     main()
                 ''')
 
-        case "shell":  # Unreachable right now but will be accessible soon
+        case "shell":  # pragma: nocover
+            # Unreachable right now but will be accessible soon
             pass
 
         case _:
@@ -70,18 +71,17 @@ def write_rule_config_table(
 
 
 def create_test_structure(target_path: Path, rule_name: str) -> None:
-    """Create the test directory structure with a dummy test."""
-    tests_dir = target_path / "tests"
-    rule_test_dir = tests_dir / rule_name
-    main_test_dir = rule_test_dir / "main"
-    input_dir = main_test_dir / "input"
-    output_dir = main_test_dir / "output"
+    """Create the test directory structure with two dummy tests (test1 and test2)."""
+    for test_name in ["test1", "test2"]:
+        test_dir = target_path / "tests" / rule_name / test_name
+        input_dir = test_dir / "input"
+        output_dir = test_dir / "output"
 
-    # Create directories
-    input_dir.mkdir(parents=True, exist_ok=True)
-    output_dir.mkdir(parents=True, exist_ok=True)
+        # Create directories
+        input_dir.mkdir(parents=True, exist_ok=True)
+        output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Created dummy test with input and output in {main_test_dir}")
+    print(f"Created dummy tests test1 and test2 with input and output in {target_path / 'tests' / rule_name}")
 
 
 def add_rule_structure(
