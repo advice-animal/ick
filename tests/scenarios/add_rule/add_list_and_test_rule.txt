@@ -1,0 +1,83 @@
+$ ick add-rule new_rule new_dir --urgency later --inputs "*.txt" --inputs "*.md" --description "Newly initialized rule"
+Created rule config at new_dir/ick.toml
+Created dummy tests test1 and test2 with input and output in new_dir/tests/new_rule
+Created rule implementation at new_dir/new_rule.py
+
+Rule 'new_rule' has been created successfully!
+$ ick list-rules
+LATER
+=====
+* new_dir/new_rule: Newly initialized rule
+$ ick test-rules
+testing...
+  new_dir/new_rule: .. PASS
+$ cat new_dir/ick.toml
+[[rule]]
+name = "new_rule"
+impl = "python"
+urgency = "later"
+inputs = ["*.txt", "*.md"]
+description = "Newly initialized rule"
+$ find new_dir -type f -o -type d | sort
+new_dir
+new_dir/ick.toml
+new_dir/new_rule.py
+new_dir/tests
+new_dir/tests/new_rule
+new_dir/tests/new_rule/test1
+new_dir/tests/new_rule/test1/input
+new_dir/tests/new_rule/test1/output
+new_dir/tests/new_rule/test2
+new_dir/tests/new_rule/test2/input
+new_dir/tests/new_rule/test2/output
+$ ick add-rule another_rule new_dir --urgency now --inputs whatever
+Created rule config at new_dir/ick.toml
+Created dummy tests test1 and test2 with input and output in new_dir/tests/another_rule
+Created rule implementation at new_dir/another_rule.py
+
+Rule 'another_rule' has been created successfully!
+$ ick list-rules
+NOW
+===
+* new_dir/another_rule
+
+LATER
+=====
+* new_dir/new_rule: Newly initialized rule
+$ ick test-rules
+testing...
+  new_dir/another_rule: .. PASS
+  new_dir/new_rule: .. PASS
+$ cat new_dir/ick.toml
+[[rule]]
+name = "new_rule"
+impl = "python"
+urgency = "later"
+inputs = ["*.txt", "*.md"]
+description = "Newly initialized rule"
+
+[[rule]]
+name = "another_rule"
+impl = "python"
+urgency = "now"
+inputs = ["whatever"]
+$ find new_dir -type f -o -type d | sort
+new_dir
+new_dir/another_rule.py
+new_dir/ick.toml
+new_dir/new_rule.py
+new_dir/tests
+new_dir/tests/another_rule
+new_dir/tests/another_rule/test1
+new_dir/tests/another_rule/test1/input
+new_dir/tests/another_rule/test1/output
+new_dir/tests/another_rule/test2
+new_dir/tests/another_rule/test2/input
+new_dir/tests/another_rule/test2/output
+new_dir/tests/new_rule
+new_dir/tests/new_rule/test1
+new_dir/tests/new_rule/test1/input
+new_dir/tests/new_rule/test1/output
+new_dir/tests/new_rule/test2
+new_dir/tests/new_rule/test2/input
+new_dir/tests/new_rule/test2/output
