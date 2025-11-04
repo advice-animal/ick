@@ -13,7 +13,7 @@ from rich import print
 from vmodule import vmodule_init
 
 from ick.add_rule import add_rule_structure
-from ick_protocol import RuleStatus, Urgency
+from ick_protocol import RuleStatus, Scope, Urgency
 
 from ._regex_translate import rule_name_re
 from .config import RuntimeConfig, Settings, load_main_config, load_rules_config, one_repo_config
@@ -118,14 +118,21 @@ def test_rules(ctx: click.Context, filters: list[str]) -> None:
     type=click.Choice(Urgency, case_sensitive=False),
     help="Urgency level for the rule",
 )
+@click.option(
+    "--scope",
+    default=Scope.FILE,
+    type=click.Choice(Scope, case_sensitive=False),
+    help="Scope of the rule",
+)
 @click.option("--description", type=str, help="Description for the rule")
 def add_rule(
     ctx: click.Context,
     rule_name: str,
     target_directory: str,
     impl: str,
-    inputs: tuple[str],
+    inputs: tuple[str, ...],
     urgency: Urgency,
+    scope: Scope,
     description: str,
 ) -> None:
     """
@@ -139,12 +146,17 @@ def add_rule(
         print("Rule structure initialization for non-python rules is not implemented yet")
         sys.exit(1)
 
+    if scope == scope.FILE and not inputs:
+        print("File-scoped rules (the default) require an `inputs` section to work!")
+        sys.exit(1)
+
     add_rule_structure(
         rule_name=rule_name,
         target_path=Path(target_directory),
         impl=impl,
         inputs=inputs,
         urgency=urgency.value,
+        scope=scope.value,
         description=description,
     )
 

@@ -17,7 +17,8 @@ def create_rule_file(rule_name: str, target_path: Path, impl: str) -> None:
                     See how to write a rule at
                     https://ick.readthedocs.io/en/latest/writing-rules/overview.html
                     """
-                    pass
+
+
                 if __name__ == "__main__":
                     main()
                 ''')
@@ -39,17 +40,13 @@ def write_rule_config_table(
     impl: str,
     inputs: Sequence[str],
     urgency: str,
+    scope: str,
     description: Optional[str] = None,
 ) -> None:
     ick_config_location = target_path / "ick.toml"
 
     # Build lines for the rule entry
-    rule_lines = [
-        "[[rule]]",
-        f'name = "{rule_name}"',
-        f'impl = "{impl}"',
-        f'urgency = "{urgency}"',
-    ]
+    rule_lines = ["[[rule]]", f'name = "{rule_name}"', f'impl = "{impl}"', f'urgency = "{urgency}"', f'scope = "{scope}"']
 
     if inputs:
         rule_lines.append(f"inputs = {json.dumps(list(inputs))}")
@@ -90,6 +87,7 @@ def add_rule_structure(
     impl: str,
     inputs: Sequence[str],
     urgency: str,
+    scope: str,
     description: Optional[str] = None,
 ) -> None:
     """
@@ -103,6 +101,7 @@ def add_rule_structure(
         impl=impl,
         inputs=inputs,
         urgency=urgency,
+        scope=scope,
         description=description,
     )
     create_test_structure(target_path=target_path, rule_name=rule_name)

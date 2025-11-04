@@ -43,7 +43,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         super().__init__(*args, **kwargs)
         self.qualname = qualname
         # TODO figure out how extra_inputs factors in
-        assert patterns is not None
+        assert patterns is not None, "File scoped rules require an `inputs` section in the rule config!"
         self.patterns = patterns
         self.match_prefix = project_path
         self.cmdline = cmdline
