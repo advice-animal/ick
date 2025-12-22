@@ -93,6 +93,33 @@ class Runner:
                 f"[red]No rules found with urgency '{self.rtc.filter_config.min_urgency.value}' or greater that matches the pattern '{self.rtc.filter_config.name_filter_re}'.[/red]"
             )
 
+    def build_steps_for_rules(
+        self,
+        *,
+        status_callback: Callable[[Run[Any, Any]], None] | None = None,
+        done_callback: Callable[[Run[Any, Any]], None] | None = None,
+    ) -> Run[str, bytes | Erasure]:
+        """Compose a feedforward Run with steps for all rules."""
+        run: Run[str, bytes | Erasure] = Run(status_callback=status_callback, done_callback=done_callback)
+        for impl in self.iter_rule_impl():
+            impl.add_steps_to_run(self.projects, self.ick_env_vars, run)
+        run.add_step(Step())  # Final sink
+        return run
+
+    def build_steps_for_test(
+        self,
+        *,
+        impl: BaseRule,
+        repo: BaseRepo,
+    ) -> Run[str, bytes | Erasure]:
+        """Compose a feedforward Run with steps for a single rule test."""
+        run: Run[str, bytes | Erasure] = Run()
+        self.repo = repo
+        project = Project(repo, "", "python", "invalid.bin")
+        impl.add_steps_to_run([project], self.ick_env_vars, run)
+        run.add_step(Step())  # Final sink
+        return run
+
     def test_rules(self) -> int:
         """
         Returns an exit code (0 on success)
@@ -174,17 +201,18 @@ class Runner:
 
             repo = maybe_repo(tp, stack.enter_context, for_testing=True)
 
-            run = next(iter(self.run(test_impl=rule_instance, test_repo=repo)))
-            response = run.modifications
+            steps = self.build_steps_for_test(impl=rule_instance, repo=repo)
+            run_result = next(iter(self.run_steps(steps)))
+            response = run_result.modifications
 
             files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
             files_to_check = {f for f in files_to_check if (outp / f).is_file()} - {"output.txt", "error.txt"}
 
-            actual_output = run.finished.message
+            actual_output = run_result.finished.message
             for old, new in self._testing_replacements.items():
                 actual_output = actual_output.replace(old, new)
 
-            if run.finished.status is RuleStatus.ERROR:
+            if run_result.finished.status is RuleStatus.ERROR:
                 # Error state
                 expected_path = outp / "error.txt"
                 if not expected_path.exists():
@@ -198,7 +226,7 @@ class Runner:
                     result.diff = moreorless.unified_diff(expected, actual_output, "error.txt")
                     result.message = "Different output found"
                 return
-            elif run.finished.status is RuleStatus.NEEDS_WORK and not run.modifications:
+            elif run_result.finished.status is RuleStatus.NEEDS_WORK and not run_result.modifications:
                 # Didn't match expectation
                 expected_path = outp / "output.txt"
                 if not expected_path.exists():
@@ -249,27 +277,11 @@ class Runner:
             assert test_path is not None
             yield impl, tuple(test_path.glob("*/"))
 
-    def run(
-        self,
-        *,
-        test_impl: BaseRule | None = None,
-        test_repo: BaseRepo | None = None,
-        status_callback: Callable[[Run[Any, Any]], None] | None = None,
-        done_callback: Callable[[Run[Any, Any]], None] | None = None,
-    ) -> Iterable[HighLevelResult]:
-        # TODO deliberate in a flag:
-        run: Run[str, bytes | Erasure] = Run(status_callback=status_callback, done_callback=done_callback)
-        if test_impl:
-            assert test_repo
-            self.repo = test_repo
-            project = Project(test_repo, "", "python", "invalid.bin")
-            test_impl.add_steps_to_run([project], self.ick_env_vars, run)
-        else:
-            for impl in self.iter_rule_impl():
-                impl.add_steps_to_run(self.projects, self.ick_env_vars, run)
-
-        run.add_step(Step())  # Final sink
-
+    def run_steps(self, steps: Run[str, bytes | Erasure]) -> Iterable[HighLevelResult]:
+        """
+        Run a series of feedforward steps and yield high-level results.
+        """
+        # TODO deliberate in a flag: (I think this got separated from code now in build_steps_for_rules)
         # TODO parallelize or show a progress bar, this takes a while...
         repo_contents: dict[str, bytes | Erasure] = {}
         # TODO the version that includes dirty files
@@ -281,8 +293,8 @@ class Runner:
             if p.is_file():
                 repo_contents[f] = p.read_bytes()
 
-        run.run_to_completion(repo_contents)
-        for s in run._steps[:-1]:
+        steps.run_to_completion(repo_contents)
+        for s in steps._steps[:-1]:
             assert isinstance(s, GenericPreparedStep)
             if s.cancelled:
                 # This should also encompass exit codes other than 0 and 99
