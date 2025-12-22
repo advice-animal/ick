@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import collections
 import json
 import sys
 from pathlib import Path
@@ -210,7 +211,6 @@ def run(
 
     # DO THE NEEDFUL
 
-    results = {}
     kwargs: dict[str, Any] = {}
 
     # TODO boring progress bar default
@@ -231,23 +231,9 @@ def run(
         kwargs["done_callback"] = lambda _: print("\n")
 
     r = Runner(ctx.obj, ctx.obj.repo)
-    for result in r.run(**kwargs):
-        if not json_flag:
-            where = f" on {result.project}" if result.project else ""
-            print(f"-> [bold]{result.rule}[/bold]{where}: ", end="")
-            if result.finished.status is RuleStatus.ERROR:
-                print("[red]ERROR[/red]")
-                for line in result.finished.message.splitlines():
-                    print("    ", line)
-            elif result.finished.status is RuleStatus.NEEDS_WORK:
-                print("[yellow]NEEDS_WORK[/yellow]")
-                for line in result.finished.message.splitlines():
-                    print("    ", line)
-            else:
-                assert result.finished.status is RuleStatus.SUCCESS
-                print("[green]OK[/green]")
-
-        if json_flag:
+    if json_flag:
+        results = collections.defaultdict(list)
+        for result in r.run(**kwargs):
             modifications = []
             for mod in result.modifications:
                 modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
@@ -258,30 +244,45 @@ def run(
                 # The meaning of this field depends on the status field above
                 "message": result.finished.message,
             }
-            if result.rule not in results:
-                results[result.rule] = [output]
-            else:
-                results[result.rule].append(output)
+            results[result.rule].append(output)
 
-        elif patch:
-            for mod in result.modifications:
-                if mod.diff:
-                    echo_color_precomputed_diff(mod.diff)
-        elif ctx.obj.settings.dry_run:
-            for mod in result.modifications:
-                print("    ", mod.filename, mod.diffstat)
-        else:
-            for mod in result.modifications:
-                path = Path(mod.filename)
-                if mod.new_bytes is None:
-                    path.unlink()
-                else:
-                    path.parent.mkdir(parents=True, exist_ok=True)
-                    path.write_bytes(mod.new_bytes)
-                print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
-
-    if json_flag:
         print(json.dumps({"results": results}, indent=4))
+
+    else:
+        for result in r.run(**kwargs):
+            where = f" on {result.project}" if result.project else ""
+            print(f"-> [bold]{result.rule}[/bold]{where}: ", end="")
+            match result.finished.status:
+                case RuleStatus.ERROR:
+                    print("[red]ERROR[/red]")
+                    for line in result.finished.message.splitlines():
+                        print("    ", line)
+                case RuleStatus.NEEDS_WORK:
+                    print("[yellow]NEEDS_WORK[/yellow]")
+                    for line in result.finished.message.splitlines():
+                        print("    ", line)
+                case RuleStatus.SUCCESS:
+                    print("[green]OK[/green]")
+                case _:  # pragma: no cover
+                    assert False, f"Unhandled status {result.finished.status}"
+
+            if patch:
+                for mod in result.modifications:
+                    if mod.diff:
+                        echo_color_precomputed_diff(mod.diff)
+            elif dry_run:
+                for mod in result.modifications:
+                    print("    ", mod.filename, mod.diffstat)
+            else:
+                assert apply
+                for mod in result.modifications:
+                    path = Path(mod.filename)
+                    if mod.new_bytes is None:
+                        path.unlink()
+                    else:
+                        path.parent.mkdir(parents=True, exist_ok=True)
+                        path.write_bytes(mod.new_bytes)
+                    print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
 
 
 def apply_filters(ctx: click.Context, filters: list[str]) -> None:
