@@ -1,6 +1,14 @@
 # Testing rules
 
-Testing your ick rules are a great way to make sure they work!
+Testing your ick rules is a great way to make sure they work!
+
+There are a few ways to test your rules:
+
+- Write automated tests alongside your rules. You can these with the
+  `ick test-rules` command. This page explains how to set up and run these tests.
+
+- Run your rule manually on samples of code you want to modify. See the next
+  section for details of manual testing.
 
 ## Ick rules test directory structure
 

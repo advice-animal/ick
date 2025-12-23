@@ -12,3 +12,4 @@ Details of how to write rules for ick to run.  Start with the
    norms
    how-rules-are-run
    testing
+   manual-testing
