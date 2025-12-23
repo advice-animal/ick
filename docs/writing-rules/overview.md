@@ -10,6 +10,3 @@ run your rule as a standalone program.  Ick offers support for running your
 rules in a coordinated and isolated way, and for running tests you can provide,
 but the rule can still be easily run on its own.  This gives you more
 flexibility in development and keeps ick simpler.
-
-- things to keep in mind when writing rules
-- the structure of a rule

@@ -409,9 +409,9 @@ inputs = ["pyproject.toml", "isort.cfg"]
 On `project` and `repo` scoped rules, it's safe to omit `inputs`, since ick will pull in every file by default. However, the rule will run more often than
 it needs to.
 
-## Best Practices on How to Access Files in Rules
+## How to access files in rules
 
-Under the hood, `ick` takes all the files in your `inputs`, puts them into a temporary directory, and passes their names to the command line. This means they are all accessible as command-line arguments and direct system paths like "Dockerfile". Thanks to this functionality, the best practices on which method to use are very flexible. They largely revolve around what your rule would like to do. 
+Under the hood, `ick` takes all the files in your `inputs`, puts them into a temporary directory, and passes their names to the command line. This means they are all accessible as command-line arguments and direct system paths like "Dockerfile". Thanks to this functionality, the best practices on which method to use are very flexible. They largely revolve around what your rule would like to do.
 
 If you want to perform the same function on many different types of files agnostic of filename, especially when you use globs, you can iterate over them like so:
 
@@ -430,7 +430,7 @@ from typing import List
 def main(filenames: List[str]):
     for filename in filenames:
         file = Path(filename)
-        # Do something cool to the file! The rule could double-check the filename too, but here we don't care. 
+        # Do something cool to the file! The rule could double-check the filename too, but here we don't care.
 
 if __name__ == "__main__":
     main(sys.argv[1:])
@@ -456,7 +456,7 @@ if __name__ == "__main__":
     main()
 ```
 
-Clearly, this method is much cleaner than something like 
+Clearly, this method is much cleaner than something like
 ```python
 def main(filenames: List[str]):
     for filename in filenames:
