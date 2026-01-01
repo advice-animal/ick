@@ -39,6 +39,10 @@ def test_scenario(filename, monkeypatch) -> None:  # type: ignore[no-untyped-def
     # Avoid reading user-level config in tests, as they probably would change
     # the available rules
     monkeypatch.setenv("XDG_CONFIG_HOME", "/")
+    # Reset a couple of common ways that locale might cause differences in
+    # output (for example, the sorted output of `ls`)
+    monkeypatch.setenv("LANG", "C")
+    monkeypatch.setenv("LC_ALL", "C")
 
     path = SCENARIO_DIR / filename
     commands = load_scenario(path)
