@@ -1,0 +1,21 @@
+$ export ICK_COVERAGE_PY=1
+$ ick test-rules
+testing...
+  i_have_no_tests: <no-test> PASS
+  move_isort_cfg: .. PASS
+  show_ick_vars: <no-test> PASS
+
+DETAILS
+i_have_no_tests: no tests in /CWD/tests/i_have_no_tests
+show_ick_vars: no tests in /CWD/tests/show_ick_vars
+
+$ coverage combine -q
+$ coverage report -m
+Name                 Stmts   Miss Branch BrPart  Cover   Missing
+----------------------------------------------------------------
+i_have_no_tests.py       1      1      0      0     0%   1
+move_isort_cfg.py       15      0      4      1    95%   8->exit
+----------------------------------------------------------------
+TOTAL                   16      1      4      1    90%
+$ echo bye
+bye
