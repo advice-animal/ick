@@ -1,0 +1,8 @@
+# See what happens with environment variables
+$ echo Hello there
+Hello there
+$ echo :$MY_VAR:
+::
+$ export MY_VAR=Hello ANOTHER=Bye
+$ echo :$MY_VAR:$NOT_SET:$ANOTHER:
+:Hello::Bye:
