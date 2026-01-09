@@ -49,7 +49,7 @@ mypy:
 
 .PHONY: test
 test:
-	pytest --cov=ick --cov=tests --cov-report=term-missing --cov-report=html --cov-context=test
+	pytest --cov=ick --cov=tests --cov-report=term-missing --cov-report=html --cov-branch --cov-context=test
 
 .PHONY: clean
 clean:

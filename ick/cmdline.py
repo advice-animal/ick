@@ -4,7 +4,7 @@ import collections
 import json
 import sys
 from pathlib import Path
-from typing import IO, Any, Optional
+from typing import IO, Any, Callable, Optional
 
 import click
 import keke
@@ -211,12 +211,12 @@ def run(
 
     # DO THE NEEDFUL
 
-    kwargs: dict[str, Any] = {}
-
     # TODO boring progress bar default
+    status_callback: Callable[[Run[Any, Any]], None] | None = None
+    done_callback: Callable[[Run[Any, Any]], None] | None = None
     if emojis:
-        kwargs["status_callback"] = _demo_status_callback
-        kwargs["done_callback"] = _demo_done_callback
+        status_callback = _demo_status_callback
+        done_callback = _demo_done_callback
     elif not json_flag and sys.stderr.isatty():
         bar = None
 
@@ -227,13 +227,18 @@ def run(
                 ctx.with_resource(bar)
             bar.update(run._finalized_idx)
 
-        kwargs["status_callback"] = progressbar_status
-        kwargs["done_callback"] = lambda _: print("\n")
+        status_callback = progressbar_status
+        done_callback = lambda _: print("\n")  # noqa: E731
 
     r = Runner(ctx.obj, ctx.obj.repo)
+    steps = r.build_steps_for_rules(
+        status_callback=status_callback,
+        done_callback=done_callback,
+    )
+
     if json_flag:
         results = collections.defaultdict(list)
-        for result in r.run(**kwargs):
+        for result in r.run_steps(steps):
             modifications = []
             for mod in result.modifications:
                 modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
@@ -249,7 +254,7 @@ def run(
         print(json.dumps({"results": results}, indent=4))
 
     else:
-        for result in r.run(**kwargs):
+        for result in r.run_steps(steps):
             where = f" on {result.project}" if result.project else ""
             print(f"-> [bold]{result.rule}[/bold]{where}: ", end="")
             match result.finished.status:

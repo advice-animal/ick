@@ -14,6 +14,7 @@ def test_python_works(tmp_path: Path) -> None:
             name="foo",
             impl="python",
             inputs=["*.py"],
+            script_path=tmp_path / "demo.py",
             data="""
                 import sys
                 import attrs
