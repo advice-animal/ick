@@ -85,6 +85,13 @@ def test_scenario(filename, monkeypatch) -> None:  # type: ignore[no-untyped-def
                 output = result.output
                 if result.exit_code != 0:
                     output += f"(exit status: {result.exit_code})\n"
+            elif command.command[:9] == "$ export ":
+                # Simulate export commands in the scenario
+                pairs = shlex.split(command.command[9:])
+                for pair in pairs:
+                    var, _, value = pair.partition("=")
+                    monkeypatch.setenv(var, value)
+                output = ""
             elif command.command == "":
                 # This happens with trailing comment lines in the scenario, so
                 # there's no command or output.
