@@ -134,8 +134,7 @@ def parse_scenario(lines: Iterable[str]) -> Iterable[ScenarioCommand]:
 
     def new_command() -> None:
         nonlocal command, found_command
-        if command is not None:
-            commands.append(command)
+        commands.append(command)
         command = ScenarioCommand()
         found_command = False
 
