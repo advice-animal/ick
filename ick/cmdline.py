@@ -246,7 +246,8 @@ def run(
             }
             results[result.rule].append(output)
 
-        print(json.dumps({"results": results}, indent=4))
+        json.dump({"results": results}, sys.stdout, indent=4)
+        sys.stdout.write("\n")
 
     else:
         for result in r.run(**kwargs):
