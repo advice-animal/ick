@@ -74,7 +74,7 @@ def test_scenario(filename, monkeypatch) -> None:  # type: ignore[no-untyped-def
                 # TODO: handle global options like -vv
                 args = shlex.split(command.command[6:])
                 with monkeypatch.context() as m:
-                    m.setenv("COLUMNS", "999")
+                    m.setenv("COLUMNS", "200")
                     m.setattr(
                         "ick.runner.Runner._testing_replacements",
                         {
