@@ -19,7 +19,7 @@ class Rule(BaseRule):
 
         # TODO validate path / rule.name ".py" exists
         assert rule_config.qualname != ""
-        venv_key = rule_config.qualname
+        venv_key = rule_config.qualname + ("-cov" if coverage else "")
         venv_path = Path(platformdirs.user_cache_dir("ick", "advice-animal"), "envs", venv_key)
         deps = self.rule_config.deps
         if coverage:
@@ -32,7 +32,7 @@ class Rule(BaseRule):
             self.command_parts.extend(["-c", textwrap.dedent(rule_config.data)])
         else:
             if coverage:
-                coveragerc = "/tmp/ick_cov_config.ini"
+                coveragerc = venv_path / "coverage.ini"
                 Path(coveragerc).write_text(textwrap.dedent(f"""\
                     [run]
                     branch = True

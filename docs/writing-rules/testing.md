@@ -135,13 +135,16 @@ ICK_COVERAGE_PY environment variable to "1" when running tests:
 $ ICK_COVERAGE_PY=1 ick test-rules
 ```
 
-This uses [coverage.py], which must already be installed in your Python
-environment. A separate coverage data files will be created for each test run.
-Combine then and report on them using the `coverage` command:
+This uses [coverage.py] to create a separate coverage data file for each test
+run. To combine the data files and report on them, install coverage into your
+Python environment and use the `coverage` command:
 
 ```shell
 $ coverage combine -q
 $ coverage report -m
 ```
+
+We are interested in adding support for tests written in other languages.  If
+you have ideas or want to contribute, please open an issue or pull request.
 
 [coverage.py]: https://coverage.readthedocs.io/
