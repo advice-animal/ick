@@ -18,6 +18,7 @@ from ick_protocol import RuleStatus, Scope, Urgency
 
 from ._regex_translate import rule_name_re
 from .config import RuntimeConfig, Settings, load_main_config, load_rules_config, one_repo_config
+from .config.search import possible_config_files
 from .git import find_repo_root
 from .project_finder import find_projects as find_projects_fn
 from .runner import Runner, _demo_done_callback, _demo_status_callback
@@ -71,6 +72,16 @@ def find_projects(ctx: click.Context) -> None:
     """
     for proj in find_projects_fn(ctx.obj.repo, ctx.obj.repo.zfiles, ctx.obj.main_config):
         print(f"{proj.subdir!r:20} ({proj.typ})")
+
+
+@main.command()
+@click.pass_context
+def show_main_config_location(ctx: click.Context) -> None:
+    """
+    Shows where to put a user-level main config file
+    """
+    _, path = list(possible_config_files(Path("."), ctx.obj.settings.isolated_repo))[-1]
+    print(path)
 
 
 @main.command()
