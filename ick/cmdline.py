@@ -84,11 +84,7 @@ def list_rules(ctx: click.Context, json_flag: bool, substring: str, filters: lis
     Lists rules applicable to the current repo
     """
     ctx.obj.filter_config.min_urgency = min(Urgency)  # List all urgencies unless specified by filters
-    if substring:
-        if filters:
-            raise click.UsageError("Cannot use -k together with positional filters")
-        ctx.obj.filter_config.name_filter_re = f".*{re.escape(substring)}.*"
-    apply_filters(ctx, filters)
+    apply_filters(ctx, filters, substring)
     r = Runner(ctx.obj, ctx.obj.repo)
     if json_flag:
         r.echo_rules_json()
@@ -107,11 +103,7 @@ def test_rules(ctx: click.Context, substring: str, filters: list[str]) -> None:
     With no filters, run tests in all rules.
     """
     ctx.obj.filter_config.min_urgency = min(Urgency)  # Test all urgencies unless specified by filters
-    if substring:
-        if filters:
-            raise click.UsageError("Cannot use -k together with positional filters")
-        ctx.obj.filter_config.name_filter_re = f".*{re.escape(substring)}.*"
-    apply_filters(ctx, filters)
+    apply_filters(ctx, filters, substring)
     r = Runner(ctx.obj, ctx.obj.repo)
     sys.exit(r.test_rules())
 
@@ -215,16 +207,13 @@ def run(
     ctx.obj.settings.dry_run = dry_run
     ctx.obj.settings.apply = apply
     ctx.obj.settings.skip_update = skip_update
-    if substring:
-        if filters:
-            raise click.UsageError("Cannot use -k together with positional filters")
-        ctx.obj.filter_config.name_filter_re = f".*{re.escape(substring)}.*"
 
     if filters:
         ctx.obj.filter_config.min_urgency = min(Urgency)
-        apply_filters(ctx, filters)
     else:
         ctx.obj.filter_config.min_urgency = Urgency.LATER
+
+    apply_filters(ctx, filters, substring)
 
     # DO THE NEEDFUL
 
@@ -308,8 +297,11 @@ def run(
                     print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
 
 
-def apply_filters(ctx: click.Context, filters: list[str]) -> None:
-    if not filters:
+def apply_filters(ctx: click.Context, filters: list[str], substring: str) -> None:
+    if substring and filters:
+        raise click.UsageError("Cannot use -k together with positional filters")
+
+    if not substring and not filters:
         pass
     elif len(filters) == 1 and getattr(Urgency, filters[0].upper(), None):
         # python 3.11 doesn't support __contains__ on enum, but also doesn't
@@ -317,7 +309,8 @@ def apply_filters(ctx: click.Context, filters: list[str]) -> None:
         # which is what I can fit on one line.
         urgency = Urgency[filters[0].upper()]
         ctx.obj.filter_config.min_urgency = urgency
-
+    elif substring:
+        ctx.obj.filter_config.name_filter_re = f".*{re.escape(substring)}.*"
     else:
         ctx.obj.filter_config.name_filter_re = "|".join(rule_name_re(name) for name in filters)
 
