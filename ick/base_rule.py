@@ -46,6 +46,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         assert patterns is not None, "File scoped rules require an `inputs` section in the rule config!"
         self.patterns = patterns
         self.match_prefix = project_path
+        self.matches_at_least_once = False
         self.cmdline = cmdline
         self.extra_env = extra_env
         self.append_filenames = append_filenames
@@ -60,11 +61,23 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         self.rule_status = RuleStatus.SUCCESS
 
     def match(self, key: str) -> bool:
-        return match_prefix_patterns(key, self.match_prefix, self.patterns) is not None
+        m = bool(match_prefix_patterns(key, self.match_prefix, self.patterns))
+        self.matches_at_least_once |= m
+        return m
 
     def run_next_batch(self) -> bool:
+
         # TODO document that we expect rule_prepare to handle a thundering herd (probably by returning False)
-        if self.unprocessed_notifications and self.rule_prepare and not self.rule_prepare():
+        # Attempt to call rule_prepare() if we've found at least one filename
+        # match -- avoids expensive prepare (like pulling a giant docker image)
+        # if we don't yet know there are relevant files to run it on.
+        if self.matches_at_least_once and self.rule_prepare and not self.rule_prepare():
+            # Important: rules that have a prepare should ensure that only one
+            # thread is preparing at a time (all others should temporarily
+            # return False).
+
+            # We now return False which signals feedforward to keep looking for
+            # work elsewhere...
             return False
 
         return super().run_next_batch()
