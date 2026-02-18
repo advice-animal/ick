@@ -10,8 +10,23 @@ from .sh import run_cmd
 
 LOG = getLogger(__name__)
 
+DEFAULT_BRANCH_NAME = "main"
 
-def _get_local_cache_name(url: str) -> str:
+
+def _split_url_ref(url: str) -> tuple[str, str]:
+    """Split a URL of the form `url@ref` into (url, ref).
+
+    Defaults to "main" when no @ref suffix is present.  Avoids splitting on
+    the @ in SSH URLs like ``git@github.com:foo/bar`` by checking whether the
+    text after the last @ looks like a hostname fragment (contains ':').
+    """
+    base, _, suffix = url.rpartition("@")
+    if base and ":" not in suffix:
+        return base, suffix
+    return url, DEFAULT_BRANCH_NAME
+
+
+def _get_local_cache_name(url: str, ref: str) -> str:
     # this isn't intended to be "secure" and we could just as easily use crc32
     # but starting with a secure hash keeps linters quiet.
     url_hash = sha256(url.encode()).hexdigest()
@@ -20,22 +35,35 @@ def _get_local_cache_name(url: str) -> str:
     if path.endswith(".git"):
         path = path[:-4]
     repo_name = posixpath.basename(path)
-    return f"{repo_name}-{url_hash[:8]}"
+    if ref == DEFAULT_BRANCH_NAME:
+        return f"{repo_name}-{url_hash[:8]}"
+    safe_ref = ref.replace("/", "-")
+    return f"{repo_name}-{safe_ref}-{url_hash[:8]}"
 
 
 def update_local_cache(url: str, *, skip_update: bool, freeze: bool = False) -> Path:
     import platformdirs
     from filelock import FileLock
 
+    clean_url, ref = _split_url_ref(url)
     cache_dir = Path(platformdirs.user_cache_dir("ick", "advice-animal")).expanduser()
-    local_checkout = cache_dir / _get_local_cache_name(url)
+    local_checkout = cache_dir / _get_local_cache_name(clean_url, ref)
     freeze_name = local_checkout / ".git" / "freeze"
     with FileLock(local_checkout.with_suffix(".lock")):
         if not local_checkout.exists():
-            run_cmd(["git", "clone", url, local_checkout])
+            # HEAD will be detached on subsequent updates (see below)
+            # TODO: consider --depth 1 since we don't need full history.
+            clone_cmd = ["git", "clone", "--single-branch", "--branch", ref]
+            if ref != DEFAULT_BRANCH_NAME:
+                # Reuse objects from the main cache dir to save bandwidth;
+                # we assume git will silently continue if the dir doesn't exist.
+                clone_cmd += ["--reference", str(cache_dir / _get_local_cache_name(clean_url, DEFAULT_BRANCH_NAME))]
+            run_cmd(clone_cmd + [clean_url, local_checkout])
         elif not skip_update:
             if not freeze_name.exists():
-                run_cmd(["git", "pull"], cwd=local_checkout)
+                run_cmd(["git", "fetch", "origin"], cwd=local_checkout)
+                # Detaches HEAD to the exact state of the remote ref
+                run_cmd(["git", "checkout", "-f", f"origin/{ref}"], cwd=local_checkout)
         if freeze:
             freeze_name.touch()
     return local_checkout

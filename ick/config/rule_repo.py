@@ -49,7 +49,7 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
 def load_rule_repo(ruleset: Ruleset, *, skip_update: bool = False) -> RuleRepoConfig:
     if ruleset.url:
         # TODO config for a subdir within?
-        repo_path = update_local_cache(ruleset.url, skip_update=skip_update)  # TODO
+        repo_path = update_local_cache(ruleset.url, skip_update=skip_update)
     else:
         assert isinstance(ruleset.path, str)
         repo_path = Path(ruleset.base_path or "", ruleset.path).resolve()
