@@ -184,15 +184,29 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
                 if a == b:
                     continue
                 elif isinstance(a, bytes) and isinstance(b, bytes):
-                    # TODO non-utf8 files
-                    diff = moreorless.unified_diff(a.decode(), b.decode(), k)
+                    try:
+                        diff = moreorless.unified_diff(a.decode(), b.decode(), k)
+                        diff_stat = diffstat(diff)
+                    except UnicodeDecodeError:
+                        diff = f"Binary files differ: {k!r} (before: {len(a)} bytes, after: {len(b)} bytes)\n"
+                        diff_stat = None
                 elif a is ERASURE:
                     # Should really say /dev/null input
                     assert isinstance(b, bytes)
-                    diff = moreorless.unified_diff("", b.decode(), k)
+                    try:
+                        diff = moreorless.unified_diff("", b.decode(), k)
+                        diff_stat = diffstat(diff)
+                    except UnicodeDecodeError:
+                        diff = f"Binary file created: {k!r} (after: {len(b)} bytes)\n"
+                        diff_stat = None
                 else:
-                    # Should really say /dev/null input
-                    diff = moreorless.unified_diff(a.decode(), "", k)
+                    # Should really say /dev/null output
+                    try:
+                        diff = moreorless.unified_diff(a.decode(), "", k)
+                        diff_stat = diffstat(diff)
+                    except UnicodeDecodeError:
+                        diff = f"Binary file removed: {k!r} (before: {len(a)} bytes)\n"
+                        diff_stat = None
 
                 changes.append(
                     Modified(
@@ -200,21 +214,26 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
                         filename=k,
                         new_bytes=None if b is ERASURE else b,
                         diff=diff,
-                        diffstat=diffstat(diff),
+                        diffstat=diff_stat,
                     )
                 )
             elif k not in self.accepted_state:
                 # Well then...
                 new_bytes = self.output_state[k].value
                 assert isinstance(new_bytes, bytes)
-                diff = moreorless.unified_diff("", new_bytes.decode(), k)
+                try:
+                    diff = moreorless.unified_diff("", new_bytes.decode(), k)
+                    diff_stat = diffstat(diff)
+                except UnicodeDecodeError:
+                    diff = f"Binary file created: {k!r} (after: {len(new_bytes)} bytes)\n"
+                    diff_stat = None
                 changes.append(
                     Modified(
                         rule_name=self.qualname,
                         filename=k,
                         new_bytes=new_bytes,
                         diff=diff,
-                        diffstat=diffstat(diff),
+                        diffstat=diff_stat,
                     )
                 )
 
