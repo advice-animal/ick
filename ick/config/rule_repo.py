@@ -33,8 +33,9 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
     rulesets = {}
     for ruleset in rtc.rules_config.ruleset:
         LOG.log(VLOG_1, "Processing %s", ruleset)
-        # Prefixes should be unique; they override here
         skip_update = rtc.settings.skip_update
+        if ruleset.prefix in rulesets:
+            raise ValueError(f"Duplicate ruleset prefix {ruleset.prefix!r}")
         rulesets[ruleset.prefix] = load_rule_repo(ruleset, skip_update=skip_update)
 
     for k, v in rulesets.items():

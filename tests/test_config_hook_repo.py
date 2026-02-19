@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from ick.config import MainConfig, RuleConfig, RuleRepoConfig, RulesConfig, Ruleset, RuntimeConfig, Settings
 from ick.config.rule_repo import discover_rules, get_impl, load_pyproject, load_rule_repo
 from ick_protocol import Scope
@@ -42,3 +44,11 @@ def test_discover() -> None:
     h = RulesConfig(ruleset=[r])
     rules = discover_rules(rtc=RuntimeConfig(main_config=MainConfig(), rules_config=h, settings=Settings()))
     assert len(rules) == 3
+
+
+def test_discover_duplicate_prefix() -> None:
+    r1 = Ruleset(base_path=Path.cwd(), path="tests/fixture_rules", prefix="myrules")
+    r2 = Ruleset(base_path=Path.cwd(), path="tests/fixture_rules", prefix="myrules")
+    h = RulesConfig(ruleset=[r1, r2])
+    with pytest.raises(ValueError, match="Duplicate ruleset prefix 'myrules'"):
+        discover_rules(rtc=RuntimeConfig(main_config=MainConfig(), rules_config=h, settings=Settings()))
