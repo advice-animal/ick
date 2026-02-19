@@ -1,0 +1,18 @@
+[[ruleset]]
+path = "."
+
+
+[[rule]]
+name = "change_binary"
+impl = "python"
+scope = "file"
+inputs = ["*.bin"]
+# Change byte 0x80 to 0x81 in binary files
+data = """
+import sys
+from pathlib import Path
+
+for f in sys.argv[1:]:
+    data = Path(f).read_bytes()
+    Path(f).write_bytes(data.replace(b"\\x80", b"\\x81"))
+"""
