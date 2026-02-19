@@ -53,4 +53,4 @@ test:
 
 .PHONY: clean
 clean:
-	rm -rf html htmlcov .coverage
+	rm -rf html htmlcov .coverage .coverage.*

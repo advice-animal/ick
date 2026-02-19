@@ -15,14 +15,14 @@ class Rule(BaseRule):
     def __init__(self, rule_config: RuleConfig) -> None:
         super().__init__(rule_config)
 
-        coverage = bool(int(os.environ.get("ICK_COVERAGE_PY", "0")))
+        self.coverage = bool(int(os.environ.get("ICK_COVERAGE_PY", "0")))
 
         # TODO validate path / rule.name ".py" exists
         assert rule_config.qualname != ""
-        venv_key = rule_config.qualname + ("-cov" if coverage else "")
+        venv_key = rule_config.qualname + ("-cov" if self.coverage else "")
         venv_path = Path(platformdirs.user_cache_dir("ick", "advice-animal"), "envs", venv_key)
         deps = self.rule_config.deps
-        if coverage:
+        if self.coverage:
             deps = [*(deps or []), "coverage"]
         self.venv = PythonEnv(venv_path, deps)
 
@@ -31,21 +31,9 @@ class Rule(BaseRule):
         if rule_config.data:
             self.command_parts.extend(["-c", textwrap.dedent(rule_config.data)])
         else:
-            if coverage:
-                coveragerc = venv_path / "coverage.ini"
-                Path(coveragerc).write_text(textwrap.dedent(f"""\
-                    [run]
-                    branch = True
-                    data_file = {os.getcwd()}/.coverage
-                    parallel = True
-                    source = {self.rule_config.script_path.parent}
-
-                    [report]
-                    partial_also =
-                        if __name__ == .__main__.:
-
-                    """))
-                self.command_parts += ["-m", "coverage", "run", "--rcfile", coveragerc]
+            if self.coverage:
+                self.coveragerc = venv_path / "coverage.ini"
+                self.command_parts += ["-m", "coverage", "run", "--rcfile", self.coveragerc]
             py_script = self.rule_config.script_path.with_suffix(".py")  # type: ignore[union-attr] # FIX ME
             if not py_script.exists():
                 self.runnable = False
@@ -55,4 +43,14 @@ class Rule(BaseRule):
         self.command_env = os.environ.copy()
 
     def prepare(self) -> bool:
-        return self.venv.prepare()
+        if not self.venv.prepare():
+            return False
+        if self.coverage:
+            Path(self.coveragerc).write_text(textwrap.dedent(f"""\
+                [run]
+                branch = True
+                data_file = {os.getcwd()}/.coverage
+                parallel = True
+                source = {self.rule_config.script_path.parent}
+                """))
+        return True
