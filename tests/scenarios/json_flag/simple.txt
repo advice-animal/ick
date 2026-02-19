@@ -33,6 +33,14 @@ $ ick run --json
                 ],
                 "message": ""
             }
+        ],
+        "testpkg/test_import": [
+            {
+                "project_name": "",
+                "status": "success",
+                "modified": [],
+                "message": "Hello from helper module!\n"
+            }
         ]
     }
 }

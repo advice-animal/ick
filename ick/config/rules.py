@@ -90,6 +90,7 @@ class RuleConfig(Struct):
     deps: Optional[list[str]] = None
     test_path: Optional[Path] = None
     script_path: Optional[Path] = None
+    repo_path: Optional[Path] = None
     qualname: str = ""  # the name _within its respective repo_
 
     inputs: Optional[Sequence[str]] = None
