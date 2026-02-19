@@ -30,7 +30,29 @@ class RulesConfig(Struct):
     ruleset: Sequence[Ruleset] = ()
 
     def inherit(self, less_specific_defaults):  # type: ignore[no-untyped-def] # FIX ME
-        self.ruleset = merge(self.ruleset, less_specific_defaults.ruleset)  # type: ignore[no-untyped-call] # FIX ME
+        # Merge rulesets by prefix. Order after merge doesn't matter - rules get sorted anyway.
+        rulesets_by_prefix = {}
+
+        # Add defaults first
+        for ruleset in less_specific_defaults.ruleset:
+            rulesets_by_prefix[ruleset.prefix] = ruleset
+
+        # Override/merge with more specific values
+        for ruleset in self.ruleset:
+            if ruleset.prefix in rulesets_by_prefix:
+                # Merge: take url/path from more specific config, fall back to base for other fields
+                base = rulesets_by_prefix[ruleset.prefix]
+                rulesets_by_prefix[ruleset.prefix] = Ruleset(
+                    url=ruleset.url,
+                    path=ruleset.path,
+                    prefix=ruleset.prefix,
+                    base_path=ruleset.base_path or base.base_path,
+                    repo=ruleset.repo or base.repo,
+                )
+            else:
+                rulesets_by_prefix[ruleset.prefix] = ruleset
+
+        self.ruleset = list(rulesets_by_prefix.values())
 
 
 class Ruleset(Struct):
@@ -43,8 +65,10 @@ class Ruleset(Struct):
     repo: Optional[RuleRepoConfig] = None
 
     def __post_init__(self) -> None:
+        if self.url and self.path:
+            raise ValueError("Can't specify both url and path")
         if self.prefix is None:
-            self.prefix = (self.url or self.path).rstrip("/").split("/")[-1]  # type: ignore[union-attr] # FIX ME
+            self.prefix = (self.path or self.url).rstrip("/").split("/")[-1]  # type: ignore[union-attr] # FIX ME
 
 
 class PyprojectRulesConfig(Struct):
