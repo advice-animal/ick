@@ -63,9 +63,9 @@ Ick can show us the rules available:
 $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 list-rules
 LATER
 =====
-* ick-tutorial-rules-1/move_isort_cfg
+* move_isort_cfg
 ```
-<!-- [[[end]]] (sum: dE4lCr/W8Q) -->
+<!-- [[[end]]] (sum: uICbKKWk2w) -->
 
 If we run the rules, ick is cautious and shows diff stats of what would change,
 but no files are changed:
@@ -73,11 +73,11 @@ but no files are changed:
 <!-- [[[cog show_cmd("ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run") ]]] -->
 ```console
 $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run
--> ick-tutorial-rules-1/move_isort_cfg: NEEDS_WORK
+-> move_isort_cfg: NEEDS_WORK
      isort.cfg -3
      pyproject.toml +4
 ```
-<!-- [[[end]]] (sum: fVKYlqzvgM) -->
+<!-- [[[end]]] (sum: hmY1X1V2eM) -->
 
 This shows that isort.cfg would have three lines deleted, and pyproject.toml
 would have four lines added.
@@ -87,7 +87,7 @@ To see the full diff, use the `--patch` option:
 <!-- [[[cog show_cmd("ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --patch") ]]] -->
 ```console
 $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --patch
--> ick-tutorial-rules-1/move_isort_cfg: NEEDS_WORK
+-> move_isort_cfg: NEEDS_WORK
 --- a/isort.cfg
 +++ b/isort.cfg
 @@ -1,3 +0,0 @@
@@ -105,7 +105,7 @@ $ ick --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 run --p
 +line_length = "88"
 +multi_line_output = "3"
 ```
-<!-- [[[end]]] (sum: wdAW9vS7jk) -->
+<!-- [[[end]]] (sum: X0YE1Kh1zv) -->
 
 [WHAT ELSE SHOULD GO HERE?]
 
