@@ -143,8 +143,9 @@ def one_repo_config(repo: str) -> RulesConfig:
     `repo`: either a file path or a URL.
     """
     conf = RulesConfig()
-    if Path(repo).exists():
-        conf.ruleset = [Ruleset(path=repo)]
+    potential_local_path = Path(repo).expanduser()
+    if potential_local_path.exists():
+        conf.ruleset = [Ruleset(path=potential_local_path.as_posix())]
     else:
         conf.ruleset = [Ruleset(url=repo)]
     return conf
