@@ -66,7 +66,6 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         return m
 
     def run_next_batch(self) -> bool:
-
         # TODO document that we expect rule_prepare to handle a thundering herd (probably by returning False)
         # Attempt to call rule_prepare() if we've found at least one filename
         # match -- avoids expensive prepare (like pulling a giant docker image)
