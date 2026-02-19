@@ -144,7 +144,7 @@ def one_repo_config(repo: str) -> RulesConfig:
     """
     conf = RulesConfig()
     if Path(repo).exists():
-        conf.ruleset = [Ruleset(path=repo)]
+        conf.ruleset = [Ruleset(path=repo, prefix="")]
     else:
-        conf.ruleset = [Ruleset(url=repo)]
+        conf.ruleset = [Ruleset(url=repo, prefix="")]
     return conf
