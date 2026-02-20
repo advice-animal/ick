@@ -37,10 +37,24 @@ class PythonEnv:
         # Both None (we don't know) and False (we know it's not working) should
         # cause us to check again...
         if not self._cached_health:
+            # 1. Binary must exist
             py = self.bin("python")
             if not py.exists():
                 self._cached_health = False
                 return self._cached_health
+
+            # 2. Deps file must be correct (the last thing written with the
+            # lock held -- we check both for existence and contents here).
+            try:
+                deps = self._deps_path().read_text()
+            except OSError:
+                self._cached_health = False
+                return self._cached_health
+            if deps != json.dumps(self.deps):
+                self._cached_health = False
+                return self._cached_health
+
+            # 3. Binary must work
             try:
                 _, returncode = run_cmd_status([py, "--version"], check=False)
             except PermissionError:
@@ -50,19 +64,14 @@ class PythonEnv:
                 self._cached_health = False
                 return self._cached_health
 
-            # Eek, this could happen outside the lock, so be defensive against
-            # concurrent modification more than usual
-            try:
-                deps = self._deps_path().read_text()
-            except OSError:
-                self._cached_health = False
-                return self._cached_health
-            self._cached_health = deps == json.dumps(self.deps)
+            # Passed all gates
+            self._cached_health = True
+
 
         assert self._cached_health is not None
         return self._cached_health
 
-    def prepare(self, blocking: bool = True) -> bool:
+    def prepare(self, blocking: bool = True, callback=None) -> bool:
         """
         Attempt to set up this venv.
 
@@ -105,6 +114,9 @@ class PythonEnv:
                 env=env,
                 timeout=10,
             )
+
+            if callback:
+                callback()
 
             # A bit silly to create a venv with no deps, but handle it gracefully
             #

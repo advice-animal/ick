@@ -45,18 +45,20 @@ class Rule(BaseRule):
         self.command_env = os.environ.copy()
 
     def prepare(self) -> bool:
-        if not self.venv.prepare():
+        def write_coverage_config():
+            if self.coverage:
+                # This config file is written into the rule's venv directory
+                # so it won't conflict with other rules running at the same time.
+                # The data file is written to the current directory when this rule
+                # was insantiated, so the user's working directory.
+                Path(self.coveragerc).write_text(textwrap.dedent(f"""\
+                    [run]
+                    branch = True
+                    data_file = {self.coverage_file_dir}/.coverage
+                    parallel = True
+                    source = {self.rule_config.script_path.parent}
+                    """))
+
+        if not self.venv.prepare(callback=write_coverage_config):
             return False
-        if self.coverage:
-            # This config file is written into the rule's venv directory
-            # so it won't conflict with other rules running at the same time.
-            # The data file is written to the current directory when this rule
-            # was insantiated, so the user's working directory.
-            Path(self.coveragerc).write_text(textwrap.dedent(f"""\
-                [run]
-                branch = True
-                data_file = {self.coverage_file_dir}/.coverage
-                parallel = True
-                source = {self.rule_config.script_path.parent}
-                """))
         return True
