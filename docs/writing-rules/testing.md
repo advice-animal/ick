@@ -125,3 +125,26 @@ In the case of a fail, ick will also tell you the following for each failed test
 
 If a test is not provided, `ick test-rules` will note that the rule has no test
 and mark it as passed.
+
+### Coverage
+
+For tests written in Python, you can measure test coverage by setting the
+ICK_COVERAGE_PY environment variable to "1" when running tests:
+
+```shell
+$ ICK_COVERAGE_PY=1 ick test-rules
+```
+
+This uses [coverage.py] to create a separate coverage data file for each test
+run. To combine the data files and report on them, install coverage into your
+Python environment and use the `coverage` command:
+
+```shell
+$ coverage combine -q
+$ coverage report -m
+```
+
+We are interested in adding support for tests written in other languages.  If
+you have ideas or want to contribute, please open an issue or pull request.
+
+[coverage.py]: https://coverage.readthedocs.io/
