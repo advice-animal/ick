@@ -324,6 +324,7 @@ class BaseRule:
                         extra_env={**env, **self.command_env},
                         append_filenames=True,
                         rule_prepare=self.prepare,
+                        batch_size=self.rule_config.batch_size,
                     )
                 )
         elif self.rule_config.scope == Scope.PROJECT:
@@ -344,7 +345,7 @@ class BaseRule:
                         append_filenames=False,
                         rule_prepare=self.prepare,
                         eager=False,
-                        batch_size=9999,  # TODO: -1 once ff 0.8 final is out
+                        batch_size=-1,
                     )
                 )
         else:  # REPO
@@ -360,6 +361,6 @@ class BaseRule:
                     append_filenames=False,
                     rule_prepare=self.prepare,
                     eager=False,
-                    batch_size=9999,  # TODO: -1 once ff 0.8 final is out
+                    batch_size=-1,
                 )
             )

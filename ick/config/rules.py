@@ -92,6 +92,7 @@ class RuleConfig(Struct):
     script_path: Optional[Path] = None
     qualname: str = ""  # the name _within its respective repo_
 
+    batch_size: int = 10
     inputs: Optional[Sequence[str]] = None
     outputs: Optional[Sequence[str]] = None
     extra_inputs: Optional[Sequence[str]] = None
