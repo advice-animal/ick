@@ -22,6 +22,7 @@ def test_python_works(tmp_path: Path) -> None:
                         fo.write("new\\n")
                 """,
             deps=["attrs"],
+            repo_path=tmp_path,
         ),
     )
 
