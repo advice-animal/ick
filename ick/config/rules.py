@@ -39,18 +39,8 @@ class RulesConfig(Struct):
 
         # Override/merge with more specific values
         for ruleset in self.ruleset:
-            if ruleset.prefix in rulesets_by_prefix:
-                # Merge: take url/path from more specific config, fall back to base for other fields
-                base = rulesets_by_prefix[ruleset.prefix]
-                rulesets_by_prefix[ruleset.prefix] = Ruleset(
-                    url=ruleset.url,
-                    path=ruleset.path,
-                    prefix=ruleset.prefix,
-                    base_path=ruleset.base_path or base.base_path,
-                    repo=ruleset.repo or base.repo,
-                )
-            else:
-                rulesets_by_prefix[ruleset.prefix] = ruleset
+            LOG.log(VLOG_1, "Overriding %r with other config", ruleset.prefix)
+            rulesets_by_prefix[ruleset.prefix] = ruleset
 
         self.ruleset = list(rulesets_by_prefix.values())
 
