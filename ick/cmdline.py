@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import collections
 import json
+import re
 import sys
 from pathlib import Path
 from typing import IO, Any, Callable, Optional
@@ -75,14 +76,15 @@ def find_projects(ctx: click.Context) -> None:
 
 @main.command()
 @click.option("--json", "json_flag", is_flag=True, help="Outputs json with rules info by qualname (can be used with run --json)")
+@click.option("-k", "substring", default="", help="Substring match on rule name (including prefix)")
 @click.argument("filters", nargs=-1)
 @click.pass_context
-def list_rules(ctx: click.Context, json_flag: bool, filters: list[str]) -> None:
+def list_rules(ctx: click.Context, json_flag: bool, substring: str, filters: list[str]) -> None:
     """
     Lists rules applicable to the current repo
     """
     ctx.obj.filter_config.min_urgency = min(Urgency)  # List all urgencies unless specified by filters
-    apply_filters(ctx, filters)
+    apply_filters(ctx, filters, substring)
     r = Runner(ctx.obj, ctx.obj.repo)
     if json_flag:
         r.echo_rules_json()
@@ -92,15 +94,16 @@ def list_rules(ctx: click.Context, json_flag: bool, filters: list[str]) -> None:
 
 @main.command()
 @click.pass_context
+@click.option("-k", "substring", default="", help="Substring match on rule name (including prefix)")
 @click.argument("filters", nargs=-1)
-def test_rules(ctx: click.Context, filters: list[str]) -> None:
+def test_rules(ctx: click.Context, substring: str, filters: list[str]) -> None:
     """
     Run rule self-tests.
 
     With no filters, run tests in all rules.
     """
     ctx.obj.filter_config.min_urgency = min(Urgency)  # Test all urgencies unless specified by filters
-    apply_filters(ctx, filters)
+    apply_filters(ctx, filters, substring)
     r = Runner(ctx.obj, ctx.obj.repo)
     sys.exit(r.test_rules())
 
@@ -169,6 +172,7 @@ def add_rule(
 @click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by rule qualname (can be used with list-rules --json)")
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
 @click.option("--emojis", is_flag=True, help="Show a waterfall of emojis as work is being done")
+@click.option("-k", "substring", default="", help="Substring match on rule name (including prefix)")
 @click.argument("filters", nargs=-1)
 @click.pass_context
 def run(
@@ -179,6 +183,7 @@ def run(
     json_flag: bool,
     skip_update: bool,
     emojis: bool,
+    substring: str,
     filters: list[str],
 ) -> None:
     """
@@ -205,9 +210,10 @@ def run(
 
     if filters:
         ctx.obj.filter_config.min_urgency = min(Urgency)
-        apply_filters(ctx, filters)
     else:
         ctx.obj.filter_config.min_urgency = Urgency.LATER
+
+    apply_filters(ctx, filters, substring)
 
     # DO THE NEEDFUL
 
@@ -291,8 +297,11 @@ def run(
                     print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
 
 
-def apply_filters(ctx: click.Context, filters: list[str]) -> None:
-    if not filters:
+def apply_filters(ctx: click.Context, filters: list[str], substring: str) -> None:
+    if substring and filters:
+        raise click.UsageError("Cannot use -k together with positional filters")
+
+    if not substring and not filters:
         pass
     elif len(filters) == 1 and getattr(Urgency, filters[0].upper(), None):
         # python 3.11 doesn't support __contains__ on enum, but also doesn't
@@ -300,7 +309,8 @@ def apply_filters(ctx: click.Context, filters: list[str]) -> None:
         # which is what I can fit on one line.
         urgency = Urgency[filters[0].upper()]
         ctx.obj.filter_config.min_urgency = urgency
-
+    elif substring:
+        ctx.obj.filter_config.name_filter_re = f".*{re.escape(substring)}.*"
     else:
         ctx.obj.filter_config.name_filter_re = "|".join(rule_name_re(name) for name in filters)
 

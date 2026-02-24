@@ -31,6 +31,7 @@ Filters can be:
 - **Rule name** - Exact name of a specific rule
 - **Rule prefix** - Partial name to match multiple rules
 - **Urgency string** - Match rules with specific urgency such as "now"
+- **Substring match** - Using the `-k` flag like pytest
 
 ### `find-projects`
 
