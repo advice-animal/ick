@@ -16,10 +16,11 @@ When ick runs a rule, it takes these steps:
 - The code of the rule is executed as a separate process.  Different `impl`
     values use different execution engines, but all share common behavior:
 
-    - File-scoped rules get file paths to operate on as command-line arguments.
+    - File-scoped rules get file paths to operate on as *multiple* command-line arguments.
         Their actions should be limited to those files.  Ick might run multiple
         processes for one rule, with different subsets of the requested files
-        passed to each process.
+        passed to each process.  If you also request `extra_inputs` those will
+        be present, but you shouldn't modify them.
 
     - Ick creates environment variables to provide extra information beyond the
         copied files:
