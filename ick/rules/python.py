@@ -55,6 +55,7 @@ class Rule(BaseRule):
             Path(self.coveragerc).write_text(textwrap.dedent(f"""\
                 [run]
                 branch = True
+                context = $ICK_TEST_NAME
                 data_file = {self.coverage_file_dir}/.coverage
                 parallel = True
                 source = {self.rule_config.script_path.parent}

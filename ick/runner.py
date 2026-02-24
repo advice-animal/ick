@@ -111,12 +111,14 @@ class Runner:
         *,
         impl: BaseRule,
         repo: BaseRepo,
+        test_name: str,
     ) -> Run[str, bytes | Erasure]:
         """Compose a feedforward Run with steps for a single rule test."""
         run: Run[str, bytes | Erasure] = Run()
         self.repo = repo
         project = Project(repo, "", "python", "invalid.bin")
-        impl.add_steps_to_run([project], self.ick_env_vars, run)
+        env_vars = self.ick_env_vars | {"ICK_TEST_NAME": test_name}
+        impl.add_steps_to_run([project], env_vars, run)
         run.add_step(Step())  # Final sink
         return run
 
@@ -201,7 +203,11 @@ class Runner:
 
             repo = maybe_repo(tp, stack.enter_context, for_testing=True)
 
-            steps = self.build_steps_for_test(impl=rule_instance, repo=repo)
+            steps = self.build_steps_for_test(
+                impl=rule_instance,
+                repo=repo,
+                test_name=str(test_path.relative_to(Path.cwd())),
+            )
             run_result = next(iter(self.run_steps(steps)))
             response = run_result.modifications
 
