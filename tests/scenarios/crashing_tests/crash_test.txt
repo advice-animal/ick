@@ -9,9 +9,10 @@ testing crashing_test with with_wrong_error:
 Different output found
 --- a/error.txt
 +++ b/error.txt
-@@ -1,4 +1,4 @@
- Traceback (most recent call last):
-   File "/CWD/crashing_test.py", line 1, in <module>
+@@ -2,5 +2,5 @@
+   File "<frozen runpy>", line <n>, in _run_module_as_main
+   File "<frozen runpy>", line <n>, in _run_code
+   File "/CWD/crashing_test.py", line <n>, in <module>
 -    raise Exception("Nothing to see here")
 -Exception: Nothing to see here
 +    raise Exception("Crash!")
@@ -22,7 +23,9 @@ testing crashing_test with without_error:
 
 Test crashed, but /CWD/tests/crashing_test/without_error/output/error.txt doesn't exist so that seems unintended:
 Traceback (most recent call last):
-  File "/CWD/crashing_test.py", line 1, in <module>
+  File "<frozen runpy>", line <n>, in _run_module_as_main
+  File "<frozen runpy>", line <n>, in _run_code
+  File "/CWD/crashing_test.py", line <n>, in <module>
     raise Exception("Crash!")
 Exception: Crash!
 
