@@ -55,14 +55,10 @@ def test_ruleset_url_and_path_error() -> None:
 def test_ruleset_merge_url_with_path() -> None:
     """Test that we can use merge to override a Ruleset with url with a Ruleset with path."""
     # Base config with a ruleset that has a URL
-    base_config = RulesConfig(ruleset=[
-        Ruleset(url="https://github.com/example/rules.git", prefix="prefix", base_path=Path.cwd())
-    ])
+    base_config = RulesConfig(ruleset=[Ruleset(url="https://github.com/example/rules.git", prefix="prefix", base_path=Path.cwd())])
 
     # More specific config with a ruleset that has a local path
-    specific_config = RulesConfig(ruleset=[
-        Ruleset(path="./local-rules", prefix="prefix", base_path=Path.cwd())
-    ])
+    specific_config = RulesConfig(ruleset=[Ruleset(path="./local-rules", prefix="prefix", base_path=Path.cwd())])
 
     # Merge: specific_config inherits from base_config
     specific_config.inherit(base_config)

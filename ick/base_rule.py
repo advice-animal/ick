@@ -28,6 +28,18 @@ def materialize(path: str, filename: str, contents: bytes) -> None:
 
 
 class GenericPreparedStep(Step[str, bytes | Erasure]):
+    """
+    Subclass of step that ensures some setup is complete before processing items.
+
+    Since most steps will need to do some sort of installation (or at least
+    checking for prereqs), and we want that to happen once, this calls
+    `rule_prepare()` before processing each batch.
+
+    Note: `rule_prepare` is passed in as a function because a Rule might be
+    able to do a single setup to perform multiple Steps (if there are multiple
+    projects).
+    """
+
     def __init__(
         self,
         qualname: str,
@@ -66,17 +78,25 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         return m
 
     def run_next_batch(self) -> bool:
-        # TODO document that we expect rule_prepare to handle a thundering herd (probably by returning False)
-        # Attempt to call rule_prepare() if we've found at least one filename
-        # match -- avoids expensive prepare (like pulling a giant docker image)
-        # if we don't yet know there are relevant files to run it on.
+        """
+        Runs a batch only after there are matches and we're prepared.
+
+        Some files matching the input patterns for a rule must exist in order
+        for the Step to do any work.  Because `prepare` and `rule_prepare` are ick
+        concepts, we override the parent implementation with one that only does that
+        (potentially expensive) setup if input patterns are known to match.
+
+        See note on `Rule.prepare` for the return value expected for
+        `rule_prepare` -- in particular, we'll call that quite often and it should just
+        cache and return True once ready.
+        """
         if self.matches_at_least_once and self.rule_prepare and not self.rule_prepare():
             # Important: rules that have a prepare should ensure that only one
             # thread is preparing at a time (all others should temporarily
             # return False).
 
-            # We now return False which signals feedforward to keep looking for
-            # work elsewhere...
+            # If _we_ got a False from rule_prepare, we also return False which
+            # signals feedforward to keep looking for work elsewhere...
             return False
 
         return super().run_next_batch()
@@ -326,6 +346,24 @@ class BaseRule:
         )
 
     def prepare(self) -> bool:
+        """
+        Make sure that we're ready to process items.
+
+        This will always be called from a worker thread, so it's perfectly fine
+        to do a core's worth of work in this thread without exceeding the
+        overall budget, or any arbitrary work as long as it's infrequent and
+        can handle a thundering herd.
+
+        Nontrivial uses will typically involve a fast path and a lock to ensure
+        the setup only happens once, and the thread either checking or setting
+        up will block before returning true.  See `ick/venv.py` for an example.
+
+        Return value:
+
+            True: ready to go (potentially after blocking)
+            False: not ready (find some other work to do)
+
+        """
         return True  # no setup required
 
     def add_steps_to_run(self, projects: Any, env: Mapping[str, str], run: Run[str, bytes | Erasure]) -> None:

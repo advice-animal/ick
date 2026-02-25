@@ -119,4 +119,8 @@ class PythonEnv:
                 )
             self._deps_path().write_text(json.dumps(self.deps))
             self._cached_health = None
+            self.prepare_complete()
         return True
+
+    def prepare_complete(self) -> None:
+        pass

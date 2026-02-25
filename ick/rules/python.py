@@ -11,6 +11,17 @@ from ..config import RuleConfig
 from ..venv import PythonEnv
 
 
+class CoveragePythonEnv(PythonEnv):
+    def __init__(self, coverage_contents, env_path, deps):
+        super().__init__(env_path, deps)
+        self.coverage_contents = coverage_contents
+        self.coveragerc = Path(self.env_path / "coverage.ini")
+
+    def prepare_complete(self):
+        # This hook should only happen once per venv setup, with the lock still held.
+        self.coveragerc.write_text(self.coverage_contents)
+
+
 class Rule(BaseRule):
     def __init__(self, rule_config: RuleConfig) -> None:
         super().__init__(rule_config)
@@ -24,7 +35,21 @@ class Rule(BaseRule):
         deps = self.rule_config.deps or []
         if self.coverage:
             deps += ["coverage"]
-        self.venv = PythonEnv(venv_path, deps)
+            # This config file is written into the rule's venv directory
+            # so it won't conflict with other rules running at the same time.
+            # The data file is written to the current directory when this rule
+            # was insantiated, so the user's working directory.
+            conf = textwrap.dedent(f"""\
+                [run]
+                branch = True
+                context = $ICK_TEST_NAME
+                data_file = {os.getcwd()}/.coverage
+                parallel = True
+                source = {self.rule_config.script_path.parent}
+            """)
+            self.venv = CoveragePythonEnv(conf, venv_path, deps)
+        else:
+            self.venv = PythonEnv(venv_path, deps)
 
         self.command_parts = [self.venv.bin("python")]
 
@@ -33,9 +58,7 @@ class Rule(BaseRule):
             self.coverage = False
         else:
             if self.coverage:
-                self.coveragerc = venv_path / "coverage.ini"
-                self.coverage_file_dir = os.getcwd()
-                self.command_parts += ["-m", "coverage", "run", "--rcfile", self.coveragerc]
+                self.command_parts += ["-m", "coverage", "run", "--rcfile", self.venv.coveragerc]
             py_script = self.rule_config.script_path.with_suffix(".py")  # type: ignore[union-attr] # FIX ME
             if not py_script.exists():
                 self.runnable = False
@@ -47,19 +70,4 @@ class Rule(BaseRule):
     def prepare(self) -> bool:
         if not self.venv.prepare():
             return False
-        if self.coverage:
-            # This config file is written into the rule's venv directory
-            # so it won't conflict with other rules running at the same time.
-            # The data file is written to the current directory when this rule
-            # was insantiated, so the user's working directory.
-            Path(self.coveragerc).write_text(
-                textwrap.dedent(f"""\
-                    [run]
-                    branch = True
-                    context = $ICK_TEST_NAME
-                    data_file = {self.coverage_file_dir}/.coverage
-                    parallel = True
-                    source = {self.rule_config.script_path.parent}
-                """)
-            )
         return True
