@@ -83,6 +83,7 @@ def load_rule_repo(ruleset: Ruleset, *, skip_update: bool = False) -> RuleRepoCo
             rule.qualname = prefix + base + rule.name
             rule.test_path = repo_path / base / "tests" / rule.name
             rule.script_path = repo_path / base / rule.name
+            rule.repo_path = repo_path
 
         rc.inherit(c)  # type: ignore[no-untyped-call] # FIX ME
 

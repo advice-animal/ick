@@ -20,12 +20,14 @@ SCENARIOS = sorted(str(f.relative_to(SCENARIO_DIR)) for f in SCENARIO_DIR.glob("
 
 LOG_LINE_TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} ", re.M)
 LOG_LINE_NUMERIC_LINE_RE = re.compile(r"^([A-Z]+\s+[a-z_.]+:)\d+(?= )", re.M)
+TRACEBACK_LINE_NUM_RE = re.compile(r"(, line )\d+(,)")
 GIT_VERSION_RE = re.compile(r"(\d+\.)\d+(?:\.\d+)?(?:\.dev\d+\S+)?")
 TRAILING_WHITESPACE = re.compile(r"(?m) +$")
 
 
 def clean_output(output: str) -> str:
-    cleaned_output = LOG_LINE_TIMESTAMP_RE.sub("", output)
+    cleaned_output = TRACEBACK_LINE_NUM_RE.sub(lambda m: (m.group(1) + "<n>" + m.group(2)), output)
+    cleaned_output = LOG_LINE_TIMESTAMP_RE.sub("", cleaned_output)
     cleaned_output = LOG_LINE_NUMERIC_LINE_RE.sub(lambda m: (m.group(1) + "<n>"), cleaned_output)
     cleaned_output = GIT_VERSION_RE.sub(lambda m: (m.group(1) + "<stuff>"), cleaned_output)
     cleaned_output = TRAILING_WHITESPACE.sub("", cleaned_output)
