@@ -43,7 +43,9 @@ class PythonEnv:
                 return self._cached_health
             try:
                 _, returncode = run_cmd_status([py, "--version"], check=False)
-            except PermissionError:
+            except (PermissionError, FileNotFoundError):
+                # Other processes may be running the same rules and can
+                # modify the venv outside this lock.
                 self._cached_health = False
                 return self._cached_health
             if returncode != 0:
