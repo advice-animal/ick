@@ -77,8 +77,9 @@ def update_local_cache(url: str, *, skip_update: bool, freeze: bool = False) -> 
             # SHAs are immutable and never need updating
             if not freeze_name.exists():
                 run_cmd(["git", "fetch", "origin"], cwd=local_checkout)
-                # Detaches HEAD to the exact state of the remote ref
-                run_cmd(["git", "checkout", "-f", f"origin/{ref}"], cwd=local_checkout)
+                # Tracks remote branch (old code expects to `git pull` in these
+                # dirs, and this allows us to share them)
+                run_cmd(["git", "reset", "--hard", f"origin/{ref}"], cwd=local_checkout)
         if freeze:
             freeze_name.touch()
     return local_checkout
