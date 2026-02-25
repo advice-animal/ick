@@ -52,11 +52,14 @@ class Rule(BaseRule):
             # so it won't conflict with other rules running at the same time.
             # The data file is written to the current directory when this rule
             # was insantiated, so the user's working directory.
-            Path(self.coveragerc).write_text(textwrap.dedent(f"""\
-                [run]
-                branch = True
-                data_file = {self.coverage_file_dir}/.coverage
-                parallel = True
-                source = {self.rule_config.script_path.parent}
-                """))
+            Path(self.coveragerc).write_text(
+                textwrap.dedent(f"""\
+                    [run]
+                    branch = True
+                    context = $ICK_TEST_NAME
+                    data_file = {self.coverage_file_dir}/.coverage
+                    parallel = True
+                    source = {self.rule_config.script_path.parent}
+                """)
+            )
         return True

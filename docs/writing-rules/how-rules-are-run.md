@@ -34,6 +34,8 @@ When ick runs a rule, it takes these steps:
           files in the working tree.  Only make those changes if this variable
           indicates that the rule is being applied.
 
+        - `ICK_TEST_NAME` is the relative path to the test being run.
+
     - Rules can make changes to the local copies of files, delete files, or
         create new files.  Any file that might be modified, created, or deleted
         must be declared in the rule's `output` setting.
