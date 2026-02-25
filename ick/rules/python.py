@@ -10,6 +10,7 @@ from ..base_rule import BaseRule
 from ..config import RuleConfig
 from ..venv import PythonEnv
 
+
 class CoveragePythonEnv(PythonEnv):
     def __init__(self, coverage_contents, env_path, deps):
         super().__init__(env_path, deps)
