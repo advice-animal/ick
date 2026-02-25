@@ -82,7 +82,6 @@ class Rule(BaseRule):
                 self.status = f"Couldn't find implementation {py_script}"
 
             # Run as a module to support relative imports
-            assert rule_config.repo_path is not None
             assert py_script.is_relative_to(rule_config.repo_path)
             relative_path = py_script.relative_to(rule_config.repo_path)
             module_path = path_to_module(relative_path)

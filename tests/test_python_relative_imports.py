@@ -1,5 +1,6 @@
 """Test that Python rules can use relative imports."""
 
+import textwrap
 from pathlib import Path
 
 import pytest
@@ -18,17 +19,21 @@ def test_python_relative_imports(tmp_path: Path) -> None:
     (repo_path / "__init__.py").write_text("")
 
     # Create helper module
-    (repo_path / "helper.py").write_text("""
+    (repo_path / "helper.py").write_text(
+        textwrap.dedent("""\
 def greet():
     return "Hello from helper!"
 """)
+    )
 
     # Create the main script that uses relative import
     script_path = repo_path / "main.py"
-    script_path.write_text("""
+    script_path.write_text(
+        textwrap.dedent("""\
 from .helper import greet
 print(greet())
 """)
+    )
 
     rule = Rule(
         RuleConfig(
