@@ -1,0 +1,48 @@
+$ ick test-rules
+testing...
+  needs_work: .FFFF FAIL
+
+DETAILS
+--------------------------------------------------------------------------------
+testing needs_work with with_wrong_output:
+
+Different output found
+--- a/output.txt
++++ b/output.txt
+@@ -1 +1 @@
+-Incorrect output message!
++This repo needs work!
+
+--------------------------------------------------------------------------------
+testing needs_work with without_output:
+
+Test failed, but /CWD/tests/needs_work/without_output/output/output.txt doesn't exist so that seems unintended:
+This repo needs work!
+
+
+--------------------------------------------------------------------------------
+testing needs_work with wrong_change:
+
+'pyproject.toml' (modified) differs
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -1,3 +1,3 @@
+
+ name = "foo"
+-# Add a wrong comment
++# Add a comment
+
+--------------------------------------------------------------------------------
+testing needs_work with wrong_change_and_output:
+
+'pyproject.toml' (modified) differs
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -1,3 +1,3 @@
+
+ name = "foo"
+-# Add a wrong comment
++# Add a comment
+
+
+(exit status: 1)
