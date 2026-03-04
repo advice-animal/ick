@@ -232,7 +232,34 @@ class Runner:
                     result.diff = moreorless.unified_diff(expected, actual_output, "error.txt")
                     result.message = "Different output found"
                 return
-            elif run_result.finished.status is RuleStatus.NEEDS_WORK and not run_result.modifications:
+
+            for r in response:
+                assert isinstance(r, Modified)
+                if r.new_bytes is None:
+                    if r.filename in files_to_check:
+                        result.message = f"Missing removal of {r.filename!r}"
+                        return
+                else:
+                    if r.filename not in files_to_check:
+                        result.message = f"Unexpected new file: {r.filename!r}"
+                        return
+                    outf = outp / r.filename
+                    if outf.read_bytes() != r.new_bytes:
+                        result.diff = unified_diff(
+                            outf.read_text(),
+                            r.new_bytes.decode(),
+                            r.filename,
+                        )
+                        result.message = f"{r.filename!r} (modified) differs"
+                        return
+                    files_to_check.remove(r.filename)
+
+            for unchanged_file in files_to_check:
+                if (inp / unchanged_file).read_bytes() != (outp / unchanged_file).read_bytes():
+                    result.message = f"{unchanged_file!r} (unchanged) differs"
+                    return
+
+            if actual_output:
                 # Didn't match expectation
                 expected_path = outp / "output.txt"
                 if not expected_path.exists():
@@ -246,33 +273,6 @@ class Runner:
                     result.diff = moreorless.unified_diff(expected, actual_output, "output.txt")
                     result.message = "Different output found"
                 return
-            else:
-                # Mainly 0 exit
-                for r in response:
-                    assert isinstance(r, Modified)
-                    if r.new_bytes is None:
-                        if r.filename in files_to_check:
-                            result.message = f"Missing removal of {r.filename!r}"
-                            return
-                    else:
-                        if r.filename not in files_to_check:
-                            result.message = f"Unexpected new file: {r.filename!r}"
-                            return
-                        outf = outp / r.filename
-                        if outf.read_bytes() != r.new_bytes:
-                            result.diff = unified_diff(
-                                outf.read_text(),
-                                r.new_bytes.decode(),
-                                r.filename,
-                            )
-                            result.message = f"{r.filename!r} (modified) differs"
-                            return
-                        files_to_check.remove(r.filename)
-
-                for unchanged_file in files_to_check:
-                    if (inp / unchanged_file).read_bytes() != (outp / unchanged_file).read_bytes():
-                        result.message = f"{unchanged_file!r} (unchanged) differs"
-                        return
 
         result.success = True
 
