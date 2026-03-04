@@ -38,7 +38,7 @@ When ick runs a rule, it takes these steps:
 
     - Rules can make changes to the local copies of files, delete files, or
         create new files.  Any file that might be modified, created, or deleted
-        must be declared in the rule's `output` setting.
+        must be declared in the rule's `outputs` setting.
 
     - Rules can also make changes beyond the local copies of files.  They might
         change settings in an external service, update databases, or anything at
