@@ -1,0 +1,10 @@
+[[rule]]
+name = "do_nothing"
+impl = "shell"
+command = "echo hi"
+scope = "repo"
+urgency = "now"
+description = "Nothing happens"
+
+[[ruleset]]
+path = "."

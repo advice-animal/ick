@@ -255,7 +255,10 @@ class Runner:
                     files_to_check.remove(r.filename)
 
             for unchanged_file in files_to_check:
-                if (inp / unchanged_file).read_bytes() != (outp / unchanged_file).read_bytes():
+                expected = (inp / unchanged_file).read_text()
+                actual = (outp / unchanged_file).read_text()
+                if expected != actual:
+                    result.diff = moreorless.unified_diff(expected, actual, unchanged_file)
                     result.message = f"{unchanged_file!r} (unchanged) differs"
                     return
 
