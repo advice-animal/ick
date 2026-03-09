@@ -1,0 +1,17 @@
+$ ick test-rules
+testing...
+  do_nothing: F FAIL
+
+DETAILS
+--------------------------------------------------------------------------------
+testing do_nothing with wrong_output:
+
+'readme.md' (unchanged) differs
+--- a/readme.md
++++ b/readme.md
+@@ -1 +1 @@
+-# This should stay unchanged
++# This was changed?
+
+
+(exit status: 1)
