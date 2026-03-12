@@ -1,0 +1,16 @@
+# zebra has order=10, alpha has default order=50.
+# zebra should run before alpha even though z > a alphabetically.
+$ ick run --apply
+-> yebra: NEEDS_WORK
+   Change made: output.txt                     +1
+-> zebra: NEEDS_WORK
+   Change made: output.txt                     +1
+-> alpha: NEEDS_WORK
+   Change made: output.txt                     +1
+-> verylast: NEEDS_WORK
+   Change made: output.txt                     +1
+$ cat output.txt
+Yebra
+Zebra
+Alpha
+Last
