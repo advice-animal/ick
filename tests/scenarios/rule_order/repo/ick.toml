@@ -1,0 +1,31 @@
+[[ruleset]]
+path = "."
+
+# zebra has order=10, so it runs before alpha (order=50) despite z > a alphabetically.
+
+[[rule]]
+name = "zebra"
+impl = "shell"
+scope = "repo"
+order = 10
+data = "echo Zebra >> output.txt"
+
+[[rule]]
+name = "yebra"
+impl = "shell"
+scope = "repo"
+order = 10
+data = "echo Yebra >> output.txt"
+
+[[rule]]
+name = "alpha"
+impl = "shell"
+scope = "repo"
+data = "echo Alpha >> output.txt"
+
+[[rule]]
+name = "verylast"
+impl = "shell"
+scope = "repo"
+order = 90
+data = "echo Last >> output.txt"
