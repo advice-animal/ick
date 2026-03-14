@@ -11,6 +11,7 @@ from keke import ktrace
 from msgspec import ValidationError
 from msgspec.json import encode as encode_json
 from msgspec.toml import decode as decode_toml
+from parse_errors import ParseContext
 from vmodule import VLOG_1, VLOG_2
 
 from ..base_rule import BaseRule
@@ -91,21 +92,23 @@ def load_rule_repo(ruleset: Ruleset, *, skip_update: bool = False) -> RuleRepoCo
 
 
 def load_pyproject(p: Path, data: bytes) -> RuleRepoConfig:
-    try:
-        c = decode_toml(data, type=PyprojectRulesConfig).tool.ick
-    except ValidationError as e:
-        # TODO surely there's a cleaner way to validate _inside_
-        # but not care if [tool.other] is present...
-        if "Object missing required field `ick` - at `$.tool`" in e.args[0]:
-            return RuleRepoConfig()
-        if "Object missing required field `tool`" in e.args[0]:
-            return RuleRepoConfig()
-        raise
+    with ParseContext(p, data=data):
+        try:
+            c = decode_toml(data, type=PyprojectRulesConfig).tool.ick
+        except ValidationError as e:
+            # TODO surely there's a cleaner way to validate _inside_
+            # but not care if [tool.other] is present...
+            if "Object missing required field `ick` - at `$.tool`" in e.args[0]:
+                return RuleRepoConfig()
+            if "Object missing required field `tool`" in e.args[0]:
+                return RuleRepoConfig()
+            raise
     return c
 
 
 def load_regular(p: Path, data: bytes) -> RuleRepoConfig:
-    return decode_toml(data, type=RuleRepoConfig)
+    with ParseContext(p, data=data):
+        return decode_toml(data, type=RuleRepoConfig)
 
 
 @ktrace("rule.impl")

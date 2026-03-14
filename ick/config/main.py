@@ -14,6 +14,7 @@ from keke import ktrace
 from msgspec import Struct, ValidationError, field
 from msgspec.structs import replace as replace
 from msgspec.toml import decode as decode_toml
+from parse_errors import ParseContext
 from vmodule import VLOG_2
 
 from ..util import merge
@@ -113,21 +114,23 @@ def load_main_config(cur: Path, isolated_repo: bool) -> MainConfig:
 
 
 def load_pyproject(p: Path, data: bytes) -> MainConfig:
-    try:
-        c = decode_toml(data, type=PyprojectConfig).tool.ick
-    except ValidationError as e:
-        # TODO surely there's a cleaner way to validate _inside_
-        # but not care if [tool.other] is present...
-        if "Object missing required field `ick` - at `$.tool`" in e.args[0]:
-            return MainConfig()
-        if "Object missing required field `tool`" in e.args[0]:
-            return MainConfig()
-        raise
+    with ParseContext(p, data=data):
+        try:
+            c = decode_toml(data, type=PyprojectConfig).tool.ick
+        except ValidationError as e:
+            # TODO surely there's a cleaner way to validate _inside_
+            # but not care if [tool.other] is present...
+            if "Object missing required field `ick` - at `$.tool`" in e.args[0]:
+                return MainConfig()
+            if "Object missing required field `tool`" in e.args[0]:
+                return MainConfig()
+            raise
     return c
 
 
 def load_regular(p: Path, data: bytes) -> MainConfig:
-    return decode_toml(data, type=MainConfig)
+    with ParseContext(p, data=data):
+        return decode_toml(data, type=MainConfig)
 
 
 class RuntimeConfig(Struct):

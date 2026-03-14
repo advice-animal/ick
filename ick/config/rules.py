@@ -12,6 +12,7 @@ from keke import ktrace
 from msgspec import Struct, ValidationError, field
 from msgspec.structs import replace as replace
 from msgspec.toml import decode as decode_toml
+from parse_errors import ParseContext
 from vmodule import VLOG_1
 
 from ick_protocol import Risk, Scope, Success, Urgency
@@ -127,19 +128,22 @@ def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:
     conf = RulesConfig()
     for config_path in config_files(cur, isolated_repo):
         if config_path.name == "pyproject.toml":
-            try:
-                c = decode_toml(config_path.read_bytes(), type=PyprojectToolConfig).tool.ick  # type: ignore[attr-defined] # FIX ME
-            except ValidationError as e:
-                # TODO surely there's a cleaner way to validate _inside_
-                # but not care if [tool.other] is present...
-                if "Object missing required field `ick`" not in e.args[0]:
-                    raise
-
-                else:
-                    LOG.log(VLOG_1, "No ick config found in %s", config_path)
-                    continue
+            data = config_path.read_bytes()
+            with ParseContext(config_path, data=data):
+                try:
+                    c = decode_toml(data, type=PyprojectToolConfig).tool.ick  # type: ignore[attr-defined] # FIX ME
+                except ValidationError as e:
+                    # TODO surely there's a cleaner way to validate _inside_
+                    # but not care if [tool.other] is present...
+                    if "Object missing required field `ick`" not in e.args[0]:
+                        raise
+                    else:
+                        LOG.log(VLOG_1, "No ick config found in %s", config_path)
+                        continue
         else:
-            c = decode_toml(config_path.read_bytes(), type=RulesConfig)
+            data = config_path.read_bytes()
+            with ParseContext(config_path, data=data):
+                c = decode_toml(data, type=RulesConfig)
 
         for ruleset in c.ruleset:
             ruleset.base_path = config_path.parent
