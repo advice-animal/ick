@@ -1,4 +1,7 @@
+import logging
+import threading
 from pathlib import Path
+from subprocess import CalledProcessError
 
 import pytest
 
@@ -69,3 +72,44 @@ def test_ruleset_merge_url_with_path() -> None:
     assert specific_config.ruleset[0].path == "./local-rules"
     assert specific_config.ruleset[0].url is None  # url from base is not kept
     assert specific_config.ruleset[0].prefix == "prefix"
+
+
+def test_discover_parallel(monkeypatch) -> None:
+    """Multiple rulesets are loaded concurrently, not serially."""
+    barrier = threading.Barrier(2, timeout=5)
+    original_load = load_rule_repo
+
+    def blocking_load(ruleset: Ruleset) -> RuleRepoConfig:
+        barrier.wait()  # both threads must reach here before either proceeds
+        return original_load(ruleset)
+
+    monkeypatch.setattr("ick.config.rule_repo.load_rule_repo", blocking_load)
+
+    r1 = Ruleset(base_path=Path.cwd(), path="tests/fixture_rules", prefix="a")
+    r2 = Ruleset(base_path=Path.cwd(), path="tests/fixture_rules", prefix="b")
+    h = RulesConfig(ruleset=[r1, r2])
+    rules = discover_rules(rtc=RuntimeConfig(main_config=MainConfig(), rules_config=h, settings=Settings()))
+    assert len(rules) == 6
+
+
+def test_discover_warns_on_failure(monkeypatch, caplog) -> None:
+    """A failing ruleset logs a warning and is skipped rather than raising."""
+    good = Ruleset(base_path=Path.cwd(), path="tests/fixture_rules")
+    bad = Ruleset(url="https://git.example.com/nonexistent.git", prefix="broken")
+    h = RulesConfig(ruleset=[good, bad])
+
+    git_error = CalledProcessError(128, ["git", "clone"], stderr=b"unable to resolve hostname")
+    original_load = load_rule_repo
+
+    def selective_load(ruleset: Ruleset) -> RuleRepoConfig:
+        if ruleset is bad:
+            raise git_error
+        return original_load(ruleset)
+
+    monkeypatch.setattr("ick.config.rule_repo.load_rule_repo", selective_load)
+
+    with caplog.at_level(logging.WARNING, logger="ick.config.rule_repo"):
+        rules = discover_rules(rtc=RuntimeConfig(main_config=MainConfig(), rules_config=h, settings=Settings()))
+
+    assert len(rules) == 3
+    assert "broken" in caplog.text
