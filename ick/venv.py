@@ -118,6 +118,7 @@ class PythonEnv:
                 run_cmd(
                     [uv, "pip", "install", *self.deps],
                     env=env,
+                    timeout=120,
                 )
             self._deps_path().write_text(json.dumps(self.deps))
             self._cached_health = None
