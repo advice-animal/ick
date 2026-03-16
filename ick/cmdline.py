@@ -14,6 +14,7 @@ from moreorless.click import echo_color_precomputed_diff
 from rich import print
 from vmodule import vmodule_init
 
+from ick._env_check import check_writable_dirs
 from ick.add_rule import add_rule_structure
 from ick_protocol import RuleStatus, Scope, Urgency
 
@@ -51,6 +52,9 @@ def main(
     """
     verbose_init(v, verbose, vmodule)
     ctx.with_resource(keke.TraceOutput(file=trace))
+
+    if msg := check_writable_dirs():
+        raise click.ClickException(f"{msg}; ick may hang or fail")
 
     # This takes a target because rules can be defined in the target repo too
     cur = Path(target)
