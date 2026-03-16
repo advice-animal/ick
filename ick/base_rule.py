@@ -100,8 +100,12 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
                     # If _we_ got a False from rule_prepare, we also return False which
                     # signals feedforward to keep looking for work elsewhere...
                     return False
-            except subprocess.TimeoutExpired as e:
-                self.cancel(str(e))
+            except subprocess.SubprocessError as e:
+                if isinstance(e, subprocess.CalledProcessError) and (e.stdout or e.stderr):
+                    msg = (e.stdout or "") + (e.stderr or "")
+                else:
+                    msg = str(e)
+                self.cancel(msg)
                 return False
 
         return super().run_next_batch()

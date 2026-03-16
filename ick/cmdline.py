@@ -267,8 +267,12 @@ def run(
             match result.finished.status:
                 case RuleStatus.ERROR:
                     print("[red]ERROR[/red]")
-                    for line in result.finished.message.splitlines():
-                        print("    ", line)
+                    lines = result.finished.message.splitlines()
+                    if ctx.parent.params.get("v", 0) > 0:
+                        for line in lines:
+                            print("    ", line)
+                    elif lines:
+                        print("    ", lines[0])
                 case RuleStatus.NEEDS_WORK:
                     print("[yellow]NEEDS_WORK[/yellow]")
                     for line in result.finished.message.splitlines():

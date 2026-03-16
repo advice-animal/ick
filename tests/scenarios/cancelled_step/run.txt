@@ -1,0 +1,5 @@
+$ ick run
+-> bad_deps: ERROR
+     error: Failed to parse: `-`
+-> fix_header: NEEDS_WORK
+     pyproject.toml +1

@@ -1,0 +1,18 @@
+[[ruleset]]
+path = "."
+
+[[rule]]
+impl = "python"
+name = "bad_deps"
+scope = "project"
+deps = ["-"]
+data = "pass"
+
+[[rule]]
+impl = "python"
+name = "fix_header"
+scope = "project"
+data = """
+with open('pyproject.toml', 'w') as f:
+    f.write('# managed by ick\\n')
+"""
