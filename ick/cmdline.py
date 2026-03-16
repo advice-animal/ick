@@ -273,6 +273,10 @@ def run(
                             print("    ", line)
                     elif lines:
                         print("    ", lines[0])
+                        if len(lines) >= 3:
+                            print("    ", "... (pass -v for complete message)")
+                        if len(lines) > 1:
+                            print("    ", lines[-1])
                 case RuleStatus.NEEDS_WORK:
                     print("[yellow]NEEDS_WORK[/yellow]")
                     for line in result.finished.message.splitlines():

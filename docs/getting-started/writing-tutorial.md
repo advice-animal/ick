@@ -210,13 +210,10 @@ trying to import those third-party dependencies:
 $ ick run
 -> move_isort_cfg: ERROR
      Traceback (most recent call last):
-       File "<frozen runpy>", line 198, in _run_module_as_main
-       File "<frozen runpy>", line 88, in _run_code
-       File "/tmp/foo/move_isort_cfg.py", line 5, in <module>
-         import imperfect
+     ... (pass -v for complete message)
      ModuleNotFoundError: No module named 'imperfect'
 ```
-<!-- [[[end]]] (sum: YG/2pd6McE) -->
+<!-- [[[end]]] (sum: UbCS0AeSaF) -->
 
 We need to tell `ick` about the dependencies the rule needs.
 
@@ -363,7 +360,7 @@ both work, but one looks much nicer!
 Rules don't have to modify files, they can examine files to simply check if they
 need updating.  If your rule finds problems, it can print messages providing
 details, and then exit with a status code of 99.  If your rule exits with 99,
-ick summarize the rule as "NEEDS_WORK", otherwise it's "OK".
+ick summarizes the rule as "NEEDS_WORK", otherwise it's "OK".
 
 Rules don't have to be pure codemods or pure checkers.  Your rule can make some
 modifications, and can also print messages and exit with 99 if there is more
