@@ -99,7 +99,7 @@ class PythonEnv:
             # hard-to-debug failures, so only inherit a couple for now.
             env = {}
             for k, v in os.environ.items():
-                if k in ("HOME", "UV_CACHE_DIR", "UV_NATIVE_TLS") or k.startswith("XDG_"):
+                if k in {"HOME", "PATH", "UV_CACHE_DIR", "UV_NATIVE_TLS"} or k.startswith("XDG_"):
                     env[k] = v
 
             run_cmd(
@@ -114,7 +114,7 @@ class PythonEnv:
             # reasonable error during prepare if it's not present/downloadable
             # on the system.
             if self.deps:
-                env["VIRTUAL_ENV"] = self.env_path  # type: ignore[assignment] # FIX ME
+                env["VIRTUAL_ENV"] = str(self.env_path)
                 run_cmd(
                     [uv, "pip", "install", *self.deps],
                     env=env,
