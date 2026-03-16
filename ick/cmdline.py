@@ -177,6 +177,7 @@ def add_rule(
 @click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by rule qualname (can be used with list-rules --json)")
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
 @click.option("--emojis", is_flag=True, help="Show a waterfall of emojis as work is being done")
+@click.option("--parallelism", type=int, default=0, help="Number of parallel workers (default: auto)")
 @click.option("-k", "substring", default="", help="Substring match on rule name (including prefix)")
 @click.argument("filters", nargs=-1)
 @click.pass_context
@@ -188,6 +189,7 @@ def run(
     json_flag: bool,
     skip_update: bool,
     emojis: bool,
+    parallelism: int,
     substring: str,
     filters: list[str],
 ) -> None:
@@ -241,7 +243,7 @@ def run(
         status_callback = progressbar_status
         done_callback = lambda _: print("\n")  # noqa: E731
 
-    r = Runner(ctx.obj, ctx.obj.repo)
+    r = Runner(ctx.obj, ctx.obj.repo, parallelism=parallelism)
     steps = r.build_steps_for_rules(
         status_callback=status_callback,
         done_callback=done_callback,

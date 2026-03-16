@@ -1,8 +1,11 @@
 import subprocess
 import sys
+import threading
+from typing import Iterable
 
 import pytest
 from feedforward import Notification, Run, State
+from feedforward.step import Step
 
 from ick.base_rule import GenericPreparedStep
 
@@ -62,3 +65,21 @@ def test_timeout_in_prepare_run_continues_with_next_step(parallelism: int) -> No
     assert step0.cancelled
     assert not step1.cancelled
     assert result["b.txt"].value == b"modified"
+
+
+def test_default_parallelism_is_at_least_two() -> None:
+    """Two items must be able to reach the barrier simultaneously."""
+    barrier = threading.Barrier(2, timeout=5)
+
+    class BarrierStep(Step[str, str]):
+        def process(self, next_gen: int, notifications: Iterable[Notification[str, str]]) -> Iterable[Notification[str, str]]:
+            list(notifications)
+            barrier.wait()
+            return []
+
+    step = BarrierStep(batch_size=1)
+    run: Run[str, str] = Run()
+    run.add_step(step)
+
+    run.run_to_completion({"a": "x", "b": "y"})
+    assert not step.cancelled
