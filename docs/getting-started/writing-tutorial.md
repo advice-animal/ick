@@ -363,7 +363,7 @@ both work, but one looks much nicer!
 Rules don't have to modify files, they can examine files to simply check if they
 need updating.  If your rule finds problems, it can print messages providing
 details, and then exit with a status code of 99.  If your rule exits with 99,
-ick summarize the rule as "NEEDS_WORK", otherwise it's "OK".
+ick summarizes the rule as "NEEDS_WORK", otherwise it's "OK".
 
 Rules don't have to be pure codemods or pure checkers.  Your rule can make some
 modifications, and can also print messages and exit with 99 if there is more
