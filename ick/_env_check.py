@@ -20,6 +20,6 @@ def check_writable_dirs() -> str | None:
         while not check.exists():
             check = check.parent
         if not os.access(check, os.W_OK):
-            return f"{dir_path} is not writable (checked {check})"
+            return f"{str(dir_path)!r} is not writable (checked {str(check)!r})"
 
     return None
