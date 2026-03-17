@@ -13,6 +13,15 @@ def test_advice_name_matching() -> None:
     assert not foo_match("py/foo/goo")
 
 
+def test_advice_name_matching_prefix_with_trailing_slash() -> None:
+    foo_match = re.compile(rule_name_re("foo/")).fullmatch
+    assert foo_match("foo")
+    assert foo_match("foo/hello")
+    assert foo_match("foo/hello/goo")
+    assert not foo_match("food_truck")
+    assert not foo_match("py/foo")
+
+
 def test_regex_matching_zfilenames() -> None:
     # start (and end)
     m = zfilename_re(["literal.txt"]).match("literal.txt\0")

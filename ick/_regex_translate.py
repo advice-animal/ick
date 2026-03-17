@@ -7,7 +7,7 @@ def rule_name_re(prefix: str) -> str:
     Returns a regular expression string that matches either prefix/ or prefix
     as the entire string.  The regex is used with re.fullmatch.
     """
-    return f"^{prefix}($|/.*$)"
+    return f"^{prefix.rstrip('/')}($|/.*$)"
 
 
 def zfilename_re(opts: Iterable[str]) -> re.Pattern[str]:
