@@ -47,19 +47,13 @@ def _get_local_cache_name(url: str, ref: str) -> str:
     return f"{repo_name}-{safe_ref}-{url_hash[:8]}"
 
 
-def local_cache_path(url: str) -> Path:
-    import platformdirs
-
-    clean_url, ref = _split_url_ref(url)
-    cache_dir = Path(platformdirs.user_cache_dir("ick", "advice-animal")).expanduser()
-    return cache_dir / _get_local_cache_name(clean_url, ref)
-
-
 def update_local_cache(url: str, *, skip_update: bool, freeze: bool = False) -> Path:
+    import platformdirs
     from filelock import FileLock
 
     clean_url, ref = _split_url_ref(url)
-    local_checkout = local_cache_path(url)
+    cache_dir = Path(platformdirs.user_cache_dir("ick", "advice-animal")).expanduser()
+    local_checkout = cache_dir / _get_local_cache_name(clean_url, ref)
     freeze_name = local_checkout / ".git" / "freeze"
     is_sha = _is_sha(ref)
     with FileLock(local_checkout.with_suffix(".lock")):
@@ -69,13 +63,15 @@ def update_local_cache(url: str, *, skip_update: bool, freeze: bool = False) -> 
             clone_cmd = ["git", "clone"]
             if is_sha:
                 # For SHA refs, use --revision to clone and checkout in one step
-                clone_cmd += ["--reference-if-able", str(local_cache_path(clean_url)), f"--revision={ref}"]
+                main_cache = cache_dir / _get_local_cache_name(clean_url, DEFAULT_BRANCH_NAME)
+                clone_cmd += ["--reference-if-able", str(main_cache), f"--revision={ref}"]
             else:
                 # For branches/tags, use single-branch optimization
                 clone_cmd += ["--single-branch", "--branch", ref]
                 if ref != DEFAULT_BRANCH_NAME:
                     # Reuse objects from the main cache dir to save bandwidth
-                    clone_cmd += ["--reference-if-able", str(local_cache_path(clean_url))]
+                    main_cache = cache_dir / _get_local_cache_name(clean_url, DEFAULT_BRANCH_NAME)
+                    clone_cmd += ["--reference-if-able", str(main_cache)]
             run_cmd(clone_cmd + [clean_url, local_checkout])
         elif not skip_update and not is_sha:
             # SHAs are immutable and never need updating
