@@ -40,6 +40,8 @@ format:
 lint:
 	ruff check
 	python -m checkdeps --allow-names ick,ick_protocol ick
+	env | sort
+	ick -v --rules-repo=https://github.com/advice-animal/ick-tutorial-rules-1 list-rules
 	python -m cogapp -cP --check --diff docs/whole-tutorial.md
 
 .PHONY: mypy
