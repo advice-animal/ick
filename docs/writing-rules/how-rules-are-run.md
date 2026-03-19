@@ -26,8 +26,16 @@ When ick runs a rule, it takes these steps:
         copied files:
 
         - `ICK_REPO_PATH` is the path to the original working directory. Use
-          this if you need information that isn't in file content, such as git
-          remote information.
+          this if you need information that isn't in file content.
+
+        - `ICK_REPO_UPSTREAM` is the upstream URL of the repository, taken from
+          the `upstream` remote if present, otherwise `origin`. This is the raw
+          URL from git config — it may have a trailing slash, and may be an SSH
+          URL (`git@github.com:...`), a `git+https://` URL, or any other form
+          git accepts. Prefer this over reading `ICK_REPO_PATH` and shelling out
+          to `git config` yourself, especially if your rule should only run
+          against certain upstream repositories. Not set if no remote is
+          configured.
 
         - `ICK_APPLY` exists (with a value of "1") if the rule is running with
           the `--apply` option.  Use this if your rule makes changes outside the

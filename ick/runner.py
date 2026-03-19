@@ -69,6 +69,8 @@ class Runner:
         self.ick_env_vars = {
             "ICK_REPO_PATH": str(repo.root),
         }
+        if repo.upstream_url:
+            self.ick_env_vars["ICK_REPO_UPSTREAM"] = repo.upstream_url
         if self.rtc.settings.apply:
             self.ick_env_vars["ICK_APPLY"] = "1"
 
