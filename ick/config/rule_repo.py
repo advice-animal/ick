@@ -43,7 +43,8 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
     # update_local_cache serialises any duplicate URLs naturally.
     _update = functools.partial(maybe_update_local_cache, skip_update=skip_update)
     with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = [(r, executor.submit(load_rule_repo, r)) for r in rulesets_list]
+        futures = [(r, executor.submit(_update, r)) for r in rulesets_list]
+
         for ruleset, future in futures:
             try:
                 future.result()
