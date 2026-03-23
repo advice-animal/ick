@@ -2,12 +2,10 @@
 
 When ick runs a rule, it takes these steps:
 
-- Files from your local directory are copied to a temporary directory.
-
-    - For file-scoped rules, only the files in the rule's `input` setting will
-        be copied.
-
-    - For project- and repo-scoped rules, all files are copied.
+- Files from your local directory are copied to a temporary directory. Only
+    the files mentioned in the `input` setting will be copied. This is true even
+    for project- and repo-scoped rules, though for those rules `input` defaults
+    to all files.
 
 - Your rule doesn't run in your local directory, and will only have access to
     files copied because of the `input` setting.  Each rule gets its own
