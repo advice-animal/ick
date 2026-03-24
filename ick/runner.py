@@ -44,6 +44,7 @@ class HighLevelResult:
     project: str
     modifications: Sequence[Modified]
     finished: Finished
+    metadata: dict[str, Any] | None = None
 
 
 @dataclass
@@ -308,6 +309,7 @@ class Runner:
         for s in steps._steps[:-1]:
             assert isinstance(s, GenericPreparedStep)
             if s.cancelled:
+                s._output_dir.cleanup()
                 # This should also encompass exit codes other than 0 and 99
                 # print(f"{s} failed:")
                 # print(f"  {s.cancel_reason}")
@@ -317,7 +319,7 @@ class Runner:
                 #     ...
 
                 changes = s.compute_diff_messages()
-                yield HighLevelResult(s.qualname, s.match_prefix, changes[:-1], changes[-1])
+                yield HighLevelResult(s.qualname, s.match_prefix, changes[:-1], changes[-1], s.metadata)
 
     @ktrace()
     def echo_rules(self) -> None:

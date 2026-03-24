@@ -1,12 +1,16 @@
 $ ick run
 -> show_ick_vars on python1/: NEEDS_WORK
+     ICK_OUTPUT_DIR=<tmp>
      ICK_REPO_PATH=/CWD
 -> show_ick_vars on mono/java/: NEEDS_WORK
+     ICK_OUTPUT_DIR=<tmp>
      ICK_REPO_PATH=/CWD
 $ ick run --apply
 -> show_ick_vars on python1/: NEEDS_WORK
      ICK_APPLY=1
+     ICK_OUTPUT_DIR=<tmp>
      ICK_REPO_PATH=/CWD
 -> show_ick_vars on mono/java/: NEEDS_WORK
      ICK_APPLY=1
+     ICK_OUTPUT_DIR=<tmp>
      ICK_REPO_PATH=/CWD

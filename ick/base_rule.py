@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 from fnmatch import fnmatch
@@ -71,6 +72,8 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         # is at the end.
         self.batch_messages: dict[tuple[tuple[str, int], ...], tuple[str, int]] = {}
         self.rule_status = RuleStatus.SUCCESS
+        self._output_dir = TemporaryDirectory(prefix="ick_output_")
+        self.metadata: dict[str, Any] | None = None
 
     def match(self, key: str) -> bool:
         m = bool(match_prefix_patterns(key, self.match_prefix, self.patterns))
@@ -142,6 +145,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
 
             env = os.environ.copy()
             env.update(self.extra_env)
+            env["ICK_OUTPUT_DIR"] = self._output_dir.name
 
             try:
                 stdout = run_cmd(
@@ -193,6 +197,12 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         assert not self.cancelled
         assert self.outputs_final
         assert self.index is not None
+
+        metadata_path = Path(self._output_dir.name) / "metadata.json"
+        if metadata_path.exists():  # most rules probably won't use this feature
+            with open(metadata_path) as f:
+                self.metadata = json.load(f)
+        self._output_dir.cleanup()
 
         changes: list[Modified | Finished] = []
         for k in sorted(set(self.accepted_state) | set(self.output_state)):

@@ -4,4 +4,5 @@ $ ick run
      isort.cfg -3
      pyproject.toml +3
 -> show_ick_vars: NEEDS_WORK
+     ICK_OUTPUT_DIR=<tmp>
      ICK_REPO_PATH=/CWD
