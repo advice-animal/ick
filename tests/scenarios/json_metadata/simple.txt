@@ -7,7 +7,7 @@ $ ick run --json
                 "status": "success",
                 "modified": [],
                 "message": "no metadata here\n",
-                "metadata": null
+                "metadata": {}
             }
         ],
         "writes_metadata": [
