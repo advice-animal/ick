@@ -297,6 +297,43 @@ def run(
                     print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
 
 
+@main.command()
+@click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, show counts of lines to change (default)")
+@click.option("-p", "--patch", is_flag=True, help="Show patches of changes to make")
+@click.option("--apply", is_flag=True, help="Apply changes")
+@click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by rule qualname (can be used with list-rules --json)")
+@click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
+@click.option("--emojis", is_flag=True, help="Show a waterfall of emojis as work is being done")
+@click.option("-k", "substring", default="", help="Substring match on rule name (including prefix)")
+@click.argument("filters", nargs=-1)
+@click.pass_context
+def run_rules(
+    ctx: click.Context,
+    dry_run: bool,
+    patch: bool,
+    apply: bool,
+    json_flag: bool,
+    skip_update: bool,
+    emojis: bool,
+    substring: str,
+    filters: list[str],
+) -> None:
+    """
+    Alias for the `run` command.
+    """
+    ctx.invoke(
+        run,
+        dry_run=dry_run,
+        patch=patch,
+        apply=apply,
+        json_flag=json_flag,
+        skip_update=skip_update,
+        emojis=emojis,
+        substring=substring,
+        filters=filters,
+    )
+
+
 def apply_filters(ctx: click.Context, filters: list[str], substring: str) -> None:
     if substring and filters:
         raise click.UsageError("Cannot use -k together with positional filters")
