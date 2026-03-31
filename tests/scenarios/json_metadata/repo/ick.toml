@@ -12,5 +12,7 @@ project_types = ["python"]
 [[rule]]
 impl = "python"
 name = "writes_metadata"
-scope = "project"
+scope = "file"
+inputs = ["*.py"]
 project_types = ["python"]
+batch_size = 1

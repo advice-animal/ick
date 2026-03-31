@@ -15,12 +15,18 @@ $ ick run --json
                 "project_name": "",
                 "status": "needs-work",
                 "modified": [],
-                "message": "found issues\n",
+                "message": "",
                 "metadata": {
                     "findings": [
                         {
+                            "file": "writes_metadata.py",
                             "line": 1,
-                            "message": "test metadata yay"
+                            "message": "test metadata for writes_metadata.py"
+                        },
+                        {
+                            "file": "no_metadata.py",
+                            "line": 1,
+                            "message": "test metadata for no_metadata.py"
                         }
                     ]
                 }

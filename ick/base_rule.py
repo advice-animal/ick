@@ -72,7 +72,6 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         # is at the end.
         self.batch_messages: dict[tuple[tuple[str, int], ...], tuple[str, int]] = {}
         self.rule_status = RuleStatus.SUCCESS
-        self._output_dir = TemporaryDirectory(prefix="ick_output_")
         self.metadata: dict[str, Any] | None = None
 
     def match(self, key: str) -> bool:
@@ -117,7 +116,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
     ) -> Iterable[Notification[str, bytes | Erasure]]:
         notifications = list(notifications)
         # TODO name better, pick a good one...
-        with TemporaryDirectory() as d:
+        with TemporaryDirectory() as d, TemporaryDirectory() as output_dir:
             # with self.state_lock:
             #     # First the common files
             #     g = self._gravitational_constant()
@@ -145,7 +144,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
 
             env = os.environ.copy()
             env.update(self.extra_env)
-            env["ICK_OUTPUT_DIR"] = self._output_dir.name
+            env["ICK_OUTPUT_DIR"] = output_dir
 
             try:
                 stdout = run_cmd(
@@ -193,16 +192,45 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
             if batch_value:
                 self.batch_messages[tuple(batch_key.items())] = batch_value
 
+            metadata_path = Path(output_dir) / "metadata.json"
+            if metadata_path.exists():
+                self.metadata = self.merge_dicts(self.metadata, json.loads(metadata_path.read_text()))
+
+    def merge_dicts(self, d1: dict | None, d2: dict):
+        if not d1:
+            return d2
+
+        else:
+            for k in d1:
+                if k in d2:
+                    if isinstance(d2[k], dict):
+                        # we technically should check if d1[k] is also a but since both jsons are created by the same script it's fine
+                        d1[k] = self.merge_dicts(d1[k], d2[k])
+
+                    elif isinstance(d2[k], list):
+                        d1[k] += d2[k]
+
+                    elif isinstance(d2[k], str) and isinstance(d1[k], str):
+                        # concat messages as best as we can
+                        if not d1[k].endswith("\n"):
+                            d1[k] += "\n"
+
+                        d1[k] += d2[k]
+
+                    else:
+                        # this is hard. Override one of the values and then recommend in docs that rule writers only use lists and dicts.
+                        d1[k] = d2[k]
+
+            for k in d2:
+                if k not in d1:
+                    d1[k] = d2[k]
+
+            return d1
+
     def compute_diff_messages(self) -> list[Modified | Finished]:
         assert not self.cancelled
         assert self.outputs_final
         assert self.index is not None
-
-        metadata_path = Path(self._output_dir.name) / "metadata.json"
-        if metadata_path.exists():  # most rules probably won't use this feature
-            with open(metadata_path) as f:
-                self.metadata = json.load(f)
-        self._output_dir.cleanup()
 
         changes: list[Modified | Finished] = []
         for k in sorted(set(self.accepted_state) | set(self.output_state)):

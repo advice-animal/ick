@@ -309,7 +309,6 @@ class Runner:
         for s in steps._steps[:-1]:
             assert isinstance(s, GenericPreparedStep)
             if s.cancelled:
-                s._output_dir.cleanup()
                 # This should also encompass exit codes other than 0 and 99
                 # print(f"{s} failed:")
                 # print(f"  {s.cancel_reason}")
