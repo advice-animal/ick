@@ -2,12 +2,10 @@
 
 When ick runs a rule, it takes these steps:
 
-- Files from your local directory are copied to a temporary directory.
-
-    - For file-scoped rules, only the files in the rule's `input` setting will
-        be copied.
-
-    - For project- and repo-scoped rules, all files are copied.
+- Files from your local directory are copied to a temporary directory. Only
+    the files mentioned in the `input` setting will be copied. This is true even
+    for project- and repo-scoped rules, though for those rules `input` defaults
+    to all files.
 
 - Your rule doesn't run in your local directory, and will only have access to
     files copied because of the `input` setting.  Each rule gets its own
@@ -26,8 +24,16 @@ When ick runs a rule, it takes these steps:
         copied files:
 
         - `ICK_REPO_PATH` is the path to the original working directory. Use
-          this if you need information that isn't in file content, such as git
-          remote information.
+          this if you need information that isn't in file content.
+
+        - `ICK_REPO_UPSTREAM` is the upstream URL of the repository, taken from
+          the `upstream` remote if present, otherwise `origin`. This is the raw
+          URL from git config — it may have a trailing slash, and may be an SSH
+          URL (`git@github.com:...`), a `git+https://` URL, or any other form
+          git accepts. Prefer this over reading `ICK_REPO_PATH` and shelling out
+          to `git config` yourself, especially if your rule should only run
+          against certain upstream repositories. Not set if no remote is
+          configured.
 
         - `ICK_APPLY` exists (with a value of "1") if the rule is running with
           the `--apply` option.  Use this if your rule makes changes outside the

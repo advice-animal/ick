@@ -7,7 +7,7 @@ from typing import Callable, ContextManager, Iterable, Sequence, TypeVar
 
 from msgspec import Struct
 
-from .sh import run_cmd
+from .sh import run_cmd, run_cmd_status
 
 _T = TypeVar("_T")
 
@@ -33,6 +33,7 @@ class BaseRepo(Struct):
     root: Path
     projects: Sequence[Project] = ()
     zfiles: str = ""
+    upstream_url: str = ""
 
 
 class Repo(BaseRepo):
@@ -40,6 +41,10 @@ class Repo(BaseRepo):
 
     def __post_init__(self) -> None:
         self.zfiles = run_cmd(["git", "ls-files", "-z"], cwd=self.root)
+        url, rc = run_cmd_status(["git", "config", "--get", "remote.upstream.url"], check=False, cwd=self.root)
+        if rc != 0:
+            url, rc = run_cmd_status(["git", "config", "--get", "remote.origin.url"], check=False, cwd=self.root)
+        self.upstream_url = url.strip() if rc == 0 else ""
 
 
 def maybe_repo(path: Path, enter_context: Callable[[ContextManager[_T]], _T], for_testing: bool = False) -> BaseRepo:
