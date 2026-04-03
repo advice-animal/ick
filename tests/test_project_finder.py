@@ -33,6 +33,12 @@ def test_project_finder_skip_root() -> None:
     assert list(find_projects(Repo(Path()), sample_string, skip_root_config)) == []
 
 
+def test_project_finder_explicit_dirs() -> None:
+    sample_string = "a/pyproject.toml\0b/pyproject.toml\0c/pyproject.toml\0"
+    explicit_config = replace(MainConfig.DEFAULT, explicit_project_dirs=["a", "c/"])  # type: ignore[attr-defined] # FIX ME
+    assert [p.subdir for p in find_projects(Repo(Path()), sample_string, explicit_config)] == ["a/", "c/"]
+
+
 def test_project_finder_marker_can_have_slashes() -> None:
     custom_config = replace(MainConfig.DEFAULT, project_root_markers={"shell": ["scripts/make.sh"]})  # type: ignore[attr-defined] # FIX ME
 

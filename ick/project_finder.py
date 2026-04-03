@@ -13,6 +13,14 @@ from .types_project import Project, Repo
 LOG = getLogger(__name__)
 
 
+def dir_in_dirlist(d: str, dlist: list[str]) -> bool:
+    """Is directory `d` in `dlist`? Normalizes trailing slashes."""
+    for dd in dlist:
+        if d.rstrip("/") == dd.rstrip("/"):
+            return True
+    return False
+
+
 def find_projects(repo: Repo, zstr: str, conf: MainConfig) -> list[Project]:
     """
     Returns topmost projects
@@ -33,10 +41,10 @@ def find_projects(repo: Repo, zstr: str, conf: MainConfig) -> list[Project]:
         if dirname == "" and conf.skip_project_root_in_repo_root:
             LOG.log(VLOG_1, "Skipping root project with marker %r because config says to", filename)
             continue
-        elif conf.explicit_project_dirs and dirname not in conf.explicit_project_dirs:
+        elif conf.explicit_project_dirs and not dir_in_dirlist(dirname, conf.explicit_project_dirs):
             LOG.log(VLOG_1, "Skipping project with marker %r because it is not in explicit_project_dirs", dirname)
             continue
-        elif conf.ignore_project_dirs and dirname in conf.ignore_project_dirs:
+        elif conf.ignore_project_dirs and dir_in_dirlist(dirname, conf.ignore_project_dirs):
             LOG.log(VLOG_1, "Skipping project at %r because it is ignored by config", dirname)
             continue
 
