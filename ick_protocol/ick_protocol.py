@@ -31,7 +31,7 @@ process (regular LSP just has "format_file").
 from __future__ import annotations
 
 from enum import Enum, StrEnum
-from typing import Sequence, Union
+from typing import Any, Sequence, Union
 
 from msgspec import Struct
 from msgspec.structs import replace as replace
@@ -132,6 +132,7 @@ class Finished(Struct, tag_field="t", tag="F"):
     # The entire rule is only allowed one message; it's used as the commit
     # message or displayed inline.
     message: str
+    metadata: dict[str, Any] | None = None
 
 
 class RunRuleFinished(Struct, tag_field="t", tag="Y"):

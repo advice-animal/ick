@@ -70,9 +70,8 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         #
         # dict value is output, exit code and we decide what the aggregate code
         # is at the end.
-        self.batch_messages: dict[tuple[tuple[str, int], ...], tuple[str, int]] = {}
+        self.batch_messages: dict[tuple[tuple[str, int], ...], tuple[str, int, dict[str, Any] | None]] = {}
         self.rule_status = RuleStatus.SUCCESS
-        self.metadata: dict[str, Any] | None = None
 
     def match(self, key: str) -> bool:
         m = bool(match_prefix_patterns(key, self.match_prefix, self.patterns))
@@ -189,12 +188,14 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
                         value=Path(d, name).read_bytes(),
                     ),
                 )
-            if batch_value:
-                self.batch_messages[tuple(batch_key.items())] = batch_value
 
             metadata_path = Path(output_dir) / "metadata.json"
+            batch_metadata: dict[str, Any] | None = None
             if metadata_path.exists():
-                self.metadata = self.merge_dicts(self.metadata, json.loads(metadata_path.read_text()))
+                batch_metadata = json.loads(metadata_path.read_text())
+
+            if batch_value:
+                self.batch_messages[tuple(batch_key.items())] = (batch_value[0], batch_value[1], batch_metadata)
 
     def merge_dicts(self, d1: dict | None, d2: dict):
         if not d1:
@@ -294,21 +295,26 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
                     )
                 )
 
-        # Keep only the messages that still apply...
+        # Keep only the messages and metadata that still apply...
         msgs = []
         disclaimer = None
         rc = set()
+        metadata: dict[str, Any] | None = None
         for key_generations, v in self.batch_messages.items():
             if all(self.output_state[k].gens[self.index] == g for k, g in key_generations):
                 # Keep, fully applies!
                 msgs.append(v[0])
                 rc.add(v[1])
+                if v[2] is not None:
+                    metadata = self.merge_dicts(metadata, v[2])
             elif not any(self.output_state[k].gens[self.index] == g for k, g in key_generations):
                 # Drop, none applies
                 pass
             else:
                 msgs.append(v[0])
                 rc.add(v[1])
+                if v[2] is not None:
+                    metadata = self.merge_dicts(metadata, v[2])
                 disclaimer = "These messages only partially apply; set to non-eager or batch size of 1 to make more precise\n\n"
 
         if rc - {99, 0}:
@@ -329,7 +335,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
             self.rule_status = RuleStatus.NEEDS_WORK
 
         changes.append(
-            Finished(self.qualname, status=self.rule_status, message="".join(msgs)),
+            Finished(self.qualname, status=self.rule_status, message="".join(msgs), metadata=metadata),
         )
         return changes
 

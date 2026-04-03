@@ -44,7 +44,6 @@ class HighLevelResult:
     project: str
     modifications: Sequence[Modified]
     finished: Finished
-    metadata: dict[str, Any] | None = None
 
 
 @dataclass
@@ -318,7 +317,7 @@ class Runner:
                 #     ...
 
                 changes = s.compute_diff_messages()
-                yield HighLevelResult(s.qualname, s.match_prefix, changes[:-1], changes[-1], s.metadata)
+                yield HighLevelResult(s.qualname, s.match_prefix, changes[:-1], changes[-1])
 
     @ktrace()
     def echo_rules(self) -> None:

@@ -254,7 +254,7 @@ def run(
                 "modified": modifications,
                 # The meaning of this field depends on the status field above
                 "message": result.finished.message,
-                "metadata": result.metadata or {},
+                "metadata": result.finished.metadata or {},
             }
             results[result.rule].append(output)
 
