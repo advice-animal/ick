@@ -67,9 +67,9 @@ def load_rule_repo(ruleset: Ruleset, *, skip_update: bool = False) -> RuleRepoCo
         p = Path(repo_path, filename)
         LOG.log(VLOG_1, "Config found at %s", filename)
         if p.name == "pyproject.toml":
-            c = load_pyproject(p, p.read_bytes())
+            c = load_pyproject(p.read_bytes())
         else:
-            c = load_regular(p, p.read_bytes())
+            c = load_toml(p.read_bytes())
 
         if not c.rule:
             continue
@@ -90,7 +90,7 @@ def load_rule_repo(ruleset: Ruleset, *, skip_update: bool = False) -> RuleRepoCo
     return rc
 
 
-def load_pyproject(p: Path, data: bytes) -> RuleRepoConfig:
+def load_pyproject(data: bytes) -> RuleRepoConfig:
     try:
         c = decode_toml(data, type=PyprojectRulesConfig).tool.ick
     except ValidationError as e:
@@ -104,7 +104,7 @@ def load_pyproject(p: Path, data: bytes) -> RuleRepoConfig:
     return c
 
 
-def load_regular(p: Path, data: bytes) -> RuleRepoConfig:
+def load_toml(data: bytes) -> RuleRepoConfig:
     return decode_toml(data, type=RuleRepoConfig)
 
 

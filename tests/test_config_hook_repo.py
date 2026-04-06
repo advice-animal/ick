@@ -29,10 +29,10 @@ def test_load_rule_repo() -> None:
 
 
 def test_load_pyproject_errors() -> None:
-    assert load_pyproject(Path(), b"") == RuleRepoConfig()
-    assert load_pyproject(Path(), b"[tool]") == RuleRepoConfig()
-    assert load_pyproject(Path(), b"[tool.ick]") == RuleRepoConfig()
-    assert load_pyproject(Path(), b"[tool.ick.baz]") == RuleRepoConfig()
+    assert load_pyproject(b"") == RuleRepoConfig()
+    assert load_pyproject(b"[tool]") == RuleRepoConfig()
+    assert load_pyproject(b"[tool.ick]") == RuleRepoConfig()
+    assert load_pyproject(b"[tool.ick.baz]") == RuleRepoConfig()
 
 
 def test_get_impl() -> None:

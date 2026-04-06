@@ -102,12 +102,13 @@ def load_main_config(cur: Path, isolated_repo: bool) -> MainConfig:
     conf = MainConfig()
 
     for config_path, key in config_files(cur, isolated_repo):
+        data = config_path.read_bytes()
         if config_path.suffix.lower() in (".yaml", ".yml"):
-            c = load_yaml(config_path, config_path.read_bytes(), key=key)
+            c = load_yaml(data, key=key)
         elif config_path.name == "pyproject.toml":
-            c = load_pyproject(config_path, config_path.read_bytes())
+            c = load_pyproject(data)
         else:
-            c = load_regular(config_path, config_path.read_bytes())
+            c = load_toml(data)
         LOG.log(VLOG_2, "Loaded %s of %r", config_path, c)
         conf.inherit(c)  # type: ignore[no-untyped-call] # FIX ME
 
@@ -116,7 +117,7 @@ def load_main_config(cur: Path, isolated_repo: bool) -> MainConfig:
     return conf
 
 
-def load_pyproject(p: Path, data: bytes) -> MainConfig:
+def load_pyproject(data: bytes) -> MainConfig:
     try:
         c = decode_toml(data, type=PyprojectConfig).tool.ick
     except ValidationError as e:
@@ -130,11 +131,11 @@ def load_pyproject(p: Path, data: bytes) -> MainConfig:
     return c
 
 
-def load_regular(p: Path, data: bytes) -> MainConfig:
+def load_toml(data: bytes) -> MainConfig:
     return decode_toml(data, type=MainConfig)
 
 
-def load_yaml(p: Path, data: bytes, key: Optional[str] = None) -> MainConfig:
+def load_yaml(data: bytes, key: Optional[str] = None) -> MainConfig:
     raw = yaml.safe_load(data) or {}
     ick_data = raw.get(key, {}) if key else raw
     return convert(ick_data, MainConfig)
