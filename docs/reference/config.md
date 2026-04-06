@@ -9,12 +9,27 @@ than the appdirs code?  The appdirs code looks like it will go to
 which is appdirs.user_data_dir.
 -->
 
+* `$ICK_CONFIG` (if set, read first — see below)
 * `$XDG_CONFIG_DIR/ick/ick.toml`
 * `$XDG_CONFIG_DIR/ick/ick.toml.local`
 * `$REPO/ick.toml`
 * `$REPO/pyproject.toml`
 
+All found files are read and merged, with earlier entries taking precedence.
 Any of these can define one or more `[[ruleset]]` sections, as detailed below.
+
+## ICK_CONFIG
+
+Set `ICK_CONFIG` to a file path to inject config before the normal search.
+TOML files are read directly; YAML files use a `file:key` syntax to specify
+which top-level key contains the config:
+
+```
+ICK_CONFIG=myconfig.yaml:ick
+```
+
+YAML files are only used for main config settings — rules are loaded from the
+normal TOML locations.
 
 
 ## Rulesets

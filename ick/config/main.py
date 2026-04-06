@@ -10,8 +10,9 @@ from logging import getLogger
 from pathlib import Path
 from typing import Any, Optional
 
+import yaml
 from keke import ktrace
-from msgspec import Struct, ValidationError, field
+from msgspec import Struct, ValidationError, convert, field
 from msgspec.structs import replace as replace
 from msgspec.toml import decode as decode_toml
 from vmodule import VLOG_2
@@ -99,8 +100,11 @@ class ToolConfig(Struct):
 @ktrace()
 def load_main_config(cur: Path, isolated_repo: bool) -> MainConfig:
     conf = MainConfig()
-    for config_path in config_files(cur, isolated_repo):
-        if config_path.name == "pyproject.toml":
+
+    for config_path, key in config_files(cur, isolated_repo):
+        if config_path.suffix.lower() in (".yaml", ".yml"):
+            c = load_yaml(config_path, config_path.read_bytes(), key=key)
+        elif config_path.name == "pyproject.toml":
             c = load_pyproject(config_path, config_path.read_bytes())
         else:
             c = load_regular(config_path, config_path.read_bytes())
@@ -130,6 +134,12 @@ def load_regular(p: Path, data: bytes) -> MainConfig:
     return decode_toml(data, type=MainConfig)
 
 
+def load_yaml(p: Path, data: bytes, key: Optional[str] = None) -> MainConfig:
+    raw = yaml.safe_load(data) or {}
+    ick_data = raw.get(key, {}) if key else raw
+    return convert(ick_data, MainConfig)
+
+
 class RuntimeConfig(Struct):
     """
     One big object to be able to pass around that contains everything we need.
@@ -142,4 +152,4 @@ class RuntimeConfig(Struct):
     repo: Any = None
 
 
-__all__ = ["load_main_config", "MainConfig", "RuntimeConfig"]
+__all__ = ["load_main_config", "load_yaml", "MainConfig", "RuntimeConfig"]

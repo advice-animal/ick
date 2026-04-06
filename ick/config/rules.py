@@ -125,7 +125,10 @@ class RuleConfig(Struct):
 @ktrace()
 def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:
     conf = RulesConfig()
-    for config_path in config_files(cur, isolated_repo):
+    for config_path, _key in config_files(cur, isolated_repo):
+        if config_path.suffix.lower() in (".yaml", ".yml"):
+            # There's no rule configuration in yaml files, so skip it.
+            continue
         if config_path.name == "pyproject.toml":
             try:
                 c = decode_toml(config_path.read_bytes(), type=PyprojectToolConfig).tool.ick  # type: ignore[attr-defined] # FIX ME
