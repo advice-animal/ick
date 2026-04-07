@@ -10,13 +10,17 @@ from logging import getLogger
 from pathlib import Path
 from typing import Any, Optional
 
+import msgspec
+import tomllib
+import yaml
 from keke import ktrace
 from msgspec import Struct, ValidationError, field
 from msgspec.structs import replace as replace
 from msgspec.toml import decode as decode_toml
 from parse_errors import ParseContext
-from vmodule import VLOG_2
+from vmodule import VLOG_1, VLOG_2
 
+from ..git import find_repo_root
 from ..util import merge
 from .search import config_files
 from .settings import FilterConfig, Settings
@@ -50,6 +54,13 @@ DEFAULT_PROJECT_MARKERS = {
 }
 
 
+class RepoSettings(Struct):
+    """Specifies a file and dotted key path to read per-repo config from."""
+
+    file: str = "pyproject.toml"
+    key: str = "tool.ick"
+
+
 class MainConfig(Struct):
     # These are all loaded and their names merged to become available
 
@@ -62,6 +73,9 @@ class MainConfig(Struct):
     # Intended to be set in a "repo" config
     explicit_project_dirs: Optional[list] = None  # type: ignore[type-arg] # FIX ME
     ignore_project_dirs: Optional[list] = None  # type: ignore[type-arg] # FIX ME
+
+    # Specifies a file and key to read additional per-repo settings from.
+    repo_settings: Optional[RepoSettings] = None
 
     def inherit(self, less_specific_defaults):  # type: ignore[no-untyped-def] # FIX ME
         # TODO this is way more verbose than I'd like.
@@ -80,6 +94,7 @@ class MainConfig(Struct):
         self.ignore_project_dirs = (
             self.ignore_project_dirs if self.ignore_project_dirs is not None else less_specific_defaults.ignore_project_dirs
         )
+        self.repo_settings = self.repo_settings if self.repo_settings is not None else less_specific_defaults.repo_settings
 
 
 MainConfig.DEFAULT = MainConfig(  # type: ignore[attr-defined] # FIX ME
@@ -97,6 +112,31 @@ class ToolConfig(Struct):
     ick: MainConfig
 
 
+def _load_repo_settings(repo_root: Path, repo_settings: RepoSettings) -> Optional[MainConfig]:
+    """Read per-repo config from a file at the dotted key path.
+
+    Supports TOML and YAML files. Returns None if the file or key is missing;
+    other errors propagate.
+    """
+    settings_path = (repo_root / repo_settings.file).resolve()
+    if not settings_path.exists():
+        LOG.log(VLOG_1, "repo_settings file not found: %s", settings_path)
+        return None
+    if settings_path.suffix == ".toml":
+        data = tomllib.loads(settings_path.read_text())
+    else:
+        data = yaml.safe_load(settings_path.read_bytes())
+    if not isinstance(data, dict):
+        return None
+    for k in repo_settings.key.split("."):
+        data = data.get(k)
+        if not isinstance(data, dict):
+            LOG.log(VLOG_1, "repo_settings key %r not found in %s", repo_settings.key, settings_path)
+            return None
+    LOG.log(VLOG_1, "Loaded repo_settings from %s key %r", settings_path, repo_settings.key)
+    return msgspec.convert(data, MainConfig)
+
+
 @ktrace()
 def load_main_config(cur: Path, isolated_repo: bool) -> MainConfig:
     conf = MainConfig()
@@ -107,6 +147,11 @@ def load_main_config(cur: Path, isolated_repo: bool) -> MainConfig:
             c = load_regular(config_path, config_path.read_bytes())
         LOG.log(VLOG_2, "Loaded %s of %r", config_path, c)
         conf.inherit(c)  # type: ignore[no-untyped-call] # FIX ME
+
+    repo_config = _load_repo_settings(find_repo_root(cur), conf.repo_settings or RepoSettings())
+    if repo_config is not None:
+        repo_config.inherit(conf)  # type: ignore[no-untyped-call] # FIX ME
+        conf = repo_config
 
     conf.inherit(MainConfig.DEFAULT)  # type: ignore[attr-defined, no-untyped-call] # FIX ME
 

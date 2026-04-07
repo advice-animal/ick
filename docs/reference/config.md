@@ -16,6 +16,23 @@ which is appdirs.user_data_dir.
 
 Any of these can define one or more `[[ruleset]]` sections, as detailed below.
 
+Additionally, the `repo_settings` setting can specify a file within your repo
+with more configuration:
+
+```toml
+[tool.ick.repo_settings]
+file = "my_settings.yaml"
+key = "ick"
+```
+
+Then in `my_settings.yaml`:
+
+```yaml
+ick:
+  explicit_project_dirs:
+    - subproject1
+    - subproject2
+```
 
 ## Rulesets
 
