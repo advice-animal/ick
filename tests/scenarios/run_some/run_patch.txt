@@ -14,4 +14,5 @@ $ ick run --patch
 +line_length = "88"
 +multi_line_output = "3"
 -> show_ick_vars: NEEDS_WORK
+     ICK_OUTPUT_DIR=<tmp>
      ICK_REPO_PATH=/CWD

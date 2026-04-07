@@ -1,0 +1,18 @@
+[[ruleset]]
+path = "."
+
+
+[[rule]]
+impl = "python"
+name = "no_metadata"
+scope = "project"
+project_types = ["python"]
+
+
+[[rule]]
+impl = "python"
+name = "writes_metadata"
+scope = "file"
+inputs = ["*.py"]
+project_types = ["python"]
+batch_size = 1

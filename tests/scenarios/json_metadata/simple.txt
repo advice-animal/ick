@@ -1,0 +1,36 @@
+$ ick run --json
+{
+    "results": {
+        "no_metadata": [
+            {
+                "project_name": "",
+                "status": "success",
+                "modified": [],
+                "message": "no metadata here\n",
+                "metadata": null
+            }
+        ],
+        "writes_metadata": [
+            {
+                "project_name": "",
+                "status": "needs-work",
+                "modified": [],
+                "message": "",
+                "metadata": {
+                    "findings": [
+                        {
+                            "file": "writes_metadata.py",
+                            "line": 1,
+                            "message": "test metadata for writes_metadata.py"
+                        },
+                        {
+                            "file": "no_metadata.py",
+                            "line": 1,
+                            "message": "test metadata for no_metadata.py"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

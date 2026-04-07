@@ -23,6 +23,7 @@ LOG_LINE_NUMERIC_LINE_RE = re.compile(r"^([A-Z]+\s+[a-z_.]+:)\d+(?= )", re.M)
 TRACEBACK_LINE_NUM_RE = re.compile(r"(, line )\d+(,)")
 GIT_VERSION_RE = re.compile(r"(\d+\.)\d+(?:\.\d+)?(?:\.dev\d+\S+)?")
 TRAILING_WHITESPACE = re.compile(r"(?m) +$")
+ICK_OUTPUT_DIR_RE = re.compile(r"ICK_OUTPUT_DIR=\S+")
 
 
 def clean_output(output: str) -> str:
@@ -32,6 +33,7 @@ def clean_output(output: str) -> str:
     cleaned_output = GIT_VERSION_RE.sub(lambda m: (m.group(1) + "<stuff>"), cleaned_output)
     cleaned_output = TRAILING_WHITESPACE.sub("", cleaned_output)
     cleaned_output = cleaned_output.replace(os.getcwd(), "/CWD")
+    cleaned_output = ICK_OUTPUT_DIR_RE.sub("ICK_OUTPUT_DIR=<tmp>", cleaned_output)
     return cleaned_output
 
 

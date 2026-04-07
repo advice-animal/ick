@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 from fnmatch import fnmatch
@@ -17,7 +18,7 @@ from ick_protocol import Finished, ListResponse, Modified, RuleStatus, Scope
 
 from .config import RuleConfig
 from .sh import run_cmd
-from .util import diffstat
+from .util import diffstat, merge_dicts
 
 LOG = getLogger(__name__)
 
@@ -69,7 +70,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         #
         # dict value is output, exit code and we decide what the aggregate code
         # is at the end.
-        self.batch_messages: dict[tuple[tuple[str, int], ...], tuple[str, int]] = {}
+        self.batch_messages: dict[tuple[tuple[str, int], ...], tuple[str, int, dict[str, Any] | None]] = {}
         self.rule_status = RuleStatus.SUCCESS
 
     def match(self, key: str) -> bool:
@@ -114,7 +115,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
     ) -> Iterable[Notification[str, bytes | Erasure]]:
         notifications = list(notifications)
         # TODO name better, pick a good one...
-        with TemporaryDirectory() as d:
+        with TemporaryDirectory() as d, TemporaryDirectory() as output_dir:
             # with self.state_lock:
             #     # First the common files
             #     g = self._gravitational_constant()
@@ -142,6 +143,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
 
             env = os.environ.copy()
             env.update(self.extra_env)
+            env["ICK_OUTPUT_DIR"] = output_dir
 
             try:
                 stdout = run_cmd(
@@ -186,8 +188,14 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
                         value=Path(d, name).read_bytes(),
                     ),
                 )
+
+            metadata_path = Path(output_dir) / "metadata.json"
+            batch_metadata: dict[str, Any] | None = None
+            if metadata_path.exists():
+                batch_metadata = json.loads(metadata_path.read_text())
+
             if batch_value:
-                self.batch_messages[tuple(batch_key.items())] = batch_value
+                self.batch_messages[tuple(batch_key.items())] = (batch_value[0], batch_value[1], batch_metadata)
 
     def compute_diff_messages(self) -> list[Modified | Finished]:
         assert not self.cancelled
@@ -256,21 +264,24 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
                     )
                 )
 
-        # Keep only the messages that still apply...
+        # Keep only the messages and metadata that still apply...
         msgs = []
         disclaimer = None
         rc = set()
+        metadata: dict[str, Any] | None = None
         for key_generations, v in self.batch_messages.items():
             if all(self.output_state[k].gens[self.index] == g for k, g in key_generations):
                 # Keep, fully applies!
                 msgs.append(v[0])
                 rc.add(v[1])
+                metadata = merge_dicts(metadata, v[2])
             elif not any(self.output_state[k].gens[self.index] == g for k, g in key_generations):
                 # Drop, none applies
                 pass
             else:
                 msgs.append(v[0])
                 rc.add(v[1])
+                metadata = merge_dicts(metadata, v[2])
                 disclaimer = "These messages only partially apply; set to non-eager or batch size of 1 to make more precise\n\n"
 
         if rc - {99, 0}:
@@ -291,7 +302,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
             self.rule_status = RuleStatus.NEEDS_WORK
 
         changes.append(
-            Finished(self.qualname, status=self.rule_status, message="".join(msgs)),
+            Finished(self.qualname, status=self.rule_status, message="".join(msgs), metadata=metadata),
         )
         return changes
 

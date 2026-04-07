@@ -16,6 +16,7 @@ $ ick run --apply
    Change made: pyproject.toml                 +3
 -> show_ick_vars: NEEDS_WORK
      ICK_APPLY=1
+     ICK_OUTPUT_DIR=<tmp>
      ICK_REPO_PATH=/CWD
 $ ls
 i_have_no_tests.py

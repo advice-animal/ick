@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import pytest
@@ -111,6 +112,8 @@ def test_update_local_cache_branch_clone(tmp_path, mocker) -> None:  # type: ign
     assert branch == "printf-repr"
 
 
+# Apple git doesn't ship with the --revision flag just yet
+@pytest.mark.skipif(sys.platform == "darwin", reason="Apple git lacks --revision flag")
 def test_update_local_cache_sha_clone(tmp_path, mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
     """Test cloning a SHA ref."""
     mocker.patch("platformdirs.user_cache_dir", return_value=tmp_path)
@@ -127,6 +130,8 @@ def test_update_local_cache_sha_clone(tmp_path, mocker) -> None:  # type: ignore
     assert branch == ""
 
 
+# Apple git doesn't ship with the --revision flag just yet
+@pytest.mark.skipif(sys.platform == "darwin", reason="Apple git lacks --revision flag")
 def test_update_local_cache_sha_immutable(tmp_path, mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
     """Test that SHA refs don't get updated (immutable)."""
     mocker.patch("platformdirs.user_cache_dir", return_value=tmp_path)
