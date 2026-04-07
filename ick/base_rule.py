@@ -18,7 +18,7 @@ from ick_protocol import Finished, ListResponse, Modified, RuleStatus, Scope
 
 from .config import RuleConfig
 from .sh import run_cmd
-from .util import diffstat
+from .util import diffstat, merge_dicts
 
 LOG = getLogger(__name__)
 
@@ -197,37 +197,6 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
             if batch_value:
                 self.batch_messages[tuple(batch_key.items())] = (batch_value[0], batch_value[1], batch_metadata)
 
-    def merge_dicts(self, d1: dict | None, d2: dict):
-        if not d1:
-            return d2
-
-        else:
-            for k in d1:
-                if k in d2:
-                    if isinstance(d2[k], dict):
-                        # we technically should check if d1[k] is also a but since both jsons are created by the same script it's fine
-                        d1[k] = self.merge_dicts(d1[k], d2[k])
-
-                    elif isinstance(d2[k], list):
-                        d1[k] += d2[k]
-
-                    elif isinstance(d2[k], str) and isinstance(d1[k], str):
-                        # concat messages as best as we can
-                        if not d1[k].endswith("\n"):
-                            d1[k] += "\n"
-
-                        d1[k] += d2[k]
-
-                    else:
-                        # this is hard. Override one of the values and then recommend in docs that rule writers only use lists and dicts.
-                        d1[k] = d2[k]
-
-            for k in d2:
-                if k not in d1:
-                    d1[k] = d2[k]
-
-            return d1
-
     def compute_diff_messages(self) -> list[Modified | Finished]:
         assert not self.cancelled
         assert self.outputs_final
@@ -305,16 +274,14 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
                 # Keep, fully applies!
                 msgs.append(v[0])
                 rc.add(v[1])
-                if v[2] is not None:
-                    metadata = self.merge_dicts(metadata, v[2])
+                metadata = merge_dicts(metadata, v[2])
             elif not any(self.output_state[k].gens[self.index] == g for k, g in key_generations):
                 # Drop, none applies
                 pass
             else:
                 msgs.append(v[0])
                 rc.add(v[1])
-                if v[2] is not None:
-                    metadata = self.merge_dicts(metadata, v[2])
+                metadata = merge_dicts(metadata, v[2])
                 disclaimer = "These messages only partially apply; set to non-eager or batch size of 1 to make more precise\n\n"
 
         if rc - {99, 0}:
