@@ -42,7 +42,7 @@ def merge_dicts(d1: dict | None, d2: dict | None) -> dict | None:
                     d1[k] = merge_dicts(d1[k], d2[k])
 
                 elif isinstance(d2[k], list):
-                    d1[k] += d2[k]
+                    d1[k] = d1[k] + d2[k]
 
                 elif isinstance(d2[k], str) and isinstance(d1[k], str):
                     # concat messages as best as we can
