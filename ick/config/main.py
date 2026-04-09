@@ -57,8 +57,8 @@ DEFAULT_PROJECT_MARKERS = {
 class RepoSettings(Struct):
     """Specifies a file and dotted key path to read per-repo config from."""
 
-    file: str = "pyproject.toml"
-    key: str = "tool.ick"
+    file: str
+    key: str
 
 
 class MainConfig(Struct):
@@ -74,7 +74,8 @@ class MainConfig(Struct):
     explicit_project_dirs: Optional[list] = None  # type: ignore[type-arg] # FIX ME
     ignore_project_dirs: Optional[list] = None  # type: ignore[type-arg] # FIX ME
 
-    # Specifies a file and key to read additional per-repo settings from.
+    # A file name and key used to read additional per-repo settings. Typically
+    # set in user settings.
     repo_settings: Optional[RepoSettings] = None
 
     def inherit(self, less_specific_defaults):  # type: ignore[no-untyped-def] # FIX ME
@@ -127,11 +128,15 @@ def _load_repo_settings(repo_root: Path, repo_settings: RepoSettings) -> Optiona
     else:
         data = yaml.safe_load(settings_path.read_bytes())
     if not isinstance(data, dict):
+        # The file was empty.
         return None
     for k in repo_settings.key.split("."):
         data = data.get(k)
         if not isinstance(data, dict):
-            LOG.log(VLOG_1, "repo_settings key %r not found in %s", repo_settings.key, settings_path)
+            if data is None:
+                LOG.log(VLOG_1, "repo_settings key %r not found in %s", repo_settings.key, settings_path)
+            else:
+                LOG.warning("unexpected type %r found for key %r in %s", type(data).__name__, repo_settings.key, settings_path)
             return None
     LOG.log(VLOG_1, "Loaded repo_settings from %s key %r", settings_path, repo_settings.key)
     return msgspec.convert(data, MainConfig)
@@ -148,10 +153,13 @@ def load_main_config(cur: Path, isolated_repo: bool) -> MainConfig:
         LOG.log(VLOG_2, "Loaded %s of %r", config_path, c)
         conf.inherit(c)  # type: ignore[no-untyped-call] # FIX ME
 
-    repo_config = _load_repo_settings(find_repo_root(cur), conf.repo_settings or RepoSettings())
-    if repo_config is not None:
-        repo_config.inherit(conf)  # type: ignore[no-untyped-call] # FIX ME
-        conf = repo_config
+    # If `repo_settings` has been set by one of the defaults config files,
+    # go read those repo settings.
+    if conf.repo_settings:
+        repo_config = _load_repo_settings(find_repo_root(cur), conf.repo_settings)
+        if repo_config is not None:
+            repo_config.inherit(conf)  # type: ignore[no-untyped-call] # FIX ME
+            conf = repo_config
 
     conf.inherit(MainConfig.DEFAULT)  # type: ignore[attr-defined, no-untyped-call] # FIX ME
 
