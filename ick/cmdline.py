@@ -298,6 +298,16 @@ def run(
                     print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
 
 
+main.add_command(
+    click.Command(
+        "run-rules",
+        params=run.params,
+        callback=run.callback,
+        help="Alias for the `run` command.",
+    )
+)
+
+
 def apply_filters(ctx: click.Context, filters: list[str], substring: str) -> None:
     if substring and filters:
         raise click.UsageError("Cannot use -k together with positional filters")
