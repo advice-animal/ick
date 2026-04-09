@@ -99,7 +99,7 @@ class PythonEnv:
             # hard-to-debug failures, so only inherit a couple for now.
             env = {}
             for k, v in os.environ.items():
-                if k in {"HOME", "PATH", "UV_CACHE_DIR", "UV_NATIVE_TLS"} or k.startswith("XDG_"):
+                if k in {"HOME", "PATH"} or k.startswith("UV_") or k.startswith("XDG_"):
                     env[k] = v
 
             run_cmd(
