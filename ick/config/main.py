@@ -125,8 +125,11 @@ def _load_repo_settings(repo_root: Path, repo_settings: RepoSettings) -> Optiona
         return None
     if settings_path.suffix == ".toml":
         data = tomllib.loads(settings_path.read_text())
-    else:
+    elif settings_path.suffix in [".yml", ".yaml"]:
         data = yaml.safe_load(settings_path.read_bytes())
+    else:
+        LOG.warning("unknown file type for repo settings: %s", settings_path)
+        return None
     if not isinstance(data, dict):
         # The file was empty.
         return None

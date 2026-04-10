@@ -219,6 +219,23 @@ def test_repo_settings_key_wrong_type(tmp_path: Path, caplog) -> None:
     assert warning.endswith("settings.yaml")
 
 
+def test_repo_settings_unknown_file_type(tmp_path: Path, caplog) -> None:
+    """A warning is issued if the repo settings file is a weird type."""
+    (tmp_path / "ick.toml").write_text(
+        textwrap.dedent("""\
+            [repo_settings]
+            file = "settings.txt"
+            key = "tool.ick"
+        """)
+    )
+    (tmp_path / "settings.txt").write_text("Nothing to see here")
+    result = load_main_config(tmp_path, isolated_repo=True)
+    assert result.skip_project_root_in_repo_root is False
+    warning = caplog.records[0].message
+    assert "unknown file type for repo settings:" in warning
+    assert warning.endswith("settings.txt")
+
+
 def test_pyproject_repo_settings_read_without_explicit_config(tmp_path: Path) -> None:
     """pyproject.toml:tool.ick is read as repo settings even without explicit repo_settings config."""
     (tmp_path / "pyproject.toml").write_text(

@@ -35,8 +35,8 @@ ick:
     - subproject2
 ```
 
-The key can be a dotted path to navigate down through nested dictionaries in the
-file.
+The file can include a path into a subdirectory, and the key can be a dotted
+name to drill down through nested dictionaries in the file.
 
 ## Rulesets
 
