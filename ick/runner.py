@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from glob import glob
 from logging import getLogger
 from pathlib import Path
-from shutil import copytree
+from shutil import copytree, rmtree
 from tempfile import TemporaryDirectory
 from typing import Any, Callable, Iterable, Sequence
 
@@ -55,6 +55,7 @@ class TestResult:
     test_path: Path
     message: str = ""
     success: bool = False
+    updated: bool = False
     diff: str = ""
     traceback: str = ""
 
@@ -124,7 +125,7 @@ class Runner:
         run.add_step(Step())  # Final sink
         return run
 
-    def test_rules(self) -> int:
+    def test_rules(self, *, update: bool = False) -> int:
         """
         Returns an exit code (0 on success)
         """
@@ -150,18 +151,20 @@ class Runner:
         # dots appear as each test finishes (not batched), while other rules' tests
         # run concurrently in the background.
         final_status = 0
+        total_updated = 0
         with ThreadPoolExecutor() as executor:
             rule_futures: list[tuple[BaseRule, list[tuple[Future[None], TestResult]]]] = []
             for rule_instance, test_paths in all_work:
                 futures: list[tuple[Future[None], TestResult]] = []
                 for test_path in sorted(test_paths):
                     result = TestResult(rule_instance, test_path)
-                    fut = executor.submit(self._perform_test, rule_instance, test_path, result)
+                    fut = executor.submit(self._perform_test, rule_instance, test_path, result, update=update)
                     futures.append((fut, result))
                 rule_futures.append((rule_instance, futures))
 
             for rule_instance, futures in rule_futures:
                 success = True
+                any_updated = False
                 print(f"  [bold]{rule_instance.rule_config.qualname}[/bold]: ", end="")
                 if not futures:
                     print("<no-test>", end="")
@@ -171,7 +174,11 @@ class Runner:
                 else:
                     for fut, result in futures:
                         fut.result()  # blocks until this test is done; propagates unexpected exceptions
-                        if result.success:
+                        if result.updated:
+                            any_updated = True
+                            total_updated += 1
+                            print("[yellow]U[/]", end="")
+                        elif result.success:
                             print(".", end="")
                         else:
                             success = False
@@ -189,27 +196,35 @@ class Runner:
                             buf_print(result.message)
                             buf_print(result.diff)
 
-                if success:
-                    print(" [green]PASS[/]")
-                else:
+                if not success:
                     print(" [red]FAIL[/]")
+                elif any_updated:
+                    print(" [yellow]UPDATED[/]")
+                else:
+                    print(" [green]PASS[/]")
 
         if buffered_output.tell():
             print()
             print("DETAILS")
             print(buffered_output.getvalue())
 
+        if total_updated:
+            print(f"[yellow]{total_updated} test(s) updated[/yellow]")
+
         return final_status
 
-    def _perform_test(self, rule_instance: BaseRule, test_path: Path, result: TestResult) -> None:
+    def _perform_test(self, rule_instance: BaseRule, test_path: Path, result: TestResult, *, update: bool = False) -> None:
         inp = test_path / "input"
         outp = test_path / "output"
         if not inp.exists():
             result.message = f"Test input directory {inp} is missing"
             return
         if not outp.exists():
-            result.message = f"Test output directory {outp} is missing"
-            return
+            if update:
+                outp.mkdir()
+            else:
+                result.message = f"Test output directory {outp} is missing"
+                return
 
         with TemporaryDirectory() as td, ExitStack() as stack:
             tp = Path(td)
@@ -225,12 +240,20 @@ class Runner:
             run_result = next(iter(self.run_steps(steps, repo=repo)))
             response = run_result.modifications
 
-            files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
-            files_to_check = {f for f in files_to_check if (outp / f).is_file()} - {"output.txt", "error.txt"}
-
             actual_output = run_result.finished.message
             for old, new in self._testing_replacements.items():
                 actual_output = actual_output.replace(old, new)
+
+            if update:
+                changed = self._write_update(inp, outp, response, run_result.finished.status, actual_output)
+                if changed:
+                    result.updated = True
+                else:
+                    result.success = True
+                return
+
+            files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
+            files_to_check = {f for f in files_to_check if (outp / f).is_file()} - {"output.txt", "error.txt"}
 
             if run_result.finished.status is RuleStatus.ERROR:
                 # Error state
@@ -292,6 +315,49 @@ class Runner:
                 return
 
         result.success = True
+
+    def _write_update(
+        self,
+        inp: Path,
+        outp: Path,
+        response: Sequence[Modified],
+        status: RuleStatus,
+        actual_output: str,
+    ) -> bool:
+        """Rebuild output/ with actual rule results. Returns True if anything changed."""
+        old_files: dict[str, bytes] = {}
+        for f in glob("**", root_dir=outp, recursive=True, include_hidden=True):
+            p = outp / f
+            if p.is_file():
+                old_files[f] = p.read_bytes()
+
+        rmtree(outp)
+        outp.mkdir()
+
+        if status is RuleStatus.ERROR:
+            (outp / "error.txt").write_text(actual_output)
+        else:
+            copytree(inp, outp, dirs_exist_ok=True)
+            for r in response:
+                assert isinstance(r, Modified)
+                if r.new_bytes is None:
+                    p = outp / r.filename
+                    if p.exists():
+                        p.unlink()
+                else:
+                    p = outp / r.filename
+                    p.parent.mkdir(parents=True, exist_ok=True)
+                    p.write_bytes(r.new_bytes)
+            if actual_output:
+                (outp / "output.txt").write_text(actual_output)
+
+        new_files: dict[str, bytes] = {}
+        for f in glob("**", root_dir=outp, recursive=True, include_hidden=True):
+            p = outp / f
+            if p.is_file():
+                new_files[f] = p.read_bytes()
+
+        return old_files != new_files
 
     def iter_tests(self) -> Iterable[tuple[BaseRule, tuple[Path, ...]]]:
         # Yields (impl, test_paths) for projects in test dir
