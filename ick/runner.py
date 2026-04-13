@@ -4,6 +4,7 @@ import collections
 import io
 import json
 import re
+from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import ExitStack
 from dataclasses import dataclass
 from glob import glob
@@ -117,7 +118,6 @@ class Runner:
     ) -> Run[str, bytes | Erasure]:
         """Compose a feedforward Run with steps for a single rule test."""
         run: Run[str, bytes | Erasure] = Run()
-        self.repo = repo
         project = Project(repo, "", "python", "invalid.bin")
         env_vars = self.ick_env_vars | {"ICK_TEST_NAME": test_name}
         impl.add_steps_to_run([project], env_vars, run)
@@ -140,47 +140,59 @@ class Runner:
             buffered_output.write(text)
             buffered_output.write("\n")
 
-        # Run is already parallel, so execute this singly so we can operate on
-        # self's instance vars.
+        # Collect all work upfront so we can submit everything to the thread pool at once.
+        all_work = list(self.iter_tests())
 
+        # Each test gets its own TestResult; _perform_test only touches shared Runner
+        # state that is read-only after __init__ (now that self.repo mutation is gone).
+        # All tests across all rules run in parallel. We print per-rule results in
+        # rule order by calling fut.result() on each future in sorted-test order —
+        # dots appear as each test finishes (not batched), while other rules' tests
+        # run concurrently in the background.
         final_status = 0
-        for rule_instance, test_paths in self.iter_tests():
-            success = True
-            print(f"  [bold]{rule_instance.rule_config.qualname}[/bold]: ", end="")
-            if not test_paths:
-                print("<no-test>", end="")
-                buf_print(
-                    f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
-                )
-            else:
+        with ThreadPoolExecutor() as executor:
+            rule_futures: list[tuple[BaseRule, list[tuple[Future[None], TestResult]]]] = []
+            for rule_instance, test_paths in all_work:
+                futures: list[tuple[Future[None], TestResult]] = []
                 for test_path in sorted(test_paths):
                     result = TestResult(rule_instance, test_path)
-                    # Not guarded because in user code won't raise here, it
-                    # will surface as a HLR failure.
-                    self._perform_test(rule_instance, test_path, result)
+                    fut = executor.submit(self._perform_test, rule_instance, test_path, result)
+                    futures.append((fut, result))
+                rule_futures.append((rule_instance, futures))
 
-                    if result.success:
-                        print(".", end="")
-                    else:
-                        success = False
-                        final_status = 1
-                        print("[red]F[/]", end="")
-                        buf_print(f"{'-' * 80}")
-                        rule_test_path = result.rule_instance.rule_config.test_path
-                        assert rule_test_path is not None
-                        rel_test_path = result.test_path.relative_to(rule_test_path)
-                        with_test = ""
-                        if str(rel_test_path) != ".":
-                            with_test = f" with [bold]{rel_test_path}[/]"
-                        buf_print(f"testing [bold]{rule_instance.rule_config.qualname}[/]{with_test}:")
-                        buf_print(result.traceback)
-                        buf_print(result.message)
-                        buf_print(result.diff)
+            for rule_instance, futures in rule_futures:
+                success = True
+                print(f"  [bold]{rule_instance.rule_config.qualname}[/bold]: ", end="")
+                if not futures:
+                    print("<no-test>", end="")
+                    buf_print(
+                        f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
+                    )
+                else:
+                    for fut, result in futures:
+                        fut.result()  # blocks until this test is done; propagates unexpected exceptions
+                        if result.success:
+                            print(".", end="")
+                        else:
+                            success = False
+                            final_status = 1
+                            print("[red]F[/]", end="")
+                            buf_print(f"{'-' * 80}")
+                            rule_test_path = result.rule_instance.rule_config.test_path
+                            assert rule_test_path is not None
+                            rel_test_path = result.test_path.relative_to(rule_test_path)
+                            with_test = ""
+                            if str(rel_test_path) != ".":
+                                with_test = f" with [bold]{rel_test_path}[/]"
+                            buf_print(f"testing [bold]{rule_instance.rule_config.qualname}[/]{with_test}:")
+                            buf_print(result.traceback)
+                            buf_print(result.message)
+                            buf_print(result.diff)
 
-            if success:
-                print(" [green]PASS[/]")
-            else:
-                print(" [red]FAIL[/]")
+                if success:
+                    print(" [green]PASS[/]")
+                else:
+                    print(" [red]FAIL[/]")
 
         if buffered_output.tell():
             print()
@@ -210,7 +222,7 @@ class Runner:
                 repo=repo,
                 test_name=str(test_path.relative_to(Path.cwd())),
             )
-            run_result = next(iter(self.run_steps(steps)))
+            run_result = next(iter(self.run_steps(steps, repo=repo)))
             response = run_result.modifications
 
             files_to_check = set(glob("**", root_dir=outp, recursive=True, include_hidden=True))
@@ -288,18 +300,20 @@ class Runner:
             assert test_path is not None
             yield impl, tuple(test_path.glob("*/"))
 
-    def run_steps(self, steps: Run[str, bytes | Erasure]) -> Iterable[HighLevelResult]:
+    def run_steps(self, steps: Run[str, bytes | Erasure], repo: BaseRepo | None = None) -> Iterable[HighLevelResult]:
         """
         Run a series of feedforward steps and yield high-level results.
         """
         # TODO deliberate in a flag: (I think this got separated from code now in build_steps_for_rules)
         # TODO parallelize or show a progress bar, this takes a while...
+        if repo is None:
+            repo = self.repo
         repo_contents: dict[str, bytes | Erasure] = {}
         # TODO the version that includes dirty files
-        for f in sorted(self.repo.zfiles.split("\0")):
+        for f in sorted(repo.zfiles.split("\0")):
             if not f:
                 continue
-            p = self.repo.root / f
+            p = repo.root / f
             # TODO symlinks, empty dirs?
             if p.is_file():
                 repo_contents[f] = p.read_bytes()
