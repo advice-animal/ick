@@ -18,6 +18,7 @@ from ick.add_rule import add_rule_structure
 from ick_protocol import RuleStatus, Scope, Urgency
 
 from ._regex_translate import rule_name_re
+from .click_better import FlexibleGroup
 from .config import RuntimeConfig, Settings, load_main_config, load_rules_config, one_repo_config
 from .git import find_repo_root
 from .project_finder import find_projects as find_projects_fn
@@ -25,7 +26,7 @@ from .runner import Runner, _demo_done_callback, _demo_status_callback
 from .types_project import maybe_repo
 
 
-@click.group()
+@click.group(cls=FlexibleGroup)
 @click.version_option()
 @click.option("-v", count=True, default=0, help="Verbosity, specify once for INFO and repeat for more")
 @click.option("--verbose", type=int, help="Log verbosity (unset=WARNING, 0=INFO, 1=VLOG_1, 2=VLOG_2, ..., 10=DEBUG)")
