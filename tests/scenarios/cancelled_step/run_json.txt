@@ -1,0 +1,26 @@
+$ ick run --json
+{
+    "results": {
+        "bad_deps": [
+            {
+                "project_name": "",
+                "status": "error",
+                "modified": [],
+                "message": "error: Failed to parse: `-`\n  Caused by: Expected package name starting with an alphanumeric character, found `-`\n-\n^\n"
+            }
+        ],
+        "fix_header": [
+            {
+                "project_name": "",
+                "status": "needs-work",
+                "modified": [
+                    {
+                        "file_name": "pyproject.toml",
+                        "diff_stat": "+1"
+                    }
+                ],
+                "message": ""
+            }
+        ]
+    }
+}

@@ -91,14 +91,23 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         `rule_prepare` -- in particular, we'll call that quite often and it should just
         cache and return True once ready.
         """
-        if self.matches_at_least_once and self.rule_prepare and not self.rule_prepare():
-            # Important: rules that have a prepare should ensure that only one
-            # thread is preparing at a time (all others should temporarily
-            # return False).
+        if self.matches_at_least_once and self.rule_prepare:
+            try:
+                if not self.rule_prepare():
+                    # Important: rules that have a prepare should ensure that only one
+                    # thread is preparing at a time (all others should temporarily
+                    # return False).
 
-            # If _we_ got a False from rule_prepare, we also return False which
-            # signals feedforward to keep looking for work elsewhere...
-            return False
+                    # If _we_ got a False from rule_prepare, we also return False which
+                    # signals feedforward to keep looking for work elsewhere...
+                    return False
+            except subprocess.SubprocessError as e:
+                if isinstance(e, subprocess.CalledProcessError) and (e.stdout or e.stderr):
+                    msg = (e.stdout or "") + (e.stderr or "")
+                else:
+                    msg = str(e)
+                self.cancel(msg)
+                return False
 
         return super().run_next_batch()
 

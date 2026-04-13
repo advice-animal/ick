@@ -327,13 +327,10 @@ trying to import those third-party dependencies:
 $ ick run
 -> move_isort_cfg: ERROR
      Traceback (most recent call last):
-       File "<frozen runpy>", line 198, in _run_module_as_main
-       File "<frozen runpy>", line 88, in _run_code
-       File "/tmp/foo/move_isort_cfg.py", line 5, in <module>
-         import imperfect
+     ... (pass -v for complete message)
      ModuleNotFoundError: No module named 'imperfect'
 ```
-<!-- [[[end]]] (sum: YG/2pd6McE) -->
+<!-- [[[end]]] (sum: UbCS0AeSaF) -->
 
 We need to tell `ick` about the dependencies the rule needs.
 

@@ -311,7 +311,7 @@ class Runner:
                 # This should also encompass exit codes other than 0 and 99
                 # print(f"{s} failed:")
                 # print(f"  {s.cancel_reason}")
-                yield HighLevelResult(s.qualname, s.match_prefix, [], Finished("a", RuleStatus.NEEDS_WORK, s.cancel_reason))
+                yield HighLevelResult(s.qualname, s.match_prefix, [], Finished(s.qualname, RuleStatus.ERROR, s.cancel_reason))
             else:
                 # if any(e == 99 for e in s.exit_codes):
                 #     ...
