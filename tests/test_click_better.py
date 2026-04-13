@@ -3,7 +3,7 @@ from __future__ import annotations
 import click
 from click.testing import CliRunner
 
-from ick.cmdline import FlexibleGroup
+from ick.click_better import FlexibleGroup
 
 
 @click.group(cls=FlexibleGroup)
