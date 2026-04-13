@@ -6,7 +6,8 @@ $ ick run --json
                 "project_name": "",
                 "status": "error",
                 "modified": [],
-                "message": "error: Failed to parse: `-`\n  Caused by: Expected package name starting with an alphanumeric character, found `-`\n-\n^\n"
+                "message": "error: Failed to parse: `-`\n  Caused by: Expected package name starting with an alphanumeric character, found `-`\n-\n^\n",
+                "metadata": null
             }
         ],
         "fix_header": [
@@ -19,7 +20,8 @@ $ ick run --json
                         "diff_stat": "+1"
                     }
                 ],
-                "message": ""
+                "message": "",
+                "metadata": null
             }
         ]
     }
