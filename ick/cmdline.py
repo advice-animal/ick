@@ -18,6 +18,7 @@ from ick.add_rule import add_rule_structure
 from ick_protocol import RuleStatus, Scope, Urgency
 
 from ._regex_translate import rule_name_re
+from .commit import check_clean_tree, create_worktree_branch, remove_worktree, apply_and_commit
 from .config import RuntimeConfig, Settings, load_main_config, load_rules_config, one_repo_config
 from .git import find_repo_root
 from .project_finder import find_projects as find_projects_fn
@@ -169,6 +170,10 @@ def add_rule(
 @click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, show counts of lines to change (default)")
 @click.option("-p", "--patch", is_flag=True, help="Show patches of changes to make")
 @click.option("--apply", is_flag=True, help="Apply changes")
+@click.option("--commit", is_flag=True, help="Apply changes and create a git commit per rule")
+@click.option("--branch", default=None, help="Commit into a new branch via git worktree (implies --commit, current checkout unchanged)")
+# TODO: add a --stack mode that creates one branch per rule (stacked on each other) so
+# each rule's changes can be submitted as a separate rebasing PR (git-town or manual)
 @click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by rule qualname (can be used with list-rules --json)")
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
 @click.option("--emojis", is_flag=True, help="Show a waterfall of emojis as work is being done")
@@ -180,6 +185,8 @@ def run(
     dry_run: bool,
     patch: bool,
     apply: bool,
+    commit: bool,
+    branch: str | None,
     json_flag: bool,
     skip_update: bool,
     emojis: bool,
@@ -197,15 +204,18 @@ def run(
     Use --apply to apply rules' changes.
     """
 
-    num_provided = sum([dry_run, patch, apply])
+    num_provided = sum([dry_run, patch, apply, bool(commit or branch)])
     if num_provided > 1:
-        print("Only one of --dry-run, --patch, and --apply can be provided")
+        print("Only one of --dry-run, --patch, --apply, and --commit can be provided")
         sys.exit(1)
     elif num_provided == 0:
         dry_run = True
 
+    if branch:
+        commit = True
+
     ctx.obj.settings.dry_run = dry_run
-    ctx.obj.settings.apply = apply
+    ctx.obj.settings.apply = apply or commit
     ctx.obj.settings.skip_update = skip_update
 
     if filters:
@@ -236,6 +246,15 @@ def run(
         status_callback = progressbar_status
         done_callback = lambda _: print("\n")  # noqa: E731
 
+    work_dir = ctx.obj.repo.root  # default: work in-place
+    if commit:
+        if not check_clean_tree(ctx.obj.repo.root):
+            print("[red]Working tree has uncommitted changes; --commit requires a clean tree.[/red]")
+            print("[red]Run `git status` to see what's in the way.[/red]")
+            sys.exit(1)
+        if branch:
+            work_dir = create_worktree_branch(ctx.obj.repo.root, branch)
+
     r = Runner(ctx.obj, ctx.obj.repo)
     steps = r.build_steps_for_rules(
         status_callback=status_callback,
@@ -264,38 +283,55 @@ def run(
     else:
         for result in r.run_steps(steps):
             where = f" on {result.project}" if result.project else ""
-            print(f"-> [bold]{result.rule}[/bold]{where}: ", end="")
-            match result.finished.status:
-                case RuleStatus.ERROR:
-                    print("[red]ERROR[/red]")
+            if commit:
+                if result.finished.status == RuleStatus.NEEDS_WORK and result.modifications:
+                    msg = result.finished.message.strip() or f"Apply rule: {result.rule}"
+                    sha = apply_and_commit(work_dir, result.modifications, msg)
+                    print(f"-> [bold]{result.rule}[/bold]{where}: [green]COMMITTED[/green] ({sha})")
+                    for mod in result.modifications:
+                        print(f"    {mod.filename:30s} {mod.diffstat}")
+                elif result.finished.status == RuleStatus.SUCCESS:
+                    print(f"-> [bold]{result.rule}[/bold]{where}: [green]OK[/green]")
+                else:
+                    print(f"-> [bold]{result.rule}[/bold]{where}: [red]{result.finished.status.upper()}[/red]")
                     for line in result.finished.message.splitlines():
                         print("    ", line)
-                case RuleStatus.NEEDS_WORK:
-                    print("[yellow]NEEDS_WORK[/yellow]")
-                    for line in result.finished.message.splitlines():
-                        print("    ", line)
-                case RuleStatus.SUCCESS:
-                    print("[green]OK[/green]")
-                case _:  # pragma: no cover
-                    assert False, f"Unhandled status {result.finished.status}"
-
-            if patch:
-                for mod in result.modifications:
-                    if mod.diff:
-                        echo_color_precomputed_diff(mod.diff)
-            elif dry_run:
-                for mod in result.modifications:
-                    print("    ", mod.filename, mod.diffstat)
             else:
-                assert apply
-                for mod in result.modifications:
-                    path = Path(mod.filename)
-                    if mod.new_bytes is None:
-                        path.unlink()
-                    else:
-                        path.parent.mkdir(parents=True, exist_ok=True)
-                        path.write_bytes(mod.new_bytes)
-                    print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
+                print(f"-> [bold]{result.rule}[/bold]{where}: ", end="")
+                match result.finished.status:
+                    case RuleStatus.ERROR:
+                        print("[red]ERROR[/red]")
+                        for line in result.finished.message.splitlines():
+                            print("    ", line)
+                    case RuleStatus.NEEDS_WORK:
+                        print("[yellow]NEEDS_WORK[/yellow]")
+                        for line in result.finished.message.splitlines():
+                            print("    ", line)
+                    case RuleStatus.SUCCESS:
+                        print("[green]OK[/green]")
+                    case _:  # pragma: no cover
+                        assert False, f"Unhandled status {result.finished.status}"
+
+                if patch:
+                    for mod in result.modifications:
+                        if mod.diff:
+                            echo_color_precomputed_diff(mod.diff)
+                elif dry_run:
+                    for mod in result.modifications:
+                        print("    ", mod.filename, mod.diffstat)
+                else:
+                    assert apply
+                    for mod in result.modifications:
+                        path = Path(mod.filename)
+                        if mod.new_bytes is None:
+                            path.unlink()
+                        else:
+                            path.parent.mkdir(parents=True, exist_ok=True)
+                            path.write_bytes(mod.new_bytes)
+                        print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
+
+        if branch:
+            remove_worktree(ctx.obj.repo.root, work_dir)
 
 
 main.add_command(

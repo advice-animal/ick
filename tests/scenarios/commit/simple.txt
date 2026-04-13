@@ -1,0 +1,21 @@
+# Test --branch: create a commit on a new branch, leaving main unchanged
+$ ick run --commit --branch feature/apply-rules
+-> move_a: COMMITTED (<sha>)
+    file_a.cfg                     -3
+    file_b.toml                    +3
+# The new branch exists
+$ git branch
+  feature/apply-rules
+* main
+# main is still at the original commit
+$ git log --oneline
+<sha> foo
+# Test --commit: apply and commit directly on main
+$ ick run --commit
+-> move_a: COMMITTED (<sha>)
+    file_a.cfg                     -3
+    file_b.toml                    +3
+# The commit appears in the log
+$ git log --oneline
+<sha> Apply rule: move_a
+<sha> foo

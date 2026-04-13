@@ -24,6 +24,7 @@ TRACEBACK_LINE_NUM_RE = re.compile(r"(, line )\d+(,)")
 GIT_VERSION_RE = re.compile(r"(\d+\.)\d+(?:\.\d+)?(?:\.dev\d+\S+)?")
 TRAILING_WHITESPACE = re.compile(r"(?m) +$")
 ICK_OUTPUT_DIR_RE = re.compile(r"ICK_OUTPUT_DIR=\S+")
+GIT_SHORT_SHA_RE = re.compile(r"\b[0-9a-f]{7}\b")
 
 
 def clean_output(output: str) -> str:
@@ -34,6 +35,7 @@ def clean_output(output: str) -> str:
     cleaned_output = TRAILING_WHITESPACE.sub("", cleaned_output)
     cleaned_output = cleaned_output.replace(os.getcwd(), "/CWD")
     cleaned_output = ICK_OUTPUT_DIR_RE.sub("ICK_OUTPUT_DIR=<tmp>", cleaned_output)
+    cleaned_output = GIT_SHORT_SHA_RE.sub("<sha>", cleaned_output)
     return cleaned_output
 
 
