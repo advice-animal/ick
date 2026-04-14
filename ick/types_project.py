@@ -5,8 +5,9 @@ from shutil import copytree
 from tempfile import TemporaryDirectory
 from typing import Callable, ContextManager, Iterable, Sequence, TypeVar
 
-from msgspec import Struct
+from msgspec import Struct, field
 
+from .config.project_config import ProjectConfig
 from .sh import run_cmd, run_cmd_status
 
 _T = TypeVar("_T")
@@ -17,6 +18,7 @@ class Project(Struct):
     subdir: str
     typ: str
     marker_filename: str
+    config: ProjectConfig = field(default_factory=ProjectConfig)
 
     def relative_filenames(self) -> Iterable[str]:
         zfiles = self.repo.zfiles

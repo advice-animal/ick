@@ -8,6 +8,7 @@ from vmodule import DEFAULT_FORMAT, VLOG_1, VLOG_2
 
 from ._regex_translate import zfilename_re
 from .config import MainConfig, load_main_config
+from .config.project_config import load_project_config
 from .types_project import Project, Repo
 from .util import dir_in_dirlist, dir_in_dirlist_or_subdir
 
@@ -44,7 +45,9 @@ def find_projects(repo: Repo, zstr: str, conf: MainConfig) -> list[Project]:
         key = (dirname, typ)
         if key not in projects:
             LOG.log(VLOG_1, "Found new %r project at %r with marker %r", typ, dirname, filename)
-            projects[key] = Project(repo, dirname, typ, filename)
+            project_dir = repo.root / dirname
+            config = load_project_config(project_dir)
+            projects[key] = Project(repo, dirname, typ, filename, config)
 
     # this is a tuple to make .startswith happy
     final_project_names: tuple[str] = ()  # type: ignore[assignment] # FIX ME
