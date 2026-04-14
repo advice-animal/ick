@@ -96,17 +96,21 @@ def list_rules(ctx: click.Context, json_flag: bool, substring: str, filters: lis
 @main.command()
 @click.pass_context
 @click.option("-k", "substring", default="", help="Substring match on rule name (including prefix)")
+@click.option("--update", is_flag=True, help="Update expected test output with actual rule output")
 @click.argument("filters", nargs=-1)
-def test_rules(ctx: click.Context, substring: str, filters: list[str]) -> None:
+def test_rules(ctx: click.Context, substring: str, update: bool, filters: list[str]) -> None:
     """
     Run rule self-tests.
 
     With no filters, run tests in all rules.
+
+    Use --update to overwrite expected output with the actual output from the
+    current rule implementation. Review the changes before committing.
     """
     ctx.obj.filter_config.min_urgency = min(Urgency)  # Test all urgencies unless specified by filters
     apply_filters(ctx, filters, substring)
     r = Runner(ctx.obj, ctx.obj.repo)
-    sys.exit(r.test_rules())
+    sys.exit(r.test_rules(update=update))
 
 
 @main.command()

@@ -1,0 +1,28 @@
+$ ick test-rules
+testing...
+  failing_test: F FAIL
+
+DETAILS
+--------------------------------------------------------------------------------
+testing failing_test with main:
+
+'foo.md' (modified) differs
+--- a/foo.md
++++ b/foo.md
+@@ -1 +1 @@
+-RIGHT
++WRONG
+
+
+(exit status: 1)
+$ cat tests/failing_test/main/output/foo.md
+RIGHT
+$ ick test-rules --update
+testing...
+  failing_test: U UPDATED
+1 test(s) updated
+$ cat tests/failing_test/main/output/foo.md
+WRONG
+$ ick test-rules
+testing...
+  failing_test: . PASS
