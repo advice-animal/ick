@@ -15,6 +15,15 @@ def test_load_rule_repo() -> None:
     rc = load_rule_repo(r)
     assert len(rc.rule) == 3
 
+
+def test_load_rule_repo_ignores_tests_dir() -> None:
+    # ick.toml files inside tests/ (e.g. rule test input fixtures) must not be
+    # treated as rule definitions.
+    r = Ruleset(base_path=Path.cwd(), path="tests/fixture_rules")
+    rc = load_rule_repo(r)
+    names = [rule.name for rule in rc.rule]
+    assert "should_not_be_discovered" not in names
+
     assert rc.rule[0].name == "hello"
     assert rc.rule[0].impl == "shell"
     assert rc.rule[0].scope == Scope.REPO
