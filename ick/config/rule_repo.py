@@ -115,6 +115,7 @@ def load_rule_repo(ruleset: Ruleset) -> RuleRepoConfig:
         prefix = ruleset.prefix + "/" if (ruleset.prefix not in ["", "."]) else ""  # type: ignore[operator] # FIX ME
         for rule in c.rule:
             rule.full_name = base + rule.name
+            rule.name_in_repo = rule.full_name
             rule.qualname = prefix + rule.full_name
             rule.prefix = prefix
             rule.test_path = repo_path / base / "tests" / rule.name

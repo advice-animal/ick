@@ -109,6 +109,7 @@ class RuleConfig(Struct):
     qualname: str = ""  # full display name: prefix + full_name
     prefix: str = ""  # ruleset prefix portion (e.g. "netflix/"), empty if none
     full_name: str = ""  # the rule name within the repo (e.g. "python/my_rule")
+    name_in_repo: str = ""  # subdir + name, e.g. "python/move_isort_cfg" — prefix excluded
 
     batch_size: int = 10
     inputs: Optional[Sequence[str]] = None
@@ -123,6 +124,8 @@ class RuleConfig(Struct):
     def __post_init__(self) -> None:
         if not self.qualname:
             self.qualname = self.name
+        if not self.name_in_repo:
+            self.name_in_repo = self.name
 
 
 @ktrace()
