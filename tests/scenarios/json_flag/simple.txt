@@ -7,7 +7,8 @@ $ ick run --json
                 "status": "success",
                 "modified": [],
                 "message": "did nothing, but this is a long message anyway:\nlorem ipsum quia dolor sit amet consectetur adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur.\n",
-                "metadata": null
+                "metadata": null,
+                "hours": null
             }
         ],
         "fail": [
@@ -16,7 +17,8 @@ $ ick run --json
                 "status": "error",
                 "modified": [],
                 "message": "AssertionError\n",
-                "metadata": null
+                "metadata": null,
+                "hours": null
             }
         ],
         "move_a": [
@@ -34,7 +36,8 @@ $ ick run --json
                     }
                 ],
                 "message": "",
-                "metadata": null
+                "metadata": null,
+                "hours": null
             }
         ],
         "testpkg/test_import": [
@@ -43,7 +46,8 @@ $ ick run --json
                 "status": "success",
                 "modified": [],
                 "message": "Hello from helper module!\n",
-                "metadata": null
+                "metadata": null,
+                "hours": null
             }
         ]
     }
