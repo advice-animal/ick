@@ -250,6 +250,8 @@ def run(
     )
 
     if json_flag:
+        rule_hours: dict[str, int | None] = {impl.rule_config.qualname: impl.rule_config.hours for impl in r.iter_rule_impl()}
+
         results = collections.defaultdict(list)
         for result in r.run_steps(steps):
             modifications = []
@@ -262,6 +264,7 @@ def run(
                 # The meaning of this field depends on the status field above
                 "message": result.finished.message,
                 "metadata": result.finished.metadata,
+                "hours": rule_hours.get(result.rule),
             }
             results[result.rule].append(output)
 
@@ -321,6 +324,95 @@ main.add_command(
         help="Alias for the `run` command.",
     )
 )
+
+
+@main.command()
+@click.argument("before_ref")
+@click.argument("after_ref", default="HEAD")
+@click.option("--json", "json_flag", is_flag=True, help="Output comparison as JSON")
+@click.option("--exit-code", is_flag=True, help="Exit non-zero if any regressions found")
+@click.option("-k", "substring", default="", help="Substring match on rule name (including prefix)")
+@click.argument("filters", nargs=-1)
+@click.pass_context
+def compare(
+    ctx: click.Context,
+    before_ref: str,
+    after_ref: str,
+    json_flag: bool,
+    exit_code: bool,
+    substring: str,
+    filters: tuple[str, ...],
+) -> None:
+    """
+    Compare ick results between two git refs.
+
+    Checks out BEFORE_REF and AFTER_REF as worktrees, runs ick on each
+    against the current target, and reports improvements and regressions.
+
+    Summary metrics: rules flagging count and hours at risk (when the
+    hours field is set on rules).
+    """
+    import dataclasses
+
+    from .compare import compare_results, managed_worktree, run_ick_json, summarize
+    from .git import find_repo_root
+
+    ick_repo_root = find_repo_root(Path(__file__).parent)
+    target = Path(ctx.parent.params["target"])  # type: ignore[union-attr]
+
+    extra_args: list[str] = []
+    if substring:
+        extra_args += ["-k", substring]
+    extra_args.extend(filters)
+
+    print(f"Comparing [bold]{before_ref}[/bold]...[bold]{after_ref}[/bold] against {target}", file=sys.stderr)
+
+    print(f"  Checking out {before_ref}...", file=sys.stderr)
+    with managed_worktree(ick_repo_root, before_ref) as wt_before:
+        print(f"  Running ick at {before_ref}...", file=sys.stderr)
+        before_results = run_ick_json(wt_before, target, extra_args)
+
+    print(f"  Checking out {after_ref}...", file=sys.stderr)
+    with managed_worktree(ick_repo_root, after_ref) as wt_after:
+        print(f"  Running ick at {after_ref}...", file=sys.stderr)
+        after_results = run_ick_json(wt_after, target, extra_args)
+
+    comparisons = compare_results(before_results, after_results)
+    summary = summarize(comparisons)
+
+    if json_flag:
+        out = {
+            "before_ref": before_ref,
+            "after_ref": after_ref,
+            "comparisons": [dataclasses.asdict(c) for c in comparisons],
+            "summary": summary,
+        }
+        json.dump(out, sys.stdout, indent=4)
+        sys.stdout.write("\n")
+    else:
+        _colors = {
+            "improved": "green",
+            "regressed": "red",
+            "new": "cyan",
+            "removed": "yellow",
+            "unchanged": "dim",
+        }
+        for c in comparisons:
+            color = _colors.get(c.verdict, "")
+            h = f" ({c.hours}h)" if c.hours is not None else ""
+            print(f"[{color}]{c.verdict.upper():10}[/{color}] {c.rule}{h}: {c.detail}")
+
+        print()
+        hrs_before = f"{summary['hours_before']}h" if summary["hours_before"] is not None else "?"
+        hrs_after = f"{summary['hours_after']}h" if summary["hours_after"] is not None else "?"
+        delta = summary["rules_delta"]
+        print(f"Rules flagging: {summary['rules_flagging_before']} -> {summary['rules_flagging_after']} ({delta:+d})")
+        if summary["hours_before"] is not None:
+            h_delta = summary["hours_delta"]
+            print(f"Hours at risk:  {hrs_before} -> {hrs_after} ({h_delta:+d}h)")
+
+    if exit_code and any(c.verdict == "regressed" for c in comparisons):
+        sys.exit(1)
 
 
 def apply_filters(ctx: click.Context, filters: list[str], substring: str) -> None:

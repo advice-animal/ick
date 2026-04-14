@@ -7,7 +7,8 @@ $ ick run --json
                 "status": "success",
                 "modified": [],
                 "message": "no metadata here\n",
-                "metadata": null
+                "metadata": null,
+                "hours": null
             }
         ],
         "writes_metadata": [
@@ -29,7 +30,8 @@ $ ick run --json
                             "message": "test metadata for no_metadata.py"
                         }
                     ]
-                }
+                },
+                "hours": null
             }
         ]
     }
