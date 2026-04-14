@@ -53,7 +53,7 @@ def main(
     ctx.with_resource(keke.TraceOutput(file=trace))
 
     # This takes a target because rules can be defined in the target repo too
-    cur = Path(target)
+    cur = Path(target).expanduser()
     conf = load_main_config(cur, isolated_repo=isolated_repo)
     if rules_repo is not None:
         rules_config = one_repo_config(rules_repo)
@@ -304,7 +304,7 @@ def run(
             else:
                 assert apply
                 for mod in result.modifications:
-                    path = Path(mod.filename)
+                    path = ctx.obj.repo.root / mod.filename
                     if mod.new_bytes is None:
                         path.unlink()
                     else:

@@ -1,0 +1,7 @@
+# Bug #157: --apply with --target should write to the target dir, not cwd.
+$ mkdir target && git -C target init -q && echo dummy > target/dummy.txt && git -C target add dummy.txt && git -C target commit -qm init >/dev/null 2>&1
+$ ick --rules-repo . --target ./target run --apply
+-> write_sentinel: NEEDS_WORK
+   Change made: output.txt                     +1
+$ cat target/output.txt
+changed
