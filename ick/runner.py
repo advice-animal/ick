@@ -64,10 +64,11 @@ class Runner:
     # Strings to replace in outputs while running scenario tests.
     _testing_replacements: dict[str, str] = {}
 
-    def __init__(self, rtc: RuntimeConfig, repo: Repo) -> None:
+    def __init__(self, rtc: RuntimeConfig, repo: Repo, parallelism: int = 0) -> None:
         self.rtc = rtc
         self.rules = discover_rules(rtc)
         self.repo: BaseRepo = repo
+        self.parallelism = parallelism
         self.ick_env_vars = {
             "ICK_REPO_PATH": str(repo.root),
         }
@@ -104,7 +105,11 @@ class Runner:
         done_callback: Callable[[Run[Any, Any]], None] | None = None,
     ) -> Run[str, bytes | Erasure]:
         """Compose a feedforward Run with steps for all rules."""
-        run: Run[str, bytes | Erasure] = Run(status_callback=status_callback, done_callback=done_callback)
+        run: Run[str, bytes | Erasure] = Run(
+            parallelism=self.parallelism,
+            status_callback=status_callback,
+            done_callback=done_callback,
+        )
         for impl in self.iter_rule_impl():
             impl.add_steps_to_run(self.projects, self.ick_env_vars, run)
         run.add_step(Step())  # Final sink
