@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import functools
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from glob import glob
 from logging import getLogger
 from pathlib import Path
@@ -15,7 +17,7 @@ from parse_errors import ParseContext
 from vmodule import VLOG_1, VLOG_2
 
 from ..base_rule import BaseRule
-from ..git import update_local_cache
+from ..git import local_cache_path, update_local_cache
 from . import PyprojectRulesConfig, RuleConfig, RuleRepoConfig, Ruleset, RuntimeConfig
 
 LOG = getLogger(__name__)
@@ -31,12 +33,36 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
     """
     rules: list[RuleConfig] = []
 
-    rulesets = {}
-    for ruleset in rtc.rules_config.ruleset:
+    skip_update = rtc.settings.skip_update
+    rulesets_list = list(rtc.rules_config.ruleset)
+    for ruleset in rulesets_list:
         LOG.log(VLOG_1, "Processing %s", ruleset)
-        # Prefixes should be unique; they override here
-        skip_update = rtc.settings.skip_update
-        rulesets[ruleset.prefix] = load_rule_repo(ruleset, skip_update=skip_update)
+
+    # Update all remote caches in parallel first, so that file loading never
+    # races with a git pull on the same working tree.  The FileLock in
+    # update_local_cache serialises any duplicate URLs naturally.
+    _update = functools.partial(maybe_update_local_cache, skip_update=skip_update)
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [(r, executor.submit(_update, r)) for r in rulesets_list]
+
+        for ruleset, future in futures:
+            try:
+                future.result()
+            except Exception as e:
+                LOG.warning("Failed to update rule repo %s: %s", ruleset.prefix, e)
+                rulesets_list.remove(ruleset)
+
+        # Note: We want all of the map to finish before we do any of the loading below.
+
+        futures = [(r, executor.submit(load_rule_repo, r)) for r in rulesets_list]
+
+    # Prefixes should be unique; they override here
+    rulesets = {}
+    for ruleset, future in futures:
+        try:
+            rulesets[ruleset.prefix] = future.result()
+        except Exception as e:
+            LOG.warning("Failed to load rule repo %s: %s", ruleset.prefix, e)
 
     for k, v in rulesets.items():
         rules.extend(v.rule)
@@ -47,10 +73,17 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
 
 
 @ktrace("ruleset.url", "ruleset.path")
-def load_rule_repo(ruleset: Ruleset, *, skip_update: bool = False) -> RuleRepoConfig:
+def maybe_update_local_cache(ruleset: Ruleset, *, skip_update: bool) -> None:
+    if ruleset.url:
+        update_local_cache(ruleset.url, skip_update=skip_update)
+
+
+@ktrace("ruleset.url", "ruleset.path")
+def load_rule_repo(ruleset: Ruleset) -> RuleRepoConfig:
     if ruleset.url:
         # TODO config for a subdir within?
-        repo_path = update_local_cache(ruleset.url, skip_update=skip_update)
+        # This never updates for you, that is in the function above.
+        repo_path = local_cache_path(ruleset.url)
     else:
         assert isinstance(ruleset.path, str)
         repo_path = Path(ruleset.base_path or "", ruleset.path).resolve()
