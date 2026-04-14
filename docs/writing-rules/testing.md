@@ -18,6 +18,13 @@ To test your ick rules, create a `tests/` directory next to your rule file, and
 then add a directory that matches the rule name. In there, each test case should
 receive its own directory, with the directory name being the name of the test.
 
+```{note}
+Subdirectories named `tests` are reserved for test fixtures and are never
+scanned for rule definitions. This means you cannot place an `ick.toml` (or
+`pyproject.toml`) inside a `tests/` directory and expect it to register rules —
+any such file will be silently ignored by rule discovery.
+```
+
 ### Structure of a single test
 
 Each test for an ick rule consists of two directories:

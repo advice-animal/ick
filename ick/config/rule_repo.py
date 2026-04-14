@@ -94,9 +94,9 @@ def load_rule_repo(ruleset: Ruleset) -> RuleRepoConfig:
     # We use a regular glob here because it might not be from a git repo, or
     # that repo might be modified.  It also will let us more easily refer to a
     # subdir in the future.
-    potential_configs = glob("**/ick.toml", root_dir=repo_path, recursive=True)
-    potential_configs.extend(glob("**/ick.toml.local", root_dir=repo_path, recursive=True))
-    potential_configs.extend(glob("**/pyproject.toml", root_dir=repo_path, recursive=True))
+    potential_configs = [f for f in glob("**/ick.toml", root_dir=repo_path, recursive=True) if "tests" not in Path(f).parts]
+    potential_configs += [f for f in glob("**/ick.toml.local", root_dir=repo_path, recursive=True) if "tests" not in Path(f).parts]
+    potential_configs += [f for f in glob("**/pyproject.toml", root_dir=repo_path, recursive=True) if "tests" not in Path(f).parts]
     for filename in potential_configs:
         p = Path(repo_path, filename)
         LOG.log(VLOG_1, "Config found at %s", filename)
