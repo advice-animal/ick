@@ -6,6 +6,7 @@ import re
 import shlex
 import shutil
 import subprocess
+import sys
 import textwrap
 from pathlib import Path
 from typing import Iterable
@@ -104,6 +105,12 @@ def test_scenario(filename, monkeypatch) -> None:  # type: ignore[no-untyped-def
                 assert command.command[:2] == "$ "
                 # We use shell=True so that scenarios can use shell features
                 # like redirection, pipes, sub-commands, and so on.
+                #
+                # Prepend the test venv's bin dir so that tools installed
+                # alongside pytest (e.g. coverage) are findable in PATH.
+                venv_bin = str(Path(sys.executable).parent)
+                env = os.environ.copy()
+                env["PATH"] = venv_bin + ":" + env.get("PATH", "")
                 proc = subprocess.run(
                     command.command[2:],
                     encoding="utf-8",
@@ -111,6 +118,7 @@ def test_scenario(filename, monkeypatch) -> None:  # type: ignore[no-untyped-def
                     check=False,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
+                    env=env,
                 )
                 output = proc.stdout
                 if proc.returncode != 0:
