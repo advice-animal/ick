@@ -60,3 +60,12 @@ class FlexibleGroup(click.Group):
             i += 1
 
         return super().parse_args(ctx, pre_cmd + lifted + kept)
+
+    def resolve_command(self, ctx: click.Context, args: list[str]) -> tuple[str | None, click.Command | None, list[str]]:
+        try:
+            return super().resolve_command(ctx, args)
+        except click.UsageError as e:
+            formatter = click.HelpFormatter()
+            with formatter.section("Available commands"):
+                formatter.write_dl([(name, self.get_command(ctx, name).get_short_help_str()) for name in sorted(self.list_commands(ctx))])
+            raise click.UsageError(f"{e.format_message()}\n\n{formatter.getvalue().rstrip()}") from e

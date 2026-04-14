@@ -1,0 +1,11 @@
+$ ick nope
+Error: No such command 'nope'.
+
+Available commands:
+  add-rule       Generate the file structure for a new rule
+  find-projects  Lists projects found in the current repo
+  list-rules     Lists rules applicable to the current repo
+  run            Run the applicable rules to the current...
+  run-rules      Alias for the `run` command.
+  test-rules     Run rule self-tests.
+(exit status: 2)
