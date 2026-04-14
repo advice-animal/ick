@@ -116,6 +116,9 @@ def load_rule_repo(ruleset: Ruleset) -> RuleRepoConfig:
         for rule in c.rule:
             rule.full_name = base + rule.name
             rule.prefixed_name = prefix + rule.full_name
+            rule.name_in_repo = rule.full_name
+            rule.qualname = rule.prefixed_name
+            rule.prefix = prefix
             rule.test_path = repo_path / base / "tests" / rule.name
             rule.script_path = repo_path / base / rule.name
             rule.repo_path = repo_path
