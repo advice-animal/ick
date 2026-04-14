@@ -21,18 +21,18 @@ def test_python_relative_imports(tmp_path: Path) -> None:
     # Create helper module
     (repo_path / "helper.py").write_text(
         textwrap.dedent("""\
-def greet():
-    return "Hello from helper!"
-""")
+            def greet():
+                return "Hello from helper!"
+        """)
     )
 
     # Create the main script that uses relative import
     script_path = repo_path / "main.py"
     script_path.write_text(
         textwrap.dedent("""\
-from .helper import greet
-print(greet())
-""")
+            from .helper import greet
+            print(greet())
+        """)
     )
 
     rule = Rule(

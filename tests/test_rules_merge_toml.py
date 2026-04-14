@@ -1,3 +1,4 @@
+import textwrap
 from pathlib import Path
 
 from feedforward import Notification, State
@@ -13,10 +14,10 @@ def test_merge_toml_works() -> None:
         RuleConfig(
             name="foo",
             impl="merge_toml",
-            data="""\
-[foo]
-baz = 99
-""",
+            data=textwrap.dedent("""\
+                [foo]
+                baz = 99
+            """),
             inputs=["*.toml"],
         ),
     )
