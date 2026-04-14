@@ -5,6 +5,19 @@ import pytest
 from pytest_mock import MockerFixture
 
 
+def _check_environment() -> None:
+    from ick._env_check import check_writable_dirs
+
+    if msg := check_writable_dirs():
+        pytest.exit(
+            f"{msg}; subprocesses may hang. Check sandbox write permissions.",
+            returncode=1,
+        )
+
+
+_check_environment()
+
+
 @pytest.fixture(scope="session", autouse=True)
 def set_loglevel() -> Iterable[None]:
     # logging.getLogger().level = vmodule.VLOG_2
