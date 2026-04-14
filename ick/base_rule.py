@@ -50,11 +50,13 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         extra_env: dict[str, str],
         append_filenames: bool,
         rule_prepare: Callable[[], bool] | None = None,
+        prefix: str = "",
         *args: Any,
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.qualname = qualname
+        self.prefix = prefix
         # TODO figure out how extra_inputs factors in
         assert patterns is not None, "File scoped rules require an `inputs` section in the rule config!"
         self.patterns = patterns
@@ -388,6 +390,7 @@ class BaseRule:
 
     def add_steps_to_run(self, projects: Any, env: Mapping[str, str], run: Run[str, bytes | Erasure]) -> None:
         qualname = self.rule_config.qualname
+        prefix = self.rule_config.prefix
 
         if self.rule_config.scope == Scope.FILE:
             for p in projects:
@@ -400,6 +403,7 @@ class BaseRule:
                         extra_env={**env, **self.command_env},
                         append_filenames=True,
                         rule_prepare=self.prepare,
+                        prefix=prefix,
                         batch_size=self.rule_config.batch_size,
                     )
                 )
@@ -420,6 +424,7 @@ class BaseRule:
                         extra_env={**env, **self.command_env},
                         append_filenames=False,
                         rule_prepare=self.prepare,
+                        prefix=prefix,
                         eager=False,
                         batch_size=-1,
                     )
@@ -436,6 +441,7 @@ class BaseRule:
                     extra_env={**env, **self.command_env},
                     append_filenames=False,
                     rule_prepare=self.prepare,
+                    prefix=prefix,
                     eager=False,
                     batch_size=-1,
                 )

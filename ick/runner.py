@@ -45,6 +45,14 @@ class HighLevelResult:
     project: str
     modifications: Sequence[Modified]
     finished: Finished
+    prefix: str = ""
+
+
+def fmt_qualname(qualname: str, prefix: str) -> str:
+    """Return Rich markup for a qualname with the prefix portion dimmed."""
+    if prefix:
+        return f"[dim]{prefix}[/dim]{qualname[len(prefix):]}"
+    return qualname
 
 
 @dataclass
@@ -170,11 +178,12 @@ class Runner:
             for rule_instance, futures in rule_futures:
                 success = True
                 any_updated = False
-                print(f"  [bold]{rule_instance.rule_config.qualname}[/bold]: ", end="")
+                qn = fmt_qualname(rule_instance.rule_config.qualname, rule_instance.rule_config.prefix)
+                print(f"  [bold]{qn}[/bold]: ", end="")
                 if not futures:
                     print("<no-test>", end="")
                     buf_print(
-                        f"{rule_instance.rule_config.qualname}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
+                        f"{qn}: [yellow]no tests[/yellow] in {rule_instance.rule_config.test_path}",
                     )
                 else:
                     for fut, result in futures:
@@ -196,7 +205,7 @@ class Runner:
                             with_test = ""
                             if str(rel_test_path) != ".":
                                 with_test = f" with [bold]{rel_test_path}[/]"
-                            buf_print(f"testing [bold]{rule_instance.rule_config.qualname}[/]{with_test}:")
+                            buf_print(f"testing [bold]{qn}[/]{with_test}:")
                             buf_print(result.traceback)
                             buf_print(result.message)
                             buf_print(result.diff)
@@ -396,13 +405,13 @@ class Runner:
                 # This should also encompass exit codes other than 0 and 99
                 # print(f"{s} failed:")
                 # print(f"  {s.cancel_reason}")
-                yield HighLevelResult(s.qualname, s.match_prefix, [], Finished(s.qualname, RuleStatus.ERROR, s.cancel_reason))
+                yield HighLevelResult(s.qualname, s.match_prefix, [], Finished(s.qualname, RuleStatus.ERROR, s.cancel_reason), s.prefix)
             else:
                 # if any(e == 99 for e in s.exit_codes):
                 #     ...
 
                 changes = s.compute_diff_messages()
-                yield HighLevelResult(s.qualname, s.match_prefix, changes[:-1], changes[-1])
+                yield HighLevelResult(s.qualname, s.match_prefix, changes[:-1], changes[-1], s.prefix)
 
     @ktrace()
     def echo_rules(self) -> None:
@@ -410,7 +419,7 @@ class Runner:
         for impl in self.iter_rule_impl():
             impl.prepare()
 
-            msg = f"[bold]{impl.rule_config.qualname}[/]"
+            msg = f"[bold]{fmt_qualname(impl.rule_config.qualname, impl.rule_config.prefix)}[/]"
             if impl.rule_config.description:
                 msg += f": {impl.rule_config.description}"
             if not impl.runnable:

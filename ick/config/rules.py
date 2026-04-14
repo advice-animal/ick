@@ -106,7 +106,9 @@ class RuleConfig(Struct):
     test_path: Optional[Path] = None
     script_path: Optional[Path] = None
     repo_path: Optional[Path] = None
-    qualname: str = ""  # the name _within its respective repo_
+    qualname: str = ""  # full display name: prefix + full_name
+    prefix: str = ""  # ruleset prefix portion (e.g. "netflix/"), empty if none
+    full_name: str = ""  # the rule name within the repo (e.g. "python/my_rule")
 
     batch_size: int = 10
     inputs: Optional[Sequence[str]] = None
