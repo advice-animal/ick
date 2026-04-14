@@ -23,7 +23,7 @@ from .click_better import FlexibleGroup
 from .config import RuntimeConfig, Settings, load_main_config, load_rules_config, one_repo_config
 from .git import find_repo_root
 from .project_finder import find_projects as find_projects_fn
-from .runner import Runner, _demo_done_callback, _demo_status_callback
+from .runner import Runner, _demo_done_callback, _demo_status_callback, fmt_qualname
 from .types_project import maybe_repo
 
 
@@ -275,7 +275,7 @@ def run(
     else:
         for result in r.run_steps(steps):
             where = f" on {result.project}" if result.project else ""
-            print(f"-> [bold]{result.rule}[/bold]{where}: ", end="")
+            print(f"-> [bold]{fmt_qualname(result.rule, result.prefix)}[/bold]{where}: ", end="")
             match result.finished.status:
                 case RuleStatus.ERROR:
                     print("[red]ERROR[/red]")
