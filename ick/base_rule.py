@@ -100,7 +100,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
             return False
         m = bool(match_prefix_patterns(key, self.match_prefix, self.patterns))
         if m and self.exclude_patterns:
-            filename = key[len(self.match_prefix):].lstrip("/")
+            filename = key[len(self.match_prefix) :].lstrip("/")
             m = not any(fnmatch(filename, pat) for pat in self.exclude_patterns)
         self.matches_at_least_once |= m
         return m
@@ -451,7 +451,7 @@ class BaseRule:
                         rule_prepare=self.prepare,
                         excluded_project_dirs=excluded_project_dirs,
                         prefix=prefix,
-                        exclude_patterns=per_rule.exclude_filenames if per_rule else (),
+                        exclude_patterns=[*p.config.ignore_filenames, *(per_rule.exclude_filenames if per_rule else ())],
                         batch_size=self.rule_config.batch_size,
                     )
                 )
@@ -480,7 +480,7 @@ class BaseRule:
                         rule_prepare=self.prepare,
                         excluded_project_dirs=excluded_project_dirs,
                         prefix=prefix,
-                        exclude_patterns=per_rule.exclude_filenames if per_rule else (),
+                        exclude_patterns=[*p.config.ignore_filenames, *(per_rule.exclude_filenames if per_rule else ())],
                         eager=False,
                         batch_size=-1,
                     )
