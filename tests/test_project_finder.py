@@ -69,7 +69,7 @@ def test_project_finder_types() -> None:
     projects[1].repo = "FAKE"  # type: ignore[assignment]
     projects[2].repo = "FAKE"  # type: ignore[assignment]
 
-    empty_config = {"ignore_rules": [], "rules": {}}
+    empty_config = {"ignore_rules": [], "ignore_filenames": [], "rules": {}}
     assert to_builtins(projects[0]) == {
         "subdir": "a/",
         "marker_filename": "pyproject.toml",

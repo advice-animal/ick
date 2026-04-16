@@ -42,6 +42,7 @@ class ProjectConfig(Struct):
 
         [tool.ick]
         ignore_rules = ["python/move_isort_cfg"]
+        ignore_filenames = ["generated/**"]  # skipped by all rules
 
         [tool.ick.rules."python/move_isort_cfg"]
         exclude_filenames = ["tests/**", "generated/**"]
@@ -49,12 +50,14 @@ class ProjectConfig(Struct):
     Example ``.ick.toml``::
 
         ignore_rules = ["python/move_isort_cfg"]
+        ignore_filenames = ["generated/**"]
 
         [rules."python/move_isort_cfg"]
         exclude_filenames = ["tests/**"]
     """
 
     ignore_rules: list[str] = field(default_factory=list)
+    ignore_filenames: list[str] = field(default_factory=list)
     rules: dict[str, PerRuleProjectConfig] = field(default_factory=dict)
 
 

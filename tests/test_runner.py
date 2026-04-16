@@ -23,43 +23,46 @@ def _step(patterns: list[str], rule_prepare=None) -> GenericPreparedStep:
     )
 
 
-def test_step_match_excludes_nested_project_paths() -> None:
-    step = GenericPreparedStep(
+def _step_with_excludes(
+    patterns: list[str],
+    exclude_patterns: list[str] = (),
+    project_path: str = "",
+) -> GenericPreparedStep:
+    return GenericPreparedStep(
         qualname="test_rule",
-        patterns=["*.py"],
-        project_path="",
+        patterns=patterns,
+        project_path=project_path,
         cmdline=[sys.executable, "-c", "pass"],
         extra_env={},
         append_filenames=True,
-        excluded_project_dirs=["nested/"],
+        exclude_patterns=exclude_patterns,
     )
 
-    assert step.match("other/file.py")
-    assert not step.match("nested/file.py")
+
+def test_match_exclude_patterns_per_rule() -> None:
+    """Per-rule exclude_filenames prevents matched files from being processed."""
+    step = _step_with_excludes(["*.py"], exclude_patterns=["tests/**"])
+    assert step.match("foo.py") is True
+    assert step.match("tests/bar.py") is False
 
 
-def test_step_errors_when_output_hits_excluded_project_path() -> None:
-    step = GenericPreparedStep(
-        qualname="test_rule",
-        patterns=["*.py"],
-        project_path="",
-        cmdline=[
-            sys.executable,
-            "-c",
-            "from pathlib import Path; Path('nested').mkdir(); Path('nested/file.py').write_text('new\\n')",
-        ],
-        extra_env={},
-        append_filenames=False,
-        excluded_project_dirs=["nested/"],
-    )
-    step.index = 0
-    step.notify(Notification(key="root.py", state=State(gens=(0,), value=b"hello")))
+def test_match_exclude_patterns_all_rules() -> None:
+    """Global ignore_filenames (merged into exclude_patterns) blocks all rules."""
+    # Simulates what add_steps_to_run does: merge global + per-rule excludes.
+    step = _step_with_excludes(["*.py"], exclude_patterns=["generated/**", "tests/special.py"])
+    assert step.match("src/main.py") is True
+    assert step.match("generated/code.py") is False
+    assert step.match("tests/special.py") is False
+    assert step.match("tests/other.py") is True  # not excluded
 
-    result = list(step.process(1, [Notification(key="root.py", state=State(gens=(0,), value=b"hello"))]))
 
-    assert result == []
-    assert step.cancelled
-    assert "excluded project path" in step.cancel_reason
+def test_match_exclude_patterns_with_project_path() -> None:
+    """Excludes are relative to the project, not the repo root."""
+    step = _step_with_excludes(["*.py"], exclude_patterns=["tests/**"], project_path="packages/mylib/")
+    assert step.match("packages/mylib/src/a.py") is True
+    assert step.match("packages/mylib/tests/b.py") is False
+    # File outside the project is not matched at all (prefix doesn't match).
+    assert step.match("other/tests/c.py") is False
 
 
 def test_timeout_in_prepare_cancels_step() -> None:
@@ -163,3 +166,42 @@ def test_current_gen_metadata_survives() -> None:
 
     assert finished.metadata == {"findings": ["kept"]}
     assert finished.message == "the message\n"
+
+
+def test_step_match_excludes_nested_project_paths() -> None:
+    step = GenericPreparedStep(
+        qualname="test_rule",
+        patterns=["*.py"],
+        project_path="",
+        cmdline=[sys.executable, "-c", "pass"],
+        extra_env={},
+        append_filenames=True,
+        excluded_project_dirs=["nested/"],
+    )
+
+    assert step.match("other/file.py")
+    assert not step.match("nested/file.py")
+
+
+def test_step_errors_when_output_hits_excluded_project_path() -> None:
+    step = GenericPreparedStep(
+        qualname="test_rule",
+        patterns=["*.py"],
+        project_path="",
+        cmdline=[
+            sys.executable,
+            "-c",
+            "from pathlib import Path; Path('nested').mkdir(); Path('nested/file.py').write_text('new\\n')",
+        ],
+        extra_env={},
+        append_filenames=False,
+        excluded_project_dirs=["nested/"],
+    )
+    step.index = 0
+    step.notify(Notification(key="root.py", state=State(gens=(0,), value=b"hello")))
+
+    result = list(step.process(1, [Notification(key="root.py", state=State(gens=(0,), value=b"hello"))]))
+
+    assert result == []
+    assert step.cancelled
+    assert "excluded project path" in step.cancel_reason
