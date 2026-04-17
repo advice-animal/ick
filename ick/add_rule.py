@@ -93,6 +93,7 @@ def add_rule_structure(
     """
     Generate the file structure for a new rule in the given target directory.
     """
+    target_path = Path(*[part.replace("-", "_") for part in target_path.parts])
     target_path.mkdir(parents=True, exist_ok=True)
     rule_name = rule_name.replace("-", "_")
 
