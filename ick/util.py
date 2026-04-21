@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from pathlib import Path
 
 
 def merge(a, b):  # type: ignore[no-untyped-def] # FIX ME
@@ -77,3 +78,7 @@ def diffstat(diff_text: str) -> str:
     if removed:
         s += f"-{removed}"
     return s
+
+
+def convert_path_to_python_identifiers(path: Path) -> Path:
+    return Path(*[part.replace("-", "_") for part in path.parts])

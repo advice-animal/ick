@@ -15,6 +15,7 @@ from rich import print
 from vmodule import vmodule_init
 
 from ick.add_rule import add_rule_structure
+from ick.util import convert_path_to_python_identifiers
 from ick_protocol import RuleStatus, Scope, Urgency
 
 from ._regex_translate import rule_name_re
@@ -154,9 +155,15 @@ def add_rule(
         print("File-scoped rules (the default) require an `inputs` section to work!")
         sys.exit(1)
 
+    # validate target_directory path
+    target_directory_path = Path(target_directory)
+    assert not target_directory_path.is_absolute(), "Please use a relative path from the repo root"
+
+    target_directory_path = convert_path_to_python_identifiers(target_directory_path)
+
     add_rule_structure(
         rule_name=rule_name,
-        target_path=Path(target_directory),
+        target_path=target_directory_path,
         impl=impl,
         inputs=inputs,
         urgency=urgency.value,
