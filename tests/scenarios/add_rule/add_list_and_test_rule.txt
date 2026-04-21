@@ -31,7 +31,7 @@ new_dir/tests/new_rule/test1/output
 new_dir/tests/new_rule/test2
 new_dir/tests/new_rule/test2/input
 new_dir/tests/new_rule/test2/output
-$ ick add-rule another_rule new_dir --urgency now --inputs whatever --scope project
+$ ick add-rule another-rule new-dir --urgency now --inputs whatever --scope project
 Created rule config at new_dir/ick.toml
 Created dummy tests test1 and test2 with input and output in new_dir/tests/another_rule
 Created rule implementation at new_dir/another_rule.py
