@@ -7,7 +7,8 @@ $ ick run --json
                 "status": "error",
                 "modified": [],
                 "message": "error: Failed to parse: `-`\n  Caused by: Expected package name starting with an alphanumeric character, found `-`\n-\n^\n",
-                "metadata": null
+                "metadata": null,
+                "hours": null
             }
         ],
         "fix_header": [
@@ -21,7 +22,8 @@ $ ick run --json
                     }
                 ],
                 "message": "",
-                "metadata": null
+                "metadata": null,
+                "hours": null
             }
         ]
     }
