@@ -49,11 +49,14 @@ def test_load_repo_settings_values_loaded(tmp_path: Path) -> None:
               explicit_project_dirs:
                 - services/
                 - tools/
+              outer_project_dirs:
+                - services/
         """)
     )
     result = _load_repo_settings(tmp_path, RepoSettings(file="settings.yaml", key="ick"))
     assert result is not None
     assert result.explicit_project_dirs == ["services/", "tools/"]
+    assert result.outer_project_dirs == ["services/"]
 
 
 def test_load_repo_settings_from_default_file(tmp_path: Path) -> None:

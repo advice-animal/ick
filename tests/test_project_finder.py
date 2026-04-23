@@ -39,6 +39,13 @@ def test_project_finder_explicit_dirs() -> None:
     assert [p.subdir for p in find_projects(Repo(Path()), sample_string, explicit_config)] == ["a/", "c/"]
 
 
+def test_project_finder_continue_dirs() -> None:
+    sample_string = "pyproject.toml\0services/pyproject.toml\0services/api/pyproject.toml\0tools/pyproject.toml\0"
+    nested_config = replace(MainConfig.DEFAULT, outer_project_dirs=["services/"])  # type: ignore[attr-defined] # FIX ME
+
+    assert [p.subdir for p in find_projects(Repo(Path()), sample_string, nested_config)] == ["", "services/", "services/api/"]
+
+
 def test_project_finder_marker_can_have_slashes() -> None:
     custom_config = replace(MainConfig.DEFAULT, project_root_markers={"shell": ["scripts/make.sh"]})  # type: ignore[attr-defined] # FIX ME
 

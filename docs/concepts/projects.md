@@ -34,7 +34,16 @@ and if the autodetection fails for you, set some of
 ```
 explicit_project_dirs = [...]
 ignore_project_dirs = [...]
+continue_project_dirs = [...]
 ```
 
 Note that explicit dirs still need to contain markers, so their type can be
 inferred.
+
+`continue_project_dirs` tells ick to keep searching for projects beneath those
+directories even if a higher-level project was already found. This is useful
+for monorepos where `services/` or `apps/` contain their own project roots.
+
+Project-scoped and file-scoped rules stop at nested project boundaries, so a
+rule for a parent project will not read or write files that belong to a child
+project.

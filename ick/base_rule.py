@@ -50,6 +50,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         extra_env: dict[str, str],
         append_filenames: bool,
         rule_prepare: Callable[[], bool] | None = None,
+        excluded_project_dirs: Sequence[str] = (),
         prefix: str = "",
         *args: Any,
         **kwargs: Any,
@@ -66,6 +67,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         self.extra_env = extra_env
         self.append_filenames = append_filenames
         self.rule_prepare = rule_prepare
+        self.excluded_project_dirs = tuple(excluded_project_dirs)
         # dict key is gen, (keys, ...) and for these to match precisely we
         # should have output_state gens[self.index] == gen for all the listed
         # keys; if we have none of them then we should skip that message.
@@ -75,7 +77,25 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         self.batch_messages: dict[tuple[tuple[str, int], ...], tuple[str, int, dict[str, Any] | None]] = {}
         self.rule_status = RuleStatus.SUCCESS
 
+    def _key_is_excluded(self, key: str) -> bool:
+        for excluded_dir in self.excluded_project_dirs:
+            excluded_dir = excluded_dir.rstrip("/")
+            if key == excluded_dir or key.startswith(f"{excluded_dir}/"):
+                return True
+        return False
+
+    def _output_key(self, relative_filename: str) -> str:
+        return f"{self.match_prefix}{relative_filename}" if self.match_prefix else relative_filename
+
+    def _ensure_allowed_key(self, key: str) -> bool:
+        if self._key_is_excluded(key):
+            self.cancel(f"Produced output for excluded project path: {key!r}")
+            return False
+        return True
+
     def match(self, key: str) -> bool:
+        if self._key_is_excluded(key):
+            return False
         m = bool(match_prefix_patterns(key, self.match_prefix, self.patterns))
         self.matches_at_least_once |= m
         return m
@@ -180,24 +200,36 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
             changed, new, remv = analyze_dir(d, expected)
             # print(changed, new, remv)
 
+            outputs: list[Notification[str, bytes | Erasure]] = []
             for n in notifications:
                 relative_filename = n.key[len(self.match_prefix) :]
                 if relative_filename in changed:
-                    yield self.update_notification(n, next_gen, new_value=Path(d, relative_filename).read_bytes())
+                    key = n.key
+                    if not self._ensure_allowed_key(key):
+                        return
+                    outputs.append(self.update_notification(n, next_gen, new_value=Path(d, relative_filename).read_bytes()))
                     batch_key[n.key] = next_gen
                 elif relative_filename in remv:
-                    yield self.update_notification(n, next_gen, new_value=ERASURE)
+                    key = n.key
+                    if not self._ensure_allowed_key(key):
+                        return
+                    outputs.append(self.update_notification(n, next_gen, new_value=ERASURE))
                     batch_key[n.key] = next_gen
 
             brand_new_gens = self.update_generations((0,) * len(notifications[0].state.gens), next_gen)
             for name in new:
-                batch_key[name] = next_gen
-                yield Notification(
-                    key=name,
-                    state=State(
-                        gens=brand_new_gens,
-                        value=Path(d, name).read_bytes(),
-                    ),
+                full_key = self._output_key(name)
+                if not self._ensure_allowed_key(full_key):
+                    return
+                batch_key[full_key] = next_gen
+                outputs.append(
+                    Notification(
+                        key=full_key,
+                        state=State(
+                            gens=brand_new_gens,
+                            value=Path(d, name).read_bytes(),
+                        ),
+                    )
                 )
 
             metadata_path = Path(output_dir) / "metadata.json"
@@ -207,6 +239,8 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
 
             if batch_value:
                 self.batch_messages[tuple(batch_key.items())] = (batch_value[0], batch_value[1], batch_metadata)
+
+            yield from outputs
 
     def compute_diff_messages(self) -> list[Modified | Finished]:
         assert not self.cancelled
@@ -394,6 +428,9 @@ class BaseRule:
 
         if self.rule_config.scope == Scope.FILE:
             for p in projects:
+                excluded_project_dirs = tuple(
+                    q.subdir for q in projects if q.subdir != p.subdir and q.subdir.startswith(p.subdir)
+                )
                 run.add_step(
                     GenericPreparedStep(
                         qualname=qualname,
@@ -403,6 +440,7 @@ class BaseRule:
                         extra_env={**env, **self.command_env},
                         append_filenames=True,
                         rule_prepare=self.prepare,
+                        excluded_project_dirs=excluded_project_dirs,
                         prefix=prefix,
                         batch_size=self.rule_config.batch_size,
                     )
@@ -413,6 +451,9 @@ class BaseRule:
             # project-relative paths.  There's some work to do here once they
             # can nest.
             for p in projects:
+                excluded_project_dirs = tuple(
+                    q.subdir for q in projects if q.subdir != p.subdir and q.subdir.startswith(p.subdir)
+                )
                 run.add_step(
                     GenericPreparedStep(
                         qualname=qualname,
@@ -424,6 +465,7 @@ class BaseRule:
                         extra_env={**env, **self.command_env},
                         append_filenames=False,
                         rule_prepare=self.prepare,
+                        excluded_project_dirs=excluded_project_dirs,
                         prefix=prefix,
                         eager=False,
                         batch_size=-1,
