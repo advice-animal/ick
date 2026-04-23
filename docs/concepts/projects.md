@@ -47,3 +47,9 @@ for monorepos where `services/` or `apps/` contain their own project roots.
 Project-scoped and file-scoped rules stop at nested project boundaries, so a
 rule for a parent project will not read or write files that belong to a child
 project.
+
+Per-project ignores live in the project directory itself, using either an
+`ick.toml` file or `[tool.ick]` inside `pyproject.toml`. If both exist, ick
+merges them, with `ick.toml` taking precedence on conflicts. These config files
+can set `ignore_rules`, `ignore_filenames`, and per-rule `rules` entries keyed
+by the repo-local rule name such as `python/move_isort_cfg`.
