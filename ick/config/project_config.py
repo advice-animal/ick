@@ -33,7 +33,7 @@ class ProjectConfig(Struct):
 
     Rule names are ``subdir/name`` within the rule repo — everything after the
     prefix.  For example, if ``ick --list`` shows
-    ``advice-animal/python/move_isort_cfg``, the key to use here is
+    ``advice-animal:python/move_isort_cfg``, the key to use here is
     ``python/move_isort_cfg`` (the prefix ``advice-animal`` is omitted because
     it is user-controlled and can vary).  For rules at the root of their repo
     there is no subdir, so just the bare name is used.

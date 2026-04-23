@@ -43,7 +43,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
 
     def __init__(
         self,
-        qualname: str,
+        prefixed_name: str,
         patterns: Sequence[str],
         project_path: str,
         cmdline: Sequence[str | Path],
@@ -57,8 +57,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.qualname = qualname
-        self.prefix = prefix
+        self.prefixed_name = prefixed_name
         # TODO figure out how extra_inputs factors in
         assert patterns is not None, "File scoped rules require an `inputs` section in the rule config!"
         self.patterns = patterns
@@ -143,7 +142,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
     def _gravitational_constant(self) -> int:
         return 1
 
-    @ktrace("self.qualname", "self.match_prefix", "next_gen")
+    @ktrace("self.prefixed_name", "self.match_prefix", "next_gen")
     def process(
         self,
         next_gen: int,
@@ -287,7 +286,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
 
                 changes.append(
                     Modified(
-                        rule_name=self.qualname,
+                        rule_name=self.prefixed_name,
                         filename=k,
                         new_bytes=None if b is ERASURE else b,
                         diff=diff,
@@ -306,7 +305,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
                     diff_stat = None
                 changes.append(
                     Modified(
-                        rule_name=self.qualname,
+                        rule_name=self.prefixed_name,
                         filename=k,
                         new_bytes=new_bytes,
                         diff=diff,
@@ -352,7 +351,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
             self.rule_status = RuleStatus.NEEDS_WORK
 
         changes.append(
-            Finished(self.qualname, status=self.rule_status, message="".join(msgs), metadata=metadata),
+            Finished(self.prefixed_name, status=self.rule_status, message="".join(msgs), metadata=metadata),
         )
         return changes
 
@@ -428,21 +427,20 @@ class BaseRule:
         return True  # no setup required
 
     def add_steps_to_run(self, projects: Any, env: Mapping[str, str], run: Run[str, bytes | Erasure]) -> None:
-        qualname = self.rule_config.qualname
-        prefix = self.rule_config.prefix
-        name_in_repo = self.rule_config.name_in_repo
+        prefixed_name = self.rule_config.prefixed_name
+        full_name = self.rule_config.full_name
 
         if self.rule_config.scope == Scope.FILE:
             for p in projects:
                 if self.rule_config.project_types is not None and p.typ not in self.rule_config.project_types:
                     continue
-                if name_in_repo in p.config.ignore_rules:
+                if full_name in p.config.ignore_rules:
                     continue
                 excluded_project_dirs = tuple(q.subdir for q in projects if q.subdir != p.subdir and q.subdir.startswith(p.subdir))
-                per_rule = p.config.rules.get(name_in_repo)
+                per_rule = p.config.rules.get(full_name)
                 run.add_step(
                     GenericPreparedStep(
-                        qualname=qualname,
+                        prefixed_name=prefixed_name,
                         patterns=self.rule_config.inputs,  # Don't default, let it raise
                         project_path=p.subdir,
                         cmdline=self.command_parts,
@@ -463,13 +461,13 @@ class BaseRule:
             for p in projects:
                 if self.rule_config.project_types is not None and p.typ not in self.rule_config.project_types:
                     continue
-                if name_in_repo in p.config.ignore_rules:
+                if full_name in p.config.ignore_rules:
                     continue
                 excluded_project_dirs = tuple(q.subdir for q in projects if q.subdir != p.subdir and q.subdir.startswith(p.subdir))
-                per_rule = p.config.rules.get(name_in_repo)
+                per_rule = p.config.rules.get(full_name)
                 run.add_step(
                     GenericPreparedStep(
-                        qualname=qualname,
+                        prefixed_name=prefixed_name,
                         # Default to wanting all files, but allow specifying that
                         # you want _no_ files as empty list.
                         patterns=("*",) if self.rule_config.inputs is None else self.rule_config.inputs,
@@ -488,7 +486,7 @@ class BaseRule:
         else:  # REPO
             run.add_step(
                 GenericPreparedStep(
-                    qualname=qualname,
+                    prefixed_name=prefixed_name,
                     # Default to wanting all files, but allow specifying that
                     # you want _no_ files as empty list.
                     patterns=("*",) if self.rule_config.inputs is None else self.rule_config.inputs,
@@ -497,7 +495,6 @@ class BaseRule:
                     extra_env={**env, **self.command_env},
                     append_filenames=False,
                     rule_prepare=self.prepare,
-                    prefix=prefix,
                     eager=False,
                     batch_size=-1,
                 )
