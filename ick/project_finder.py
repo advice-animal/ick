@@ -51,7 +51,9 @@ def find_projects(repo: Repo, zstr: str, conf: MainConfig) -> list[Project]:
     final_projects: list[Project] = []
 
     for project in sorted(projects.values(), key=lambda p: (p.subdir.count("/"), p.subdir)):
-        if project.subdir.startswith(final_project_names) and project.subdir not in final_project_names:
+        if conf.explicit_project_dirs:
+            LOG.debug("Keeping project at %r because it is in explicit_project_dirs", project.subdir)
+        elif project.subdir.startswith(final_project_names) and project.subdir not in final_project_names:
             if conf.outer_project_dirs and dir_in_dirlist_or_subdir(project.subdir, conf.outer_project_dirs):
                 LOG.log(VLOG_1, "Keeping nested project at %r because it is in outer_project_dirs", project.subdir)
             else:
