@@ -61,10 +61,12 @@ def test_discover() -> None:
 def test_load_rule_repo_ruleset_url_propagates(mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
     fixture_path = Path("tests/fixture_rules").resolve()
     mocker.patch("ick.config.rule_repo.update_local_cache", return_value=fixture_path)
-    r = Ruleset(url="https://github.com/example/rules.git")
+    r = Ruleset(url="https://github.com/example/rules.git", prefix="rule")
     rc = load_rule_repo(r)
     for rule in rc.rule:
         assert rule.url == "https://github.com/example/rules.git"
+        assert rule.full_name
+        assert rule.prefixed_name.startswith("rule:")
 
 
 def test_ruleset_url_and_path_error() -> None:

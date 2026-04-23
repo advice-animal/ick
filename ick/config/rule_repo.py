@@ -67,7 +67,7 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
     for k, v in rulesets.items():
         rules.extend(v.rule)
 
-    rules.sort(key=lambda h: (h.order, h.qualname))
+    rules.sort(key=lambda h: (h.order, h.prefixed_name))
 
     return rules
 
@@ -112,12 +112,10 @@ def load_rule_repo(ruleset: Ruleset) -> RuleRepoConfig:
         base = dirname(filename).lstrip("/")
         if base:
             base += "/"
-        prefix = ruleset.prefix + "/" if (ruleset.prefix not in ["", "."]) else ""  # type: ignore[operator] # FIX ME
+        prefix = ruleset.prefix + ":" if (ruleset.prefix not in ["", "."]) else ""  # type: ignore[operator] # FIX ME
         for rule in c.rule:
             rule.full_name = base + rule.name
-            rule.name_in_repo = rule.full_name
-            rule.qualname = prefix + rule.full_name
-            rule.prefix = prefix
+            rule.prefixed_name = prefix + rule.full_name
             rule.test_path = repo_path / base / "tests" / rule.name
             rule.script_path = repo_path / base / rule.name
             rule.repo_path = repo_path

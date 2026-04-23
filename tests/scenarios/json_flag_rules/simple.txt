@@ -1,7 +1,7 @@
 $ ick list-rules --json
 {
     "rules": {
-        "rule/do_nothing": {
+        "rule:do_nothing": {
             "duration": null,
             "description": null,
             "urgency": "LATER",
@@ -9,7 +9,7 @@ $ ick list-rules --json
             "contact": "john",
             "url": null
         },
-        "rule/fail": {
+        "rule:fail": {
             "duration": 2,
             "description": null,
             "urgency": "LATER",
@@ -17,7 +17,7 @@ $ ick list-rules --json
             "contact": null,
             "url": "url"
         },
-        "rule/move_a": {
+        "rule:move_a": {
             "duration": null,
             "description": "Description for move_a",
             "urgency": "NOW",

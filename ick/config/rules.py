@@ -106,10 +106,8 @@ class RuleConfig(Struct):
     test_path: Optional[Path] = None
     script_path: Optional[Path] = None
     repo_path: Optional[Path] = None
-    qualname: str = ""  # full display name: prefix + full_name
-    prefix: str = ""  # ruleset prefix portion (e.g. "netflix/"), empty if none
-    full_name: str = ""  # the rule name within the repo (e.g. "python/my_rule")
-    name_in_repo: str = ""  # subdir + name, e.g. "python/move_isort_cfg" — prefix excluded
+    full_name: str = ""  # subdir + name, e.g. "python/move_isort_cfg" — prefix excluded
+    prefixed_name: str = ""  # user prefix + ':' + full_name, e.g. "rule:python/move_isort_cfg"
 
     batch_size: int = 10
     inputs: Optional[Sequence[str]] = None
@@ -122,10 +120,10 @@ class RuleConfig(Struct):
     url: Optional[str] = None
 
     def __post_init__(self) -> None:
-        if not self.qualname:
-            self.qualname = self.name
-        if not self.name_in_repo:
-            self.name_in_repo = self.name
+        if not self.full_name:
+            self.full_name = self.name
+        if not self.prefixed_name:
+            self.prefixed_name = self.full_name
 
 
 @ktrace()
