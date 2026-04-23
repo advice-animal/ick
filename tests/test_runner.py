@@ -12,9 +12,9 @@ from feedforward.step import Step
 from ick.base_rule import BaseRule, GenericPreparedStep
 from ick.cmdline import apply_filters
 from ick.config import MainConfig, RuleConfig, RulesConfig, RuntimeConfig, Settings
-from ick_protocol import Finished
 from ick.runner import Runner
 from ick.types_project import BaseRepo
+from ick_protocol import Finished
 
 
 def _step(patterns: list[str], rule_prepare=None) -> GenericPreparedStep:
@@ -215,7 +215,7 @@ def test_current_gen_metadata_survives() -> None:
 
 def test_step_match_excludes_nested_project_paths() -> None:
     step = GenericPreparedStep(
-        qualname="test_rule",
+        prefixed_name="test_rule",
         patterns=["*.py"],
         project_path="",
         cmdline=[sys.executable, "-c", "pass"],
@@ -230,7 +230,7 @@ def test_step_match_excludes_nested_project_paths() -> None:
 
 def test_step_errors_when_output_hits_excluded_project_path() -> None:
     step = GenericPreparedStep(
-        qualname="test_rule",
+        prefixed_name="test_rule",
         patterns=["*.py"],
         project_path="",
         cmdline=[

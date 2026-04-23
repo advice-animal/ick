@@ -24,7 +24,7 @@ from .click_better import FlexibleGroup
 from .config import RuntimeConfig, Settings, load_main_config, load_rules_config, one_repo_config
 from .git import find_repo_root
 from .project_finder import find_projects as find_projects_fn
-from .runner import HighLevelRunner, Runner, _demo_done_callback, _demo_status_callback, fmt_name
+from .runner import HighLevelResult, Runner, _demo_done_callback, _demo_status_callback, fmt_name
 from .types_project import maybe_repo
 
 ALLOW_LEGACY_NAME_FILTER_OPTION = "--allow-legacy-name-filter"
