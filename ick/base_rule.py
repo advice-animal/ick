@@ -428,9 +428,7 @@ class BaseRule:
 
         if self.rule_config.scope == Scope.FILE:
             for p in projects:
-                excluded_project_dirs = tuple(
-                    q.subdir for q in projects if q.subdir != p.subdir and q.subdir.startswith(p.subdir)
-                )
+                excluded_project_dirs = tuple(q.subdir for q in projects if q.subdir != p.subdir and q.subdir.startswith(p.subdir))
                 run.add_step(
                     GenericPreparedStep(
                         qualname=qualname,
@@ -451,9 +449,7 @@ class BaseRule:
             # project-relative paths.  There's some work to do here once they
             # can nest.
             for p in projects:
-                excluded_project_dirs = tuple(
-                    q.subdir for q in projects if q.subdir != p.subdir and q.subdir.startswith(p.subdir)
-                )
+                excluded_project_dirs = tuple(q.subdir for q in projects if q.subdir != p.subdir and q.subdir.startswith(p.subdir))
                 run.add_step(
                     GenericPreparedStep(
                         qualname=qualname,

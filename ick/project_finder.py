@@ -8,8 +8,8 @@ from vmodule import DEFAULT_FORMAT, VLOG_1, VLOG_2
 
 from ._regex_translate import zfilename_re
 from .config import MainConfig, load_main_config
-from .util import dir_in_dirlist, dir_in_dirlist_or_subdir
 from .types_project import Project, Repo
+from .util import dir_in_dirlist, dir_in_dirlist_or_subdir
 
 LOG = getLogger(__name__)
 
