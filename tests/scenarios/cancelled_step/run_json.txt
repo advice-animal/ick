@@ -26,3 +26,4 @@ $ ick run --json
         ]
     }
 }
+(exit status: 2)

@@ -1,0 +1,9 @@
+# NEEDS_WORK without -q exits 0
+$ ick run
+-> needs_something: NEEDS_WORK
+     README.md +1-1
+# NEEDS_WORK with -q exits 1
+$ ick run -q
+-> needs_something: NEEDS_WORK
+     README.md +1-1
+(exit status: 1)

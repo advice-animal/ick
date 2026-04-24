@@ -190,6 +190,7 @@ def add_rule(
 @click.option("--emojis", is_flag=True, help="Show a waterfall of emojis as work is being done")
 @click.option("--parallelism", type=int, default=0, help="Number of parallel workers (default: auto)")
 @click.option("-k", "substring", default="", help="Substring match on rule name (including prefix)")
+@click.option("-q", "--question", is_flag=True, help="Exit 1 if any rule needs work, exit 2 on errors (like make -q)")
 @click.argument("filters", nargs=-1)
 @click.pass_context
 def run(
@@ -202,6 +203,7 @@ def run(
     emojis: bool,
     parallelism: int,
     substring: str,
+    question: bool,
     filters: list[str],
 ) -> None:
     """
@@ -260,6 +262,8 @@ def run(
         done_callback=done_callback,
     )
 
+    exit_code = 0
+
     if json_flag:
         results = collections.defaultdict(list)
         for result in r.run_steps(steps):
@@ -275,6 +279,10 @@ def run(
                 "metadata": result.finished.metadata,
             }
             results[result.rule].append(output)
+            if result.finished.status == RuleStatus.ERROR:
+                exit_code = max(exit_code, 2)
+            elif result.finished.status == RuleStatus.NEEDS_WORK and question:
+                exit_code = max(exit_code, 1)
 
         json.dump({"results": results}, sys.stdout, indent=4)
         sys.stdout.write("\n")
@@ -285,6 +293,7 @@ def run(
             print(f"-> [bold]{fmt_qualname(result.rule, result.prefix)}[/bold]{where}: ", end="")
             match result.finished.status:
                 case RuleStatus.ERROR:
+                    exit_code = max(exit_code, 2)
                     print("[red]ERROR[/red]")
                     lines = result.finished.message.splitlines()
                     if ctx.parent.params.get("v", 0) > 0:
@@ -297,6 +306,8 @@ def run(
                         if len(lines) > 1:
                             print("    ", lines[-1])
                 case RuleStatus.NEEDS_WORK:
+                    if question:
+                        exit_code = max(exit_code, 1)
                     print("[yellow]NEEDS_WORK[/yellow]")
                     for line in result.finished.message.splitlines():
                         print("    ", line)
@@ -322,6 +333,9 @@ def run(
                         path.parent.mkdir(parents=True, exist_ok=True)
                         path.write_bytes(mod.new_bytes)
                     print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
+
+    if exit_code:
+        sys.exit(exit_code)
 
 
 main.add_command(
