@@ -312,6 +312,9 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
             # As documented in ick_protocol, it's a fail if there are changes...
             self.rule_status = RuleStatus.NEEDS_WORK
 
+        if metadata:
+            metadata = {k: v for k, v in sorted(metadata.items())}
+
         changes.append(
             Finished(self.qualname, status=self.rule_status, message="".join(msgs), metadata=metadata),
         )
