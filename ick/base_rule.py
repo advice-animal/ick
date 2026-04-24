@@ -313,7 +313,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
             self.rule_status = RuleStatus.NEEDS_WORK
 
         if metadata:
-            metadata = {k:v for k, v in sorted(metadata.items())}
+            metadata = {k: v for k, v in sorted(metadata.items())}
 
         changes.append(
             Finished(self.qualname, status=self.rule_status, message="".join(msgs), metadata=metadata),

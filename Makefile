@@ -49,7 +49,7 @@ mypy:
 
 .PHONY: test
 test:
-	coverage run -m pytest
+	coverage run -m pytest -n 8
 	coverage combine
 	coverage report
 
