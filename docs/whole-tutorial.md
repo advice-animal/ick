@@ -329,8 +329,9 @@ $ ick run
      Traceback (most recent call last):
      ... (pass -v for complete message)
      ModuleNotFoundError: No module named 'imperfect'
+(exited with 2)
 ```
-<!-- [[[end]]] (sum: UbCS0AeSaF) -->
+<!-- [[[end]]] (sum: qVBugs4Jk4) -->
 
 We need to tell `ick` about the dependencies the rule needs.
 
