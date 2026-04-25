@@ -49,7 +49,9 @@ mypy:
 
 .PHONY: test
 test:
-	pytest --cov=ick --cov=tests --cov-report=term-missing --cov-report=html --cov-branch --cov-context=test
+	coverage run -m pytest
+	coverage combine
+	coverage report
 
 .PHONY: clean
 clean:
