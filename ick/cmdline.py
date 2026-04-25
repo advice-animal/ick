@@ -276,7 +276,7 @@ def run(
             }
             results[result.rule].append(output)
 
-        json.dump({"results": results}, sys.stdout, indent=4)
+        json.dump({"results": results}, sys.stdout, indent=4, sort_keys=True)
         sys.stdout.write("\n")
 
     else:
