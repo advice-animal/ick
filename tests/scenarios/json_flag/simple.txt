@@ -3,47 +3,47 @@ $ ick run --json
     "results": {
         "do_nothing": [
             {
-                "project_name": "",
-                "status": "success",
-                "modified": [],
                 "message": "did nothing, but this is a long message anyway:\nlorem ipsum quia dolor sit amet consectetur adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur.\n",
-                "metadata": null
+                "metadata": null,
+                "modified": [],
+                "project_name": "",
+                "status": "success"
             }
         ],
         "fail": [
             {
-                "project_name": "",
-                "status": "error",
-                "modified": [],
                 "message": "AssertionError\n",
-                "metadata": null
+                "metadata": null,
+                "modified": [],
+                "project_name": "",
+                "status": "error"
             }
         ],
         "move_a": [
             {
-                "project_name": "",
-                "status": "needs-work",
+                "message": "",
+                "metadata": null,
                 "modified": [
                     {
-                        "file_name": "file_a.cfg",
-                        "diff_stat": "-3"
+                        "diff_stat": "-3",
+                        "file_name": "file_a.cfg"
                     },
                     {
-                        "file_name": "file_b.toml",
-                        "diff_stat": "+3"
+                        "diff_stat": "+3",
+                        "file_name": "file_b.toml"
                     }
                 ],
-                "message": "",
-                "metadata": null
+                "project_name": "",
+                "status": "needs-work"
             }
         ],
         "testpkg/test_import": [
             {
-                "project_name": "",
-                "status": "success",
-                "modified": [],
                 "message": "Hello from helper module!\n",
-                "metadata": null
+                "metadata": null,
+                "modified": [],
+                "project_name": "",
+                "status": "success"
             }
         ]
     }
