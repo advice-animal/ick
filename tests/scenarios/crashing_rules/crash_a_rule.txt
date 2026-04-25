@@ -1,3 +1,4 @@
 $ ick run
 -> crash: ERROR
      Oh NO!
+(exit status: 2)

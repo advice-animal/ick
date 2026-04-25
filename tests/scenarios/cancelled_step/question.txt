@@ -1,4 +1,5 @@
-$ ick run
+# -q with ERROR exits 2 (ERROR dominates over NEEDS_WORK)
+$ ick run -q
 -> bad_deps: ERROR
      error: Failed to parse: `-`
      ... (pass -v for complete message)
