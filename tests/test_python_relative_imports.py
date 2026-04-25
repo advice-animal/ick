@@ -41,7 +41,7 @@ def test_python_relative_imports(tmp_path: Path) -> None:
             impl="python",
             script_path=script_path.with_suffix(""),  # without .py
             repo_path=repo_path,
-            qualname="test/main",
+            prefixed_name="test:main",
         ),
     )
 
@@ -64,7 +64,7 @@ def test_python_module_path_conversion() -> None:
             impl="python",
             script_path=script_path,
             repo_path=repo_path,
-            qualname="test/subdir/myscript",
+            prefixed_name="test:subdir/myscript",
         ),
     )
 
