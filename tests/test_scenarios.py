@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Iterable
 
 import pytest
+import rich as _rich
 from click.testing import CliRunner
 
 from ick.cmdline import main
@@ -48,6 +49,11 @@ def test_scenario(filename, monkeypatch) -> None:  # type: ignore[no-untyped-def
     # output (for example, the sorted output of `ls`)
     monkeypatch.setenv("LANG", "C")
     monkeypatch.setenv("LC_ALL", "C")
+    # Rich's Console caches _width from COLUMNS at construction time, so
+    # monkeypatching COLUMNS later has no effect if the Console already exists.
+    # Reset it here so it's recreated fresh with COLUMNS=200 on first use.
+    monkeypatch.setenv("COLUMNS", "200")
+    monkeypatch.setattr(_rich, "_console", None)
 
     path = SCENARIO_DIR / filename
     commands = load_scenario(path)
@@ -79,7 +85,6 @@ def test_scenario(filename, monkeypatch) -> None:  # type: ignore[no-untyped-def
                 # TODO: handle global options like -vv
                 args = shlex.split(command.command[6:])
                 with monkeypatch.context() as m:
-                    m.setenv("COLUMNS", "200")
                     m.setattr(
                         "ick.runner.Runner._testing_replacements",
                         {
