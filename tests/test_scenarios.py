@@ -10,8 +10,8 @@ import textwrap
 from pathlib import Path
 from typing import Iterable
 
-import pytest
 import rich as _rich
+import pytest
 from click.testing import CliRunner
 
 from ick.cmdline import main
