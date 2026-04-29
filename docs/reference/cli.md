@@ -77,6 +77,7 @@ ick run [OPTIONS] [FILTERS]...
 - `-p, --patch` - Show diff of what changes would be made
 - `--apply` - Apply changes made by rule
 - `--json` - JSON output of modifications made by rule (doesn't apply changes)
+- `--json-file FILE` - Write JSON results to a file while showing human-readable output on stdout
 - `--skip-update` - When loading rules from a repo, don't pull if some version already exists locally
 
 Note: Only one of the flags `--dryrun`, `--patch`, and `--apply` can be used at a time.
@@ -100,6 +101,10 @@ ick run now
 
 # Output results as JSON
 ick run --json
+
+# Write JSON results to a file while keeping human-readable output on stdout
+ick run --json-file result.json
+ick run --apply --json-file result.json
 ```
 
 ### `test-rules`

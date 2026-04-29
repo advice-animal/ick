@@ -186,6 +186,7 @@ def add_rule(
 @click.option("-p", "--patch", is_flag=True, help="Show patches of changes to make")
 @click.option("--apply", is_flag=True, help="Apply changes")
 @click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by rule qualname (can be used with list-rules --json)")
+@click.option("--json-file", "json_file", type=click.Path(dir_okay=False, writable=True), default=None, help="Write JSON results to a file while showing human-readable output on stdout")
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
 @click.option("--emojis", is_flag=True, help="Show a waterfall of emojis as work is being done")
 @click.option("--parallelism", type=int, default=0, help="Number of parallel workers (default: auto)")
@@ -199,6 +200,7 @@ def run(
     patch: bool,
     apply: bool,
     json_flag: bool,
+    json_file: str | None,
     skip_update: bool,
     emojis: bool,
     parallelism: int,
@@ -264,21 +266,24 @@ def run(
 
     exit_code = 0
 
+    def _collect_json_result(result: Any, results: dict) -> None:  # type: ignore[type-arg]
+        modifications = []
+        for mod in result.modifications:
+            modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
+        output = {
+            "project_name": result.project,
+            "status": result.finished.status,
+            "modified": modifications,
+            # The meaning of this field depends on the status field above
+            "message": result.finished.message,
+            "metadata": result.finished.metadata,
+        }
+        results[result.rule].append(output)
+
     if json_flag:
         results = collections.defaultdict(list)
         for result in r.run_steps(steps):
-            modifications = []
-            for mod in result.modifications:
-                modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
-            output = {
-                "project_name": result.project,
-                "status": result.finished.status,
-                "modified": modifications,
-                # The meaning of this field depends on the status field above
-                "message": result.finished.message,
-                "metadata": result.finished.metadata,
-            }
-            results[result.rule].append(output)
+            _collect_json_result(result, results)
             if result.finished.status == RuleStatus.ERROR:
                 exit_code = max(exit_code, 2)
             elif result.finished.status == RuleStatus.NEEDS_WORK and question:
@@ -288,7 +293,10 @@ def run(
         sys.stdout.write("\n")
 
     else:
+        json_results: dict | None = collections.defaultdict(list) if json_file else None
         for result in r.run_steps(steps):
+            if json_results is not None:
+                _collect_json_result(result, json_results)
             where = f" on {result.project}" if result.project else ""
             print(f"-> [bold]{fmt_qualname(result.rule, result.prefix)}[/bold]{where}: ", end="")
             match result.finished.status:
@@ -333,6 +341,12 @@ def run(
                         path.parent.mkdir(parents=True, exist_ok=True)
                         path.write_bytes(mod.new_bytes)
                     print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
+
+        if json_results is not None:
+            assert json_file is not None
+            with open(json_file, "w") as f:
+                json.dump({"results": json_results}, f, indent=4, sort_keys=True)
+                f.write("\n")
 
     if exit_code:
         sys.exit(exit_code)
