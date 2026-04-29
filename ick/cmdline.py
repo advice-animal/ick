@@ -351,6 +351,8 @@ main.add_command(
 def apply_filters(ctx: click.Context, filters: list[str], substring: str) -> None:
     if substring and filters:
         raise click.UsageError("Cannot use -k together with positional filters")
+    if substring and " " in substring:
+        raise click.UsageError("-k with spaces is not yet supported")
 
     if not substring and not filters:
         pass
