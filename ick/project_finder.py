@@ -9,16 +9,9 @@ from vmodule import DEFAULT_FORMAT, VLOG_1, VLOG_2
 from ._regex_translate import zfilename_re
 from .config import MainConfig, load_main_config
 from .types_project import Project, Repo
+from .util import dir_in_dirlist, dir_in_dirlist_or_subdir
 
 LOG = getLogger(__name__)
-
-
-def dir_in_dirlist(d: str, dlist: list[str]) -> bool:
-    """Is directory `d` in `dlist`? Normalizes trailing slashes."""
-    for dd in dlist:
-        if d.rstrip("/") == dd.rstrip("/"):
-            return True
-    return False
 
 
 def find_projects(repo: Repo, zstr: str, conf: MainConfig) -> list[Project]:
@@ -58,14 +51,19 @@ def find_projects(repo: Repo, zstr: str, conf: MainConfig) -> list[Project]:
     final_projects: list[Project] = []
 
     for project in sorted(projects.values(), key=lambda p: (p.subdir.count("/"), p.subdir)):
-        if project.subdir.startswith(final_project_names) and project.subdir not in final_project_names:
-            LOG.log(
-                VLOG_1,
-                "Skipping project at %r with marker %r because it is subordinate",
-                project.subdir,
-                project.marker_filename,
-            )
-            continue
+        if conf.explicit_project_dirs:
+            LOG.debug("Keeping project at %r because it is in explicit_project_dirs", project.subdir)
+        elif project.subdir.startswith(final_project_names) and project.subdir not in final_project_names:
+            if conf.outer_project_dirs and dir_in_dirlist_or_subdir(project.subdir, conf.outer_project_dirs):
+                LOG.log(VLOG_1, "Keeping nested project at %r because it is in outer_project_dirs", project.subdir)
+            else:
+                LOG.log(
+                    VLOG_1,
+                    "Skipping project at %r with marker %r because it is subordinate",
+                    project.subdir,
+                    project.marker_filename,
+                )
+                continue
         else:
             LOG.debug("Keeping project at %r", project.subdir)
         final_projects.append(project)

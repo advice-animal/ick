@@ -28,6 +28,24 @@ def bucket(items, key):  # type: ignore[no-untyped-def] # FIX ME
     return d
 
 
+def dir_in_dirlist(d: str, dlist: Sequence[str]) -> bool:
+    """Is directory `d` exactly in `dlist`? Normalizes trailing slashes."""
+    for dd in dlist:
+        if d.rstrip("/") == dd.rstrip("/"):
+            return True
+    return False
+
+
+def dir_in_dirlist_or_subdir(d: str, dlist: Sequence[str]) -> bool:
+    """Is directory `d` in `dlist` or inside one of its entries?"""
+    d = d.rstrip("/")
+    for dd in dlist:
+        dd = dd.rstrip("/")
+        if d == dd or d.startswith(f"{dd}/"):
+            return True
+    return False
+
+
 def merge_dicts(d1: dict | None, d2: dict | None) -> dict | None:
     if not d1:
         return d2

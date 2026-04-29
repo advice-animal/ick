@@ -51,7 +51,7 @@ class HighLevelResult:
 def fmt_qualname(qualname: str, prefix: str) -> str:
     """Return Rich markup for a qualname with the prefix portion dimmed."""
     if prefix:
-        return f"[dim]{prefix}[/dim]{qualname[len(prefix):]}"
+        return f"[dim]{prefix}[/dim]{qualname[len(prefix) :]}"
     return qualname
 
 

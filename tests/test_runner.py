@@ -23,6 +23,45 @@ def _step(patterns: list[str], rule_prepare=None) -> GenericPreparedStep:
     )
 
 
+def test_step_match_excludes_nested_project_paths() -> None:
+    step = GenericPreparedStep(
+        qualname="test_rule",
+        patterns=["*.py"],
+        project_path="",
+        cmdline=[sys.executable, "-c", "pass"],
+        extra_env={},
+        append_filenames=True,
+        excluded_project_dirs=["nested/"],
+    )
+
+    assert step.match("other/file.py")
+    assert not step.match("nested/file.py")
+
+
+def test_step_errors_when_output_hits_excluded_project_path() -> None:
+    step = GenericPreparedStep(
+        qualname="test_rule",
+        patterns=["*.py"],
+        project_path="",
+        cmdline=[
+            sys.executable,
+            "-c",
+            "from pathlib import Path; Path('nested').mkdir(); Path('nested/file.py').write_text('new\\n')",
+        ],
+        extra_env={},
+        append_filenames=False,
+        excluded_project_dirs=["nested/"],
+    )
+    step.index = 0
+    step.notify(Notification(key="root.py", state=State(gens=(0,), value=b"hello")))
+
+    result = list(step.process(1, [Notification(key="root.py", state=State(gens=(0,), value=b"hello"))]))
+
+    assert result == []
+    assert step.cancelled
+    assert "excluded project path" in step.cancel_reason
+
+
 def test_timeout_in_prepare_cancels_step() -> None:
     """TimeoutExpired from rule_prepare cancels the step."""
 

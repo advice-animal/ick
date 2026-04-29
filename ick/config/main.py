@@ -73,6 +73,7 @@ class MainConfig(Struct):
     # Intended to be set in a "repo" config
     explicit_project_dirs: Optional[list] = None  # type: ignore[type-arg] # FIX ME
     ignore_project_dirs: Optional[list] = None  # type: ignore[type-arg] # FIX ME
+    outer_project_dirs: Optional[list] = None  # type: ignore[type-arg] # FIX ME
 
     # A file name and key used to read additional per-repo settings. Typically
     # set in user settings.
@@ -95,6 +96,9 @@ class MainConfig(Struct):
         self.ignore_project_dirs = (
             self.ignore_project_dirs if self.ignore_project_dirs is not None else less_specific_defaults.ignore_project_dirs
         )
+        self.outer_project_dirs = (
+            self.outer_project_dirs if self.outer_project_dirs is not None else less_specific_defaults.outer_project_dirs
+        )
         self.repo_settings = self.repo_settings if self.repo_settings is not None else less_specific_defaults.repo_settings
 
 
@@ -102,6 +106,7 @@ MainConfig.DEFAULT = MainConfig(  # type: ignore[attr-defined] # FIX ME
     project_root_markers=DEFAULT_PROJECT_MARKERS,
     explicit_project_dirs=False,  # type: ignore[arg-type] # FIX ME
     skip_project_root_in_repo_root=False,
+    outer_project_dirs=False,  # type: ignore[arg-type] # FIX ME
 )
 
 
