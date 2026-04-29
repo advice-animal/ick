@@ -294,9 +294,9 @@ def run(
         sys.stdout.write("\n")
 
     else:
-        json_results: dict[str, Any] | None = collections.defaultdict(list) if json_file else None
+        json_results = collections.defaultdict(list)
         for result in r.run_steps(steps):
-            if json_results is not None:
+            if json_file is not None:
                 _collect_json_result(result, json_results)
             where = f" on {result.project}" if result.project else ""
             print(f"-> [bold]{fmt_qualname(result.rule, result.prefix)}[/bold]{where}: ", end="")
@@ -343,8 +343,7 @@ def run(
                         path.write_bytes(mod.new_bytes)
                     print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
 
-        if json_results is not None:
-            assert json_file is not None
+        if json_file is not None:
             json.dump({"results": json_results}, json_file, indent=4, sort_keys=True)
             json_file.write("\n")
 
