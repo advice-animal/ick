@@ -10,3 +10,21 @@ Only one of --dry-run, --patch, and --apply can be provided
 $ ick run --dry-run --patch --apply
 Only one of --dry-run, --patch, and --apply can be provided
 (exit status: 1)
+$ ick run -k "foo bar"
+Usage: main run [OPTIONS] [FILTERS]...
+Try 'main run --help' for help.
+
+Error: -k with spaces is not yet supported
+(exit status: 2)
+$ ick list-rules -k "foo bar"
+Usage: main list-rules [OPTIONS] [FILTERS]...
+Try 'main list-rules --help' for help.
+
+Error: -k with spaces is not yet supported
+(exit status: 2)
+$ ick test-rules -k "foo bar"
+Usage: main test-rules [OPTIONS] [FILTERS]...
+Try 'main test-rules --help' for help.
+
+Error: -k with spaces is not yet supported
+(exit status: 2)
