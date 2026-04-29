@@ -104,6 +104,8 @@ ick run --json
 
 # Write JSON results to a file while keeping human-readable output on stdout
 ick run --json-file result.json
+
+# OR: apply changes and also write JSON results to a file
 ick run --apply --json-file result.json
 ```
 
