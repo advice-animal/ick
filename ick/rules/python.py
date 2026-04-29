@@ -46,8 +46,8 @@ class Rule(BaseRule):
         self.coverage = bool(int(os.environ.get("ICK_COVERAGE_PY", "0")))
 
         # TODO validate path / rule.name ".py" exists
-        assert rule_config.qualname != ""
-        venv_key = rule_config.qualname + ("-cov" if self.coverage else "")
+        assert rule_config.prefixed_name != ""
+        venv_key = rule_config.prefixed_name + ("-cov" if self.coverage else "")
         venv_path = Path(platformdirs.user_cache_dir("ick", "advice-animal"), "envs", venv_key)
         deps = self.rule_config.deps or []
         if self.coverage:

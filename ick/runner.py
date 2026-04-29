@@ -38,21 +38,21 @@ class HighLevelResult:
     """
     Capture the result of running ick in a structured way.
 
-    rule is the qualified name of the rule
+    rule is the prefixed name of the rule
     """
 
     rule: str
     project: str
     modifications: Sequence[Modified]
     finished: Finished
-    prefix: str = ""
 
 
-def fmt_qualname(qualname: str, prefix: str) -> str:
-    """Return Rich markup for a qualname with the prefix portion dimmed."""
-    if prefix:
-        return f"[dim]{prefix}[/dim]{qualname[len(prefix) :]}"
-    return qualname
+def fmt_name(name: str) -> str:
+    """Return Rich markup for a name with the prefix portion dimmed."""
+    if ":" in name:
+        prefix, suffix = name.split(":", 1)
+        return f"[dim]{prefix}:[/dim]{suffix}"
+    return name
 
 
 @dataclass
@@ -89,22 +89,39 @@ class Runner:
         self.projects: list[Project] = find_projects(repo, repo.zfiles, self.rtc.main_config)
 
     def iter_rule_impl(self) -> Iterable[BaseRule]:
-        name_filter = re.compile(self.rtc.filter_config.name_filter_re).fullmatch
-        rules_matched = 0
-        for rule in self.rules:
-            if rule.urgency < self.rtc.filter_config.min_urgency:
-                continue
+        def matched_rules(*, legacy: bool) -> list[BaseRule]:
+            filter_re = self.rtc.filter_config.legacy_name_filter_re if legacy else self.rtc.filter_config.name_filter_re
+            name_filter = re.compile(filter_re).fullmatch
+            rules: list[BaseRule] = []
+            for rule in self.rules:
+                if rule.urgency < self.rtc.filter_config.min_urgency:
+                    continue
 
-            if not name_filter(rule.qualname):
-                continue
+                name = rule.prefixed_name.replace(":", "/") if legacy else rule.full_name
+                if not name_filter(name):
+                    continue
 
-            rules_matched += 1
-            yield get_impl(rule)(rule)
+                rules.append(get_impl(rule)(rule))
+            return rules
 
-        if rules_matched == 0 and len(self.rules) > 0:
+        rules = matched_rules(legacy=False)
+        legacy_rules: list[BaseRule] = []
+        if not rules and self.rtc.filter_config.allow_legacy_name_filter:
+            rules = matched_rules(legacy=True)
+        elif not rules:
+            legacy_rules = matched_rules(legacy=True)
+
+        if not rules and len(self.rules) > 0:
+            pattern = self.rtc.filter_config.name_filter_re
+            hint = ""
+            if legacy_rules:
+                hint = " Try --allow-legacy-name-filter."
             print(
-                f"[red]No rules found with urgency '{self.rtc.filter_config.min_urgency.value}' or greater that matches the pattern '{self.rtc.filter_config.name_filter_re}'.[/red]"
+                f"[red]No rules found with urgency '{self.rtc.filter_config.min_urgency.value}' or greater that matches the pattern '{pattern}'.{hint}[/red]"
             )
+
+        for rule in rules:
+            yield rule
 
     def build_steps_for_rules(
         self,
@@ -178,7 +195,7 @@ class Runner:
             for rule_instance, futures in rule_futures:
                 success = True
                 any_updated = False
-                qn = fmt_qualname(rule_instance.rule_config.qualname, rule_instance.rule_config.prefix)
+                qn = fmt_name(rule_instance.rule_config.prefixed_name)
                 print(f"  [bold]{qn}[/bold]: ", end="")
                 if not futures:
                     print("<no-test>", end="")
@@ -405,13 +422,13 @@ class Runner:
                 # This should also encompass exit codes other than 0 and 99
                 # print(f"{s} failed:")
                 # print(f"  {s.cancel_reason}")
-                yield HighLevelResult(s.qualname, s.match_prefix, [], Finished(s.qualname, RuleStatus.ERROR, s.cancel_reason), s.prefix)
+                yield HighLevelResult(s.prefixed_name, s.match_prefix, [], Finished(s.prefixed_name, RuleStatus.ERROR, s.cancel_reason))
             else:
                 # if any(e == 99 for e in s.exit_codes):
                 #     ...
 
                 changes = s.compute_diff_messages()
-                yield HighLevelResult(s.qualname, s.match_prefix, changes[:-1], changes[-1], s.prefix)
+                yield HighLevelResult(s.prefixed_name, s.match_prefix, changes[:-1], changes[-1])
 
     @ktrace()
     def echo_rules(self) -> None:
@@ -419,7 +436,7 @@ class Runner:
         for impl in self.iter_rule_impl():
             impl.prepare()
 
-            msg = f"[bold]{fmt_qualname(impl.rule_config.qualname, impl.rule_config.prefix)}[/]"
+            msg = f"[bold]{fmt_name(impl.rule_config.prefixed_name)}[/]"
             if impl.rule_config.description:
                 msg += f": {impl.rule_config.description}"
             if not impl.runnable:
@@ -453,7 +470,7 @@ class Runner:
                 "contact": config.contact,
                 "url": config.url,
             }
-            rules[config.qualname] = rule
+            rules[config.prefixed_name] = rule
 
         print(json.dumps({"rules": rules}, indent=4))
 

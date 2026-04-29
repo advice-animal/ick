@@ -1,19 +1,25 @@
 import subprocess
 import sys
 import threading
+from pathlib import Path
+from types import SimpleNamespace
 from typing import Iterable
 
 import pytest
 from feedforward import Notification, Run, State
 from feedforward.step import Step
 
-from ick.base_rule import GenericPreparedStep
+from ick.base_rule import BaseRule, GenericPreparedStep
+from ick.cmdline import apply_filters
+from ick.config import MainConfig, RuleConfig, RulesConfig, RuntimeConfig, Settings
+from ick.runner import Runner
+from ick.types_project import BaseRepo
 from ick_protocol import Finished
 
 
 def _step(patterns: list[str], rule_prepare=None) -> GenericPreparedStep:
     return GenericPreparedStep(
-        qualname="test_rule",
+        prefixed_name="test_rule",
         patterns=patterns,
         project_path="",
         cmdline=[sys.executable, "-c", "pass"],
@@ -23,43 +29,46 @@ def _step(patterns: list[str], rule_prepare=None) -> GenericPreparedStep:
     )
 
 
-def test_step_match_excludes_nested_project_paths() -> None:
-    step = GenericPreparedStep(
-        qualname="test_rule",
-        patterns=["*.py"],
-        project_path="",
+def _step_with_excludes(
+    patterns: list[str],
+    exclude_patterns: list[str] = (),
+    project_path: str = "",
+) -> GenericPreparedStep:
+    return GenericPreparedStep(
+        prefixed_name="test_rule",
+        patterns=patterns,
+        project_path=project_path,
         cmdline=[sys.executable, "-c", "pass"],
         extra_env={},
         append_filenames=True,
-        excluded_project_dirs=["nested/"],
+        exclude_patterns=exclude_patterns,
     )
 
-    assert step.match("other/file.py")
-    assert not step.match("nested/file.py")
+
+def test_match_exclude_patterns_per_rule() -> None:
+    """Per-rule exclude_filenames prevents matched files from being processed."""
+    step = _step_with_excludes(["*.py"], exclude_patterns=["tests/**"])
+    assert step.match("foo.py") is True
+    assert step.match("tests/bar.py") is False
 
 
-def test_step_errors_when_output_hits_excluded_project_path() -> None:
-    step = GenericPreparedStep(
-        qualname="test_rule",
-        patterns=["*.py"],
-        project_path="",
-        cmdline=[
-            sys.executable,
-            "-c",
-            "from pathlib import Path; Path('nested').mkdir(); Path('nested/file.py').write_text('new\\n')",
-        ],
-        extra_env={},
-        append_filenames=False,
-        excluded_project_dirs=["nested/"],
-    )
-    step.index = 0
-    step.notify(Notification(key="root.py", state=State(gens=(0,), value=b"hello")))
+def test_match_exclude_patterns_all_rules() -> None:
+    """Global ignore_filenames (merged into exclude_patterns) blocks all rules."""
+    # Simulates what add_steps_to_run does: merge global + per-rule excludes.
+    step = _step_with_excludes(["*.py"], exclude_patterns=["generated/**", "tests/special.py"])
+    assert step.match("src/main.py") is True
+    assert step.match("generated/code.py") is False
+    assert step.match("tests/special.py") is False
+    assert step.match("tests/other.py") is True  # not excluded
 
-    result = list(step.process(1, [Notification(key="root.py", state=State(gens=(0,), value=b"hello"))]))
 
-    assert result == []
-    assert step.cancelled
-    assert "excluded project path" in step.cancel_reason
+def test_match_exclude_patterns_with_project_path() -> None:
+    """Excludes are relative to the project, not the repo root."""
+    step = _step_with_excludes(["*.py"], exclude_patterns=["tests/**"], project_path="packages/mylib/")
+    assert step.match("packages/mylib/src/a.py") is True
+    assert step.match("packages/mylib/tests/b.py") is False
+    # File outside the project is not matched at all (prefix doesn't match).
+    assert step.match("other/tests/c.py") is False
 
 
 def test_timeout_in_prepare_cancels_step() -> None:
@@ -89,7 +98,7 @@ def test_timeout_in_prepare_run_continues_with_next_step(parallelism: int) -> No
     run = Run(parallelism=parallelism)
     step0 = _step(["*.py"], rule_prepare=failing_prepare)
     step1 = GenericPreparedStep(
-        qualname="test_rule_2",
+        prefixed_name="test_rule_2",
         patterns=["*.txt"],
         project_path="",
         cmdline=[sys.executable, "-c", "import sys; [open(f, 'w').write('modified') for f in sys.argv[1:]]"],
@@ -123,6 +132,45 @@ def test_default_parallelism_is_at_least_two() -> None:
 
     run.run_to_completion({"a": "x", "b": "y"})
     assert not step.cancelled
+
+
+def test_no_rules_found_mentions_legacy_flag_when_it_would_help(capsys) -> None:
+    class DummyRule(BaseRule):
+        def __init__(self, rule_config: RuleConfig) -> None:
+            super().__init__(rule_config)
+
+    rule = RuleConfig(
+        name="rule",
+        impl="dummy",
+        full_name="subdir/rule",
+        prefixed_name="prefix:subdir/rule",
+    )
+    rtc = RuntimeConfig(main_config=MainConfig.DEFAULT, rules_config=RulesConfig(), settings=Settings())
+    runner = Runner(rtc, BaseRepo(root=Path.cwd()))
+    runner.rules = [rule]
+    runner.projects = []
+    apply_filters(
+        SimpleNamespace(obj=SimpleNamespace(filter_config=runner.rtc.filter_config)),
+        ["prefix:subdir/rule"],
+        "",
+        allow_legacy_name_filter=False,
+    )
+
+    def fake_get_impl(_: RuleConfig) -> type[BaseRule]:
+        return DummyRule
+
+    from ick import runner as runner_module
+
+    original_get_impl = runner_module.get_impl
+    runner_module.get_impl = fake_get_impl
+    try:
+        assert list(runner.iter_rule_impl()) == []
+    finally:
+        runner_module.get_impl = original_get_impl
+
+    out = capsys.readouterr().out
+    assert "No rules found" in out
+    assert "--allow-legacy-name-filter" in out
 
 
 def _finished(results: list) -> Finished:
@@ -163,3 +211,42 @@ def test_current_gen_metadata_survives() -> None:
 
     assert finished.metadata == {"findings": ["kept"]}
     assert finished.message == "the message\n"
+
+
+def test_step_match_excludes_nested_project_paths() -> None:
+    step = GenericPreparedStep(
+        prefixed_name="test_rule",
+        patterns=["*.py"],
+        project_path="",
+        cmdline=[sys.executable, "-c", "pass"],
+        extra_env={},
+        append_filenames=True,
+        excluded_project_dirs=["nested/"],
+    )
+
+    assert step.match("other/file.py")
+    assert not step.match("nested/file.py")
+
+
+def test_step_errors_when_output_hits_excluded_project_path() -> None:
+    step = GenericPreparedStep(
+        prefixed_name="test_rule",
+        patterns=["*.py"],
+        project_path="",
+        cmdline=[
+            sys.executable,
+            "-c",
+            "from pathlib import Path; Path('nested').mkdir(); Path('nested/file.py').write_text('new\\n')",
+        ],
+        extra_env={},
+        append_filenames=False,
+        excluded_project_dirs=["nested/"],
+    )
+    step.index = 0
+    step.notify(Notification(key="root.py", state=State(gens=(0,), value=b"hello")))
+
+    result = list(step.process(1, [Notification(key="root.py", state=State(gens=(0,), value=b"hello"))]))
+
+    assert result == []
+    assert step.cancelled
+    assert "excluded project path" in step.cancel_reason

@@ -69,21 +69,25 @@ def test_project_finder_types() -> None:
     projects[1].repo = "FAKE"  # type: ignore[assignment]
     projects[2].repo = "FAKE"  # type: ignore[assignment]
 
+    empty_config = {"ignore_rules": [], "ignore_filenames": [], "rules": {}}
     assert to_builtins(projects[0]) == {
         "subdir": "a/",
         "marker_filename": "pyproject.toml",
         "typ": "python",
         "repo": "FAKE",
+        "config": empty_config,
     }
     assert to_builtins(projects[1]) == {
         "subdir": "b/",
         "marker_filename": "build.gradle",
         "typ": "java",
         "repo": "FAKE",
+        "config": empty_config,
     }
     assert to_builtins(projects[2]) == {
         "subdir": "c/",
         "marker_filename": "go.mod",
         "typ": "go",
         "repo": "FAKE",
+        "config": empty_config,
     }
