@@ -24,7 +24,7 @@ from .click_better import FlexibleGroup
 from .config import RuntimeConfig, Settings, load_main_config, load_rules_config, one_repo_config
 from .git import find_repo_root
 from .project_finder import find_projects as find_projects_fn
-from .runner import Runner, _demo_done_callback, _demo_status_callback, fmt_qualname
+from .runner import HighLevelResult, Runner, _demo_done_callback, _demo_status_callback, fmt_qualname
 from .types_project import maybe_repo
 
 
@@ -186,6 +186,7 @@ def add_rule(
 @click.option("-p", "--patch", is_flag=True, help="Show patches of changes to make")
 @click.option("--apply", is_flag=True, help="Apply changes")
 @click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by rule qualname (can be used with list-rules --json)")
+@click.option("--json-file", "json_file", type=click.File(mode="w"), default=None, help="Write JSON results to a file while showing human-readable output on stdout")
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
 @click.option("--emojis", is_flag=True, help="Show a waterfall of emojis as work is being done")
 @click.option("--parallelism", type=int, default=0, help="Number of parallel workers (default: auto)")
@@ -199,6 +200,7 @@ def run(
     patch: bool,
     apply: bool,
     json_flag: bool,
+    json_file: IO[str] | None,
     skip_update: bool,
     emojis: bool,
     parallelism: int,
@@ -264,21 +266,25 @@ def run(
 
     exit_code = 0
 
+    def _collect_json_result(result: HighLevelResult, results_to_modify: dict[str, Any]) -> None:
+        """Collect results into a dict for JSON output."""
+        modifications = []
+        for mod in result.modifications:
+            modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
+        output = {
+            "project_name": result.project,
+            "status": result.finished.status,
+            "modified": modifications,
+            # The meaning of this field depends on the status field above
+            "message": result.finished.message,
+            "metadata": result.finished.metadata,
+        }
+        results_to_modify[result.rule].append(output)
+
     if json_flag:
-        results = collections.defaultdict(list)
+        results: dict[str, Any] = collections.defaultdict(list)
         for result in r.run_steps(steps):
-            modifications = []
-            for mod in result.modifications:
-                modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
-            output = {
-                "project_name": result.project,
-                "status": result.finished.status,
-                "modified": modifications,
-                # The meaning of this field depends on the status field above
-                "message": result.finished.message,
-                "metadata": result.finished.metadata,
-            }
-            results[result.rule].append(output)
+            _collect_json_result(result, results)
             if result.finished.status == RuleStatus.ERROR:
                 exit_code = max(exit_code, 2)
             elif result.finished.status == RuleStatus.NEEDS_WORK and question:
@@ -288,7 +294,10 @@ def run(
         sys.stdout.write("\n")
 
     else:
+        json_results = collections.defaultdict(list)
         for result in r.run_steps(steps):
+            if json_file is not None:
+                _collect_json_result(result, json_results)
             where = f" on {result.project}" if result.project else ""
             print(f"-> [bold]{fmt_qualname(result.rule, result.prefix)}[/bold]{where}: ", end="")
             match result.finished.status:
@@ -333,6 +342,10 @@ def run(
                         path.parent.mkdir(parents=True, exist_ok=True)
                         path.write_bytes(mod.new_bytes)
                     print(f"   Change made: {mod.filename:30s} {mod.diffstat}")
+
+        if json_file is not None:
+            json.dump({"results": json_results}, json_file, indent=4, sort_keys=True)
+            json_file.write("\n")
 
     if exit_code:
         sys.exit(exit_code)
