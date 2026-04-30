@@ -59,7 +59,7 @@ def find_projects(repo: Repo, zstr: str, conf: MainConfig) -> list[Project]:
             else:
                 LOG.log(
                     VLOG_1,
-                    "Skipping project at %r with marker %r because it is subordinate",
+                    "Skipping project at %r with marker %r because it is inside another project",
                     project.subdir,
                     project.marker_filename,
                 )

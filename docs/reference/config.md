@@ -33,14 +33,14 @@ ick:
   explicit_project_dirs:
     - subproject1
     - subproject2
-  continue_project_dirs:
+  outer_project_dirs:
     - services/
 ```
 
 The file can include a path into a subdirectory, and the key can be a dotted
 name to drill down through nested dictionaries in the file.
 
-`continue_project_dirs` is for nested-project layouts: it tells project
+`outer_project_dirs` is for nested-project layouts: it tells project
 discovery to keep looking beneath the listed directories even if a parent
 project has already been found there.
 
