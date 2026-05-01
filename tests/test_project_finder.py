@@ -46,7 +46,7 @@ def test_project_finder_explicit_dirs_keep_nested_projects() -> None:
     assert [p.subdir for p in find_projects(Repo(Path()), sample_string, explicit_config)] == ["services/", "services/api/"]
 
 
-def test_project_finder_continue_dirs() -> None:
+def test_project_finder_outer_dirs() -> None:
     sample_string = "pyproject.toml\0services/pyproject.toml\0services/api/pyproject.toml\0tools/pyproject.toml\0"
     nested_config = replace(MainConfig.DEFAULT, outer_project_dirs=["services/"])  # type: ignore[attr-defined] # FIX ME
 
