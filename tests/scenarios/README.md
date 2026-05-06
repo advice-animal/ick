@@ -10,6 +10,11 @@
     - it has tests
         - the tests will only be run if you use `$ ick test-rules` in your
             scenario
-- If you've changed code and it will change scenarios:
+- Do not `cd` into a scenario's `repo` directory to run commands manually;
+  always run from the project root
+- If you've changed code and it will change existing scenarios:
     - you can run the scenarios to auto-update them:
         - `UPDATE_SCENARIOS=1 pytest -k scenario`
+- To create a new scenario `.txt` file:
+    - write a stub containing just the command line (for example: `$ ick test-rules\n`)
+    - then run `UPDATE_SCENARIOS=1 pytest -k scenario` to fill in the expected output
