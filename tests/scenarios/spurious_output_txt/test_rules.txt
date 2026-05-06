@@ -1,0 +1,16 @@
+$ ick test-rules
+testing...
+  clean_rule: F FAIL
+
+DETAILS
+--------------------------------------------------------------------------------
+testing clean_rule with with_spurious_output:
+
+Expected output, but rule produced none
+--- a/output.txt
++++ b/output.txt
+@@ -1 +0,0 @@
+-This output should not have been here!
+
+
+(exit status: 1)
