@@ -313,9 +313,9 @@ class Runner:
                     result.message = f"{unchanged_file!r} (unchanged) differs"
                     return
 
+            expected_path = outp / "output.txt"
             if actual_output:
                 # Didn't match expectation
-                expected_path = outp / "output.txt"
                 if not expected_path.exists():
                     result.message = f"Test failed, but {expected_path} doesn't exist so that seems unintended:\n{actual_output}"
                     return
@@ -326,6 +326,13 @@ class Runner:
                 else:
                     result.diff = moreorless.unified_diff(expected, actual_output, "output.txt")
                     result.message = "Different output found"
+                return
+
+            if expected_path.exists():
+                # There was no output, but we expected some
+                expected = expected_path.read_text()
+                result.diff = moreorless.unified_diff(expected, "", "output.txt")
+                result.message = "Expected output, but rule produced none"
                 return
 
         result.success = True
