@@ -6,8 +6,8 @@ Regardless of the scope, rules are run in temporary directories with copies of
 the files ick thinks it needs based on the scope and the `inputs` setting.  Your
 rule cannot access files other than those.
 
-You only have access to the files you specify as `input=` -- even specifying
-inefficient globs like `*.py` or `**/scripts/*` is better than leaving it unset
+You only have access to the files you specify as `inputs=` -- even specifying
+inefficient globs like `*.py` or `*/scripts/*` is better than leaving it unset
 which assumes every file gets read.
 
 

@@ -7,7 +7,7 @@ import pytest
 from feedforward import Notification, Run, State
 from feedforward.step import Step
 
-from ick.base_rule import GenericPreparedStep
+from ick.base_rule import GenericPreparedStep, match_prefix_patterns
 from ick_protocol import Finished
 
 
@@ -21,6 +21,50 @@ def _step(patterns: list[str], rule_prepare=None) -> GenericPreparedStep:
         append_filenames=True,
         rule_prepare=rule_prepare,
     )
+
+
+def test_pattern_without_slash_matches_basename_anywhere() -> None:
+    assert match_prefix_patterns("tox.ini", "", ["tox.ini"]) == "tox.ini"
+    assert match_prefix_patterns("subdir/tox.ini", "", ["tox.ini"]) == "subdir/tox.ini"
+    assert match_prefix_patterns("a/b/tox.ini", "", ["tox.ini"]) == "a/b/tox.ini"
+    assert match_prefix_patterns("not-tox.ini", "", ["tox.ini"]) is None
+    assert match_prefix_patterns("foo.py", "", ["*.py"]) == "foo.py"
+    assert match_prefix_patterns("src/foo.py", "", ["*.py"]) == "src/foo.py"
+    assert match_prefix_patterns("src/foo.txt", "", ["*.py"]) is None
+
+
+def test_pattern_with_slash_matches_full_path() -> None:
+    assert match_prefix_patterns("src/foo.py", "", ["src/*.py"]) == "src/foo.py"
+    assert match_prefix_patterns("foo.py", "", ["src/*.py"]) is None
+    assert match_prefix_patterns("other/foo.py", "", ["src/*.py"]) is None
+
+
+def test_file_outside_prefix_never_matches() -> None:
+    assert match_prefix_patterns("other/foo.py", "mylib/", ["*.py"]) is None
+
+
+def test_prefix_stripped_from_returned_filename() -> None:
+    assert match_prefix_patterns("mylib/src/foo.py", "mylib/", ["*.py"]) == "src/foo.py"
+    assert match_prefix_patterns("mylib/tox.ini", "mylib/", ["tox.ini"]) == "tox.ini"
+    assert match_prefix_patterns("mylib/subdir/tox.ini", "mylib/", ["tox.ini"]) == "subdir/tox.ini"
+
+
+def test_any_pattern_in_list_can_match() -> None:
+    assert match_prefix_patterns("tox.ini", "", ["*.py", "tox.ini"]) == "tox.ini"
+    assert match_prefix_patterns("foo.py", "", ["*.py", "tox.ini"]) == "foo.py"
+    assert match_prefix_patterns("setup.cfg", "", ["*.py", "tox.ini"]) is None
+
+
+def test_double_star_is_not_special() -> None:
+    # ** has no special meaning; it behaves identically to *.
+    # */scripts/* matches scripts/ preceded by at least one path component.
+    assert match_prefix_patterns("foo/scripts/run.sh", "", ["*/scripts/*"]) == "foo/scripts/run.sh"
+    assert match_prefix_patterns("a/b/scripts/run.sh", "", ["*/scripts/*"]) == "a/b/scripts/run.sh"
+    assert match_prefix_patterns("foo/scripts/run.sh", "", ["**/scripts/*"]) == "foo/scripts/run.sh"
+    assert match_prefix_patterns("a/b/scripts/run.sh", "", ["**/scripts/*"]) == "a/b/scripts/run.sh"
+    # Neither form matches scripts/ at the project root (no leading path component).
+    assert match_prefix_patterns("scripts/run.sh", "", ["*/scripts/*"]) is None
+    assert match_prefix_patterns("scripts/run.sh", "", ["**/scripts/*"]) is None
 
 
 def test_step_match_excludes_nested_project_paths() -> None:

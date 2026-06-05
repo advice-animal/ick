@@ -3,12 +3,12 @@
 When ick runs a rule, it takes these steps:
 
 - Files from your local directory are copied to a temporary directory. Only
-    the files mentioned in the `input` setting will be copied. This is true even
-    for project- and repo-scoped rules, though for those rules `input` defaults
+    the files mentioned in the `inputs` setting will be copied. This is true even
+    for project- and repo-scoped rules, though for those rules `inputs` defaults
     to all files.
 
 - Your rule doesn't run in your local directory, and will only have access to
-    files copied because of the `input` setting.  Each rule gets its own
+    files copied because of the `inputs` setting.  Each rule gets its own
     temporary directory so they can run independently.
 
 - The code of the rule is executed as a separate process.  Different `impl`
@@ -17,8 +17,7 @@ When ick runs a rule, it takes these steps:
     - File-scoped rules get file paths to operate on as *multiple* command-line arguments.
         Their actions should be limited to those files.  Ick might run multiple
         processes for one rule, with different subsets of the requested files
-        passed to each process.  If you also request `extra_inputs` those will
-        be present, but you shouldn't modify them.
+        passed to each process.
 
     - Ick creates environment variables to provide extra information beyond the
         copied files:
@@ -43,8 +42,7 @@ When ick runs a rule, it takes these steps:
         - `ICK_TEST_NAME` is the relative path to the test being run.
 
     - Rules can make changes to the local copies of files, delete files, or
-        create new files.  Any file that might be modified, created, or deleted
-        must be declared in the rule's `outputs` setting.
+        create new files.
 
     - Rules can also make changes beyond the local copies of files.  They might
         change settings in an external service, update databases, or anything at
