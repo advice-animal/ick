@@ -186,7 +186,13 @@ def add_rule(
 @click.option("-p", "--patch", is_flag=True, help="Show patches of changes to make")
 @click.option("--apply", is_flag=True, help="Apply changes")
 @click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by rule qualname (can be used with list-rules --json)")
-@click.option("--json-file", "json_file", type=click.File(mode="w"), default=None, help="Write JSON results to a file while showing human-readable output on stdout")
+@click.option(
+    "--json-file",
+    "json_file",
+    type=click.File(mode="w"),
+    default=None,
+    help="Write JSON results to a file while showing human-readable output on stdout",
+)
 @click.option("--skip-update", is_flag=True, help="When loading rules from a repo, don't pull if some version already exists locally")
 @click.option("--emojis", is_flag=True, help="Show a waterfall of emojis as work is being done")
 @click.option("--parallelism", type=int, default=0, help="Number of parallel workers (default: auto)")
