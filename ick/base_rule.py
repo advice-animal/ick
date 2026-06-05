@@ -374,13 +374,40 @@ def analyze_dir(directory: str, expected: Mapping[str, bytes | Erasure]) -> tupl
     return changed, new, remv
 
 
+def _pattern_matches(filename: str, pat: str) -> bool:
+    """Match filename against pat, using basename when pat has no path separator."""
+    if "/" not in pat:
+        filename = filename.rsplit("/", 1)[-1]
+    return fnmatch(filename, pat)
+
+
 def match_prefix_patterns(filename: str, prefix: str, patterns: Sequence[str]) -> str | None:
     """
-    Returns the prefix-removed filename if it matches, otherwise None.
+    Check whether `filename` starts with `prefix` and is matched by one of the
+    `patterns`.
+
+    This is used to check whether a repo-relative file path belongs to a
+    project and matches the rule's ``inputs`` patterns.
+
+    ``prefix`` is the project's subdirectory within the repo (e.g. ``"mylib/"``
+    for a project rooted at ``mylib/``; ``""`` for a repo-root project).
+    ``filename`` is the repo-relative path of the file being considered.
+    ``patterns`` are the glob patterns from the rule's ``inputs`` setting.
+
+    If the file is inside the project *and* matches at least one pattern, the
+    project-relative filename is returned so callers can pass it to the rule
+    command.  Returns ``None`` if the file is outside the project or matches no
+    pattern.
+
+    Pattern matching uses :func:`fnmatch.fnmatch` semantics.  Patterns that
+    contain no ``/`` are matched against the bare filename (so ``tox.ini``
+    matches ``subdir/tox.ini``).  Patterns that contain ``/`` are matched
+    against the full project-relative path (so ``src/*.py`` matches only files
+    directly inside ``src/``).
     """
     if filename.startswith(prefix):
         filename = filename[len(prefix) :].lstrip("/")
-        if any(fnmatch(filename, pat) for pat in patterns):
+        if any(_pattern_matches(filename, pat) for pat in patterns):
             return filename
     return None
 

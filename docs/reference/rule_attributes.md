@@ -71,10 +71,12 @@ A single `[[rule]]` in an ick.toml can be configured with the following attribut
 
 #### Input/output
 
-These all follow `.gitignore`-like glob patterns, like `*.py`.
-- `inputs` (Sequence[str]): List of input files/patterns.
-- `outputs` (Sequence[str]): List of output files/patterns.
-- `extra_inputs` (Sequence[str]): Additional input files/patterns.
+- `inputs` (Sequence[str]): List of input files/patterns. Simple file name
+    patterns like `*.py` or `data.db` will match file names matching that
+    pattern no matter where they appear in the project. If the pattern has a
+    slash in it, then the directories must also match. `tests/*.py` will only
+    match Python files in the tests directory. `*/data/*.db` will match any .db
+    file in any directory named data anywhere in the project.
 
 #### Metadata
 
