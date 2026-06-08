@@ -1,3 +1,5 @@
+import os
+import re
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -100,3 +102,22 @@ def diffstat(diff_text: str) -> str:
 
 def convert_path_to_python_identifiers(path: Path) -> Path:
     return Path(*[part.replace("-", "_") for part in path.parts])
+
+
+TRACEBACK_LINE_NUM_RE = re.compile(r"(, line )\d+(,)")
+LOG_LINE_TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} ", re.M)
+LOG_LINE_NUMERIC_LINE_RE = re.compile(r"^([A-Z]+\s+[a-z_.]+:)\d+(?= )", re.M)
+GIT_VERSION_RE = re.compile(r"(\d+\.)\d+(?:\.\d+)?(?:\.dev\d+\S+)?")
+TRAILING_WHITESPACE = re.compile(r"(?m) +$")
+ICK_OUTPUT_DIR_RE = re.compile(r"ICK_OUTPUT_DIR=\S+")
+
+
+def clean_output(output: str) -> str:
+    cleaned_output = TRACEBACK_LINE_NUM_RE.sub(r"\1<n>\2", output)
+    cleaned_output = LOG_LINE_TIMESTAMP_RE.sub("", cleaned_output)
+    cleaned_output = LOG_LINE_NUMERIC_LINE_RE.sub(r"\1<n>", cleaned_output)
+    cleaned_output = GIT_VERSION_RE.sub(r"\1<stuff>", cleaned_output)
+    cleaned_output = TRAILING_WHITESPACE.sub("", cleaned_output)
+    cleaned_output = cleaned_output.replace(os.getcwd(), "/CWD")
+    cleaned_output = ICK_OUTPUT_DIR_RE.sub("ICK_OUTPUT_DIR=<tmp>", cleaned_output)
+    return cleaned_output

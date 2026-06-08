@@ -28,6 +28,7 @@ from .config import RuntimeConfig
 from .config.rule_repo import discover_rules, get_impl
 from .project_finder import find_projects
 from .types_project import BaseRepo, Project, Repo, maybe_repo
+from .util import clean_output
 
 LOG = getLogger(__name__)
 
@@ -69,9 +70,6 @@ class TestResult:
 
 
 class Runner:
-    # Strings to replace in outputs while running scenario tests.
-    _testing_replacements: dict[str, str] = {}
-
     def __init__(self, rtc: RuntimeConfig, repo: Repo, parallelism: int = 0) -> None:
         self.rtc = rtc
         self.rules = discover_rules(rtc)
@@ -255,8 +253,6 @@ class Runner:
             response = run_result.modifications
 
             actual_output = run_result.finished.message
-            for old, new in self._testing_replacements.items():
-                actual_output = actual_output.replace(old, new)
 
             if update:
                 changed = self._write_update(inp, outp, response, run_result.finished.status, actual_output)
@@ -276,11 +272,12 @@ class Runner:
                     result.message = f"Test crashed, but {expected_path} doesn't exist so that seems unintended:\n{actual_output}"
                     return
 
-                expected = expected_path.read_text()
-                if expected == actual_output:
+                expected = clean_output(expected_path.read_text())
+                output = clean_output(actual_output)
+                if expected == output:
                     result.success = True
                 else:
-                    result.diff = moreorless.unified_diff(expected, actual_output, "error.txt")
+                    result.diff = moreorless.unified_diff(expected, output, "error.txt")
                     result.message = "Different output found"
                 return
 
