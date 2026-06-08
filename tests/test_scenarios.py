@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 import os
-import re
 import shlex
 import shutil
 import subprocess
@@ -16,27 +15,10 @@ import rich as _rich
 from click.testing import CliRunner
 
 from ick.cmdline import main
+from ick.util import clean_output
 
 SCENARIO_DIR = Path(__file__).parent / "scenarios"
 SCENARIOS = sorted(str(f.relative_to(SCENARIO_DIR)) for f in SCENARIO_DIR.glob("*/*.txt"))
-
-LOG_LINE_TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} ", re.M)
-LOG_LINE_NUMERIC_LINE_RE = re.compile(r"^([A-Z]+\s+[a-z_.]+:)\d+(?= )", re.M)
-TRACEBACK_LINE_NUM_RE = re.compile(r"(, line )\d+(,)")
-GIT_VERSION_RE = re.compile(r"(\d+\.)\d+(?:\.\d+)?(?:\.dev\d+\S+)?")
-TRAILING_WHITESPACE = re.compile(r"(?m) +$")
-ICK_OUTPUT_DIR_RE = re.compile(r"ICK_OUTPUT_DIR=\S+")
-
-
-def clean_output(output: str) -> str:
-    cleaned_output = TRACEBACK_LINE_NUM_RE.sub(lambda m: (m.group(1) + "<n>" + m.group(2)), output)
-    cleaned_output = LOG_LINE_TIMESTAMP_RE.sub("", cleaned_output)
-    cleaned_output = LOG_LINE_NUMERIC_LINE_RE.sub(lambda m: (m.group(1) + "<n>"), cleaned_output)
-    cleaned_output = GIT_VERSION_RE.sub(lambda m: (m.group(1) + "<stuff>"), cleaned_output)
-    cleaned_output = TRAILING_WHITESPACE.sub("", cleaned_output)
-    cleaned_output = cleaned_output.replace(os.getcwd(), "/CWD")
-    cleaned_output = ICK_OUTPUT_DIR_RE.sub("ICK_OUTPUT_DIR=<tmp>", cleaned_output)
-    return cleaned_output
 
 
 @pytest.mark.parametrize("filename", SCENARIOS)
@@ -84,14 +66,7 @@ def test_scenario(filename, monkeypatch) -> None:  # type: ignore[no-untyped-def
             if command.command[:6] == "$ ick ":
                 # TODO: handle global options like -vv
                 args = shlex.split(command.command[6:])
-                with monkeypatch.context() as m:
-                    m.setattr(
-                        "ick.runner.Runner._testing_replacements",
-                        {
-                            os.getcwd(): "/CWD",
-                        },
-                    )
-                    result = cli_runner.invoke(main, args, catch_exceptions=False)
+                result = cli_runner.invoke(main, args, catch_exceptions=False)
                 output = result.output
                 if result.exit_code != 0:
                     output += f"(exit status: {result.exit_code})\n"
