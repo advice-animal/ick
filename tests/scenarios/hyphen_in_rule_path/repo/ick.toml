@@ -1,0 +1,9 @@
+[[ruleset]]
+path = "."
+
+[[rule]]
+name = "good"
+impl = "shell"
+scope = "repo"
+data = "true"
+urgency = "now"

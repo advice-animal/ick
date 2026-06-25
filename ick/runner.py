@@ -69,6 +69,30 @@ class TestResult:
     traceback: str = ""
 
 
+class ErrorRule(BaseRule):
+    """Synthetic rule yielded when a rule impl raises during instantiation."""
+
+    def __init__(self, rule_config: Any, error: str) -> None:
+        super().__init__(rule_config)
+        self.runnable = False
+        self.status = error
+
+    def add_steps_to_run(self, projects: Any, env: Any, run: Run[str, bytes | Erasure]) -> None:
+        step = GenericPreparedStep(
+            qualname=self.rule_config.qualname,
+            patterns=("*",),
+            project_path="",
+            cmdline=[],
+            extra_env={},
+            append_filenames=False,
+            prefix=self.rule_config.prefix or "",
+            eager=False,
+            batch_size=-1,
+        )
+        run.add_step(step)
+        step.cancel(self.status)
+
+
 class Runner:
     def __init__(self, rtc: RuntimeConfig, repo: Repo, parallelism: int = 0) -> None:
         self.rtc = rtc
@@ -97,7 +121,10 @@ class Runner:
                 continue
 
             rules_matched += 1
-            yield get_impl(rule)(rule)
+            try:
+                yield get_impl(rule)(rule)
+            except Exception as e:
+                yield ErrorRule(rule, str(e))
 
         if rules_matched == 0 and len(self.rules) > 0:
             print(
