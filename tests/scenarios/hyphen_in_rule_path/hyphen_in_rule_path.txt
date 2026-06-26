@@ -1,0 +1,5 @@
+$ ick run
+-> galactic-empire/foundation_series/foundation_series: ERROR
+     Path PosixPath('galactic-empire/foundation_series/foundation_series.py') contains invalid Python identifiers
+-> good: OK
+(exit status: 2)
