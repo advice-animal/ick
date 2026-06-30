@@ -1,4 +1,4 @@
-$ ick list-rules '.*cfg'
+$ ick list-rules move_isort_cfg
 LATER
 =====
 * move_isort_cfg

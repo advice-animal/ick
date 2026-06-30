@@ -18,6 +18,7 @@ from ick_protocol import Finished, ListResponse, Modified, RuleStatus, Scope
 
 from .config import RuleConfig
 from .sh import run_cmd
+from .types_project import Project, root_project
 from .util import diffstat, merge_dicts
 
 LOG = getLogger(__name__)
@@ -51,6 +52,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         append_filenames: bool,
         rule_prepare: Callable[[], bool] | None = None,
         excluded_project_dirs: Sequence[str] = (),
+        exclude_patterns: Sequence[str] = (),
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -59,6 +61,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         # TODO figure out how extra_inputs factors in
         assert patterns is not None, "File scoped rules require an `inputs` section in the rule config!"
         self.patterns = patterns
+        self.exclude_patterns = exclude_patterns
         self.match_prefix = project_path
         self.matches_at_least_once = False
         self.cmdline = cmdline
@@ -95,6 +98,9 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         if self._key_is_excluded(key):
             return False
         m = bool(match_prefix_patterns(key, self.match_prefix, self.patterns))
+        if m and self.exclude_patterns:
+            filename = key[len(self.match_prefix) :].lstrip("/")
+            m = not any(fnmatch(filename, pat) for pat in self.exclude_patterns)
         self.matches_at_least_once |= m
         return m
 
@@ -447,12 +453,25 @@ class BaseRule:
         """
         return True  # no setup required
 
+    def _project_step_excludes(self, p: Project) -> Sequence[str] | None:
+        """Return the exclude patterns for p, or None if this rule should be skipped for p."""
+        name_in_repo = self.rule_config.name_in_repo
+        if self.rule_config.project_types is not None and p.typ not in self.rule_config.project_types:
+            return None
+        if name_in_repo in p.config.ignore_rules:
+            return None
+        per_rule = p.config.rules.get(name_in_repo)
+        return [*p.config.ignore_filenames, *(per_rule.exclude_filenames if per_rule else ())]
+
     def add_steps_to_run(self, projects: Any, env: Mapping[str, str], run: Run[str, bytes | Erasure]) -> None:
         prefixed_name = self.rule_config.prefixed_name
 
         if self.rule_config.scope == Scope.FILE:
             for p in projects:
                 excluded_project_dirs = tuple(q.subdir for q in projects if q.subdir != p.subdir and q.subdir.startswith(p.subdir))
+                excludes = self._project_step_excludes(p)
+                if excludes is None:
+                    continue
                 run.add_step(
                     GenericPreparedStep(
                         prefixed_name=prefixed_name,
@@ -463,6 +482,7 @@ class BaseRule:
                         append_filenames=True,
                         rule_prepare=self.prepare,
                         excluded_project_dirs=excluded_project_dirs,
+                        exclude_patterns=excludes,
                         batch_size=self.rule_config.batch_size,
                     )
                 )
@@ -473,6 +493,9 @@ class BaseRule:
             # can nest.
             for p in projects:
                 excluded_project_dirs = tuple(q.subdir for q in projects if q.subdir != p.subdir and q.subdir.startswith(p.subdir))
+                excludes = self._project_step_excludes(p)
+                if excludes is None:
+                    continue
                 run.add_step(
                     GenericPreparedStep(
                         prefixed_name=prefixed_name,
@@ -485,11 +508,19 @@ class BaseRule:
                         append_filenames=False,
                         rule_prepare=self.prepare,
                         excluded_project_dirs=excluded_project_dirs,
+                        exclude_patterns=excludes,
                         eager=False,
                         batch_size=-1,
                     )
                 )
         else:  # REPO
+            root = root_project(projects)
+            if root is not None:
+                excludes = self._project_step_excludes(root)
+                if excludes is None:
+                    return
+            else:
+                excludes = ()
             run.add_step(
                 GenericPreparedStep(
                     prefixed_name=prefixed_name,
@@ -501,6 +532,7 @@ class BaseRule:
                     extra_env={**env, **self.command_env},
                     append_filenames=False,
                     rule_prepare=self.prepare,
+                    exclude_patterns=excludes,
                     eager=False,
                     batch_size=-1,
                 )

@@ -65,7 +65,7 @@ def test_load_rule_repo_ruleset_url_propagates(mocker) -> None:  # type: ignore[
     rc = load_rule_repo(r)
     for rule in rc.rule:
         assert rule.url == "https://github.com/example/rules.git"
-        assert rule.full_name
+        assert rule.name_in_repo
         assert rule.prefixed_name.startswith("rule:")
 
 
