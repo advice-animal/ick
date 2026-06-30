@@ -28,6 +28,7 @@ from .runner import HighLevelResult, Runner, _demo_done_callback, _demo_status_c
 from .types_project import maybe_repo
 
 ALLOW_LEGACY_NAME_FILTER_OPTION = "--allow-legacy-name-filter"
+REGEX_FILTER_OPTION = "--regex"
 
 
 @click.group(cls=FlexibleGroup)
@@ -84,6 +85,7 @@ def find_projects(ctx: click.Context) -> None:
 
 @main.command()
 @click.option(ALLOW_LEGACY_NAME_FILTER_OPTION, is_flag=True, help="Allow legacy slash-joined rule-name filtering")
+@click.option(REGEX_FILTER_OPTION, "regex", is_flag=True, help="Treat positional filters as raw regex instead of literal names")
 @click.option("--json", "json_flag", is_flag=True, help="Outputs json with rules info by prefixed name (can be used with run --json)")
 @click.option("-k", "substring", default="", help="Substring match on rule name")
 @click.argument("filters", nargs=-1)
@@ -91,6 +93,7 @@ def find_projects(ctx: click.Context) -> None:
 def list_rules(
     ctx: click.Context,
     allow_legacy_name_filter: bool,
+    regex: bool,
     json_flag: bool,
     substring: str,
     filters: list[str],
@@ -99,7 +102,7 @@ def list_rules(
     Lists rules applicable to the current repo
     """
     ctx.obj.filter_config.min_urgency = min(Urgency)  # List all urgencies unless specified by filters
-    apply_filters(ctx, filters, substring, allow_legacy_name_filter=allow_legacy_name_filter)
+    apply_filters(ctx, filters, substring, allow_legacy_name_filter=allow_legacy_name_filter, regex=regex)
     r = Runner(ctx.obj, ctx.obj.repo)
     if json_flag:
         r.echo_rules_json()
@@ -110,12 +113,14 @@ def list_rules(
 @main.command()
 @click.pass_context
 @click.option(ALLOW_LEGACY_NAME_FILTER_OPTION, is_flag=True, help="Allow legacy slash-joined rule-name filtering")
+@click.option(REGEX_FILTER_OPTION, "regex", is_flag=True, help="Treat positional filters as raw regex instead of literal names")
 @click.option("-k", "substring", default="", help="Substring match on rule name")
 @click.option("--update", is_flag=True, help="Update expected test output with actual rule output")
 @click.argument("filters", nargs=-1)
 def test_rules(
     ctx: click.Context,
     allow_legacy_name_filter: bool,
+    regex: bool,
     substring: str,
     update: bool,
     filters: list[str],
@@ -129,7 +134,7 @@ def test_rules(
     current rule implementation. Review the changes before committing.
     """
     ctx.obj.filter_config.min_urgency = min(Urgency)  # Test all urgencies unless specified by filters
-    apply_filters(ctx, filters, substring, allow_legacy_name_filter=allow_legacy_name_filter)
+    apply_filters(ctx, filters, substring, allow_legacy_name_filter=allow_legacy_name_filter, regex=regex)
     r = Runner(ctx.obj, ctx.obj.repo)
     sys.exit(r.test_rules(update=update))
 
@@ -215,6 +220,7 @@ def add_rule(
 @click.option("-k", "substring", default="", help="Substring match on rule name (including prefix)")
 @click.option("-q", "--question", is_flag=True, help="Exit 1 if any rule needs work, exit 2 on errors (like make -q)")
 @click.option(ALLOW_LEGACY_NAME_FILTER_OPTION, is_flag=True, help="Allow legacy slash-joined rule-name filtering")
+@click.option(REGEX_FILTER_OPTION, "regex", is_flag=True, help="Treat positional filters as raw regex instead of literal names")
 @click.argument("filters", nargs=-1)
 @click.pass_context
 def run(
@@ -228,6 +234,7 @@ def run(
     emojis: bool,
     parallelism: int,
     allow_legacy_name_filter: bool,
+    regex: bool,
     substring: str,
     question: bool,
     filters: list[str],
@@ -259,7 +266,7 @@ def run(
     else:
         ctx.obj.filter_config.min_urgency = Urgency.LATER
 
-    apply_filters(ctx, filters, substring, allow_legacy_name_filter=allow_legacy_name_filter)
+    apply_filters(ctx, filters, substring, allow_legacy_name_filter=allow_legacy_name_filter, regex=regex)
 
     # DO THE NEEDFUL
 
@@ -391,6 +398,7 @@ def apply_filters(
     substring: str,
     *,
     allow_legacy_name_filter: bool = False,
+    regex: bool = False,
 ) -> None:
     if substring and filters:
         raise click.UsageError("Cannot use -k together with positional filters")
@@ -410,8 +418,9 @@ def apply_filters(
         ctx.obj.filter_config.name_filter_re = f".*{re.escape(substring)}.*"
         ctx.obj.filter_config.legacy_name_filter_re = ctx.obj.filter_config.name_filter_re
     else:
-        ctx.obj.filter_config.name_filter_re = "|".join(rule_name_re(name) for name in filters)
-        ctx.obj.filter_config.legacy_name_filter_re = "|".join(rule_name_re(name, legacy=True) for name in filters)
+        names = filters if regex else [re.escape(name) for name in filters]
+        ctx.obj.filter_config.name_filter_re = "|".join(rule_name_re(name) for name in names)
+        ctx.obj.filter_config.legacy_name_filter_re = "|".join(rule_name_re(name, legacy=True) for name in names)
 
 
 def verbose_init(v: int, verbose: Optional[int], vmodule: Optional[str]) -> None:

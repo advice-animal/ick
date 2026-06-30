@@ -225,7 +225,7 @@ def test_no_rules_found_mentions_legacy_flag_when_it_would_help(capsys) -> None:
     rule = RuleConfig(
         name="rule",
         impl="dummy",
-        full_name="subdir/rule",
+        name_in_repo="subdir/rule",
         prefixed_name="prefix:subdir/rule",
     )
     rtc = RuntimeConfig(main_config=MainConfig.DEFAULT, rules_config=RulesConfig(), settings=Settings())

@@ -106,9 +106,8 @@ class RuleConfig(Struct):
     test_path: Optional[Path] = None
     script_path: Optional[Path] = None
     repo_path: Optional[Path] = None
-    full_name: str = ""  # subdir + name, e.g. "python/move_isort_cfg" — prefix excluded
-    prefixed_name: str = ""  # user prefix + ':' + full_name, e.g. "rule:python/move_isort_cfg"
-    name_in_repo: str = ""  # alias for full_name; used for project-level ignore matching
+    name_in_repo: str = ""  # subdir + name within the rule repo, e.g. "python/move_isort_cfg"; used for project-level ignore matching
+    prefixed_name: str = ""  # user prefix + ':' + name_in_repo, e.g. "rule:python/move_isort_cfg"
 
     batch_size: int = 10
     inputs: Optional[Sequence[str]] = None
@@ -121,12 +120,10 @@ class RuleConfig(Struct):
     url: Optional[str] = None
 
     def __post_init__(self) -> None:
-        if not self.full_name:
-            self.full_name = self.name
-        if not self.prefixed_name:
-            self.prefixed_name = self.full_name
         if not self.name_in_repo:
-            self.name_in_repo = self.full_name
+            self.name_in_repo = self.name
+        if not self.prefixed_name:
+            self.prefixed_name = self.name_in_repo
 
 
 @ktrace()

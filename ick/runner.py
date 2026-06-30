@@ -118,7 +118,7 @@ class Runner:
                 if rule.urgency < self.rtc.filter_config.min_urgency:
                     continue
 
-                name = rule.prefixed_name.replace(":", "/") if legacy else rule.full_name
+                name = rule.prefixed_name.replace(":", "/") if legacy else rule.name_in_repo
                 if not name_filter(name):
                     continue
 

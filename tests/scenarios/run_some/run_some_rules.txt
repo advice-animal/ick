@@ -1,4 +1,4 @@
-$ ick run '.*cfg'
+$ ick run move_isort_cfg
 -> move_isort_cfg: NEEDS_WORK
      isort.cfg -3
      pyproject.toml +3

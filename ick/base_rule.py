@@ -18,6 +18,7 @@ from ick_protocol import Finished, ListResponse, Modified, RuleStatus, Scope
 
 from .config import RuleConfig
 from .sh import run_cmd
+from .types_project import Project, root_project
 from .util import diffstat, merge_dicts
 
 LOG = getLogger(__name__)
@@ -452,18 +453,25 @@ class BaseRule:
         """
         return True  # no setup required
 
+    def _project_step_excludes(self, p: Project) -> Sequence[str] | None:
+        """Return the exclude patterns for p, or None if this rule should be skipped for p."""
+        name_in_repo = self.rule_config.name_in_repo
+        if self.rule_config.project_types is not None and p.typ not in self.rule_config.project_types:
+            return None
+        if name_in_repo in p.config.ignore_rules:
+            return None
+        per_rule = p.config.rules.get(name_in_repo)
+        return [*p.config.ignore_filenames, *(per_rule.exclude_filenames if per_rule else ())]
+
     def add_steps_to_run(self, projects: Any, env: Mapping[str, str], run: Run[str, bytes | Erasure]) -> None:
         prefixed_name = self.rule_config.prefixed_name
-        name_in_repo = self.rule_config.name_in_repo
 
         if self.rule_config.scope == Scope.FILE:
             for p in projects:
                 excluded_project_dirs = tuple(q.subdir for q in projects if q.subdir != p.subdir and q.subdir.startswith(p.subdir))
-                if self.rule_config.project_types is not None and p.typ not in self.rule_config.project_types:
+                excludes = self._project_step_excludes(p)
+                if excludes is None:
                     continue
-                if name_in_repo in p.config.ignore_rules:
-                    continue
-                per_rule = p.config.rules.get(name_in_repo)
                 run.add_step(
                     GenericPreparedStep(
                         prefixed_name=prefixed_name,
@@ -474,7 +482,7 @@ class BaseRule:
                         append_filenames=True,
                         rule_prepare=self.prepare,
                         excluded_project_dirs=excluded_project_dirs,
-                        exclude_patterns=[*p.config.ignore_filenames, *(per_rule.exclude_filenames if per_rule else ())],
+                        exclude_patterns=excludes,
                         batch_size=self.rule_config.batch_size,
                     )
                 )
@@ -485,11 +493,9 @@ class BaseRule:
             # can nest.
             for p in projects:
                 excluded_project_dirs = tuple(q.subdir for q in projects if q.subdir != p.subdir and q.subdir.startswith(p.subdir))
-                if self.rule_config.project_types is not None and p.typ not in self.rule_config.project_types:
+                excludes = self._project_step_excludes(p)
+                if excludes is None:
                     continue
-                if name_in_repo in p.config.ignore_rules:
-                    continue
-                per_rule = p.config.rules.get(name_in_repo)
                 run.add_step(
                     GenericPreparedStep(
                         prefixed_name=prefixed_name,
@@ -502,12 +508,19 @@ class BaseRule:
                         append_filenames=False,
                         rule_prepare=self.prepare,
                         excluded_project_dirs=excluded_project_dirs,
-                        exclude_patterns=[*p.config.ignore_filenames, *(per_rule.exclude_filenames if per_rule else ())],
+                        exclude_patterns=excludes,
                         eager=False,
                         batch_size=-1,
                     )
                 )
         else:  # REPO
+            root = root_project(projects)
+            if root is not None:
+                excludes = self._project_step_excludes(root)
+                if excludes is None:
+                    return
+            else:
+                excludes = ()
             run.add_step(
                 GenericPreparedStep(
                     prefixed_name=prefixed_name,
@@ -519,6 +532,7 @@ class BaseRule:
                     extra_env={**env, **self.command_env},
                     append_filenames=False,
                     rule_prepare=self.prepare,
+                    exclude_patterns=excludes,
                     eager=False,
                     batch_size=-1,
                 )
