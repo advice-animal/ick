@@ -108,8 +108,6 @@ class RuleConfig(Struct):
     repo_path: Optional[Path] = None
     full_name: str = ""  # subdir + name, e.g. "python/move_isort_cfg" — prefix excluded
     prefixed_name: str = ""  # user prefix + ':' + full_name, e.g. "rule:python/move_isort_cfg"
-    qualname: str = ""  # alias for prefixed_name; used by project-config matching code
-    prefix: str = ""  # ruleset prefix portion (e.g. "advice-animal:"), empty if none
     name_in_repo: str = ""  # alias for full_name; used for project-level ignore matching
 
     batch_size: int = 10
@@ -127,8 +125,6 @@ class RuleConfig(Struct):
             self.full_name = self.name
         if not self.prefixed_name:
             self.prefixed_name = self.full_name
-        if not self.qualname:
-            self.qualname = self.prefixed_name
         if not self.name_in_repo:
             self.name_in_repo = self.full_name
 

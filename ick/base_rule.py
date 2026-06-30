@@ -51,7 +51,6 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
         append_filenames: bool,
         rule_prepare: Callable[[], bool] | None = None,
         excluded_project_dirs: Sequence[str] = (),
-        prefix: str = "",
         exclude_patterns: Sequence[str] = (),
         *args: Any,
         **kwargs: Any,
@@ -455,7 +454,6 @@ class BaseRule:
 
     def add_steps_to_run(self, projects: Any, env: Mapping[str, str], run: Run[str, bytes | Erasure]) -> None:
         prefixed_name = self.rule_config.prefixed_name
-        prefix = self.rule_config.prefix
         name_in_repo = self.rule_config.name_in_repo
 
         if self.rule_config.scope == Scope.FILE:
@@ -476,7 +474,6 @@ class BaseRule:
                         append_filenames=True,
                         rule_prepare=self.prepare,
                         excluded_project_dirs=excluded_project_dirs,
-                        prefix=prefix,
                         exclude_patterns=[*p.config.ignore_filenames, *(per_rule.exclude_filenames if per_rule else ())],
                         batch_size=self.rule_config.batch_size,
                     )
@@ -505,7 +502,6 @@ class BaseRule:
                         append_filenames=False,
                         rule_prepare=self.prepare,
                         excluded_project_dirs=excluded_project_dirs,
-                        prefix=prefix,
                         exclude_patterns=[*p.config.ignore_filenames, *(per_rule.exclude_filenames if per_rule else ())],
                         eager=False,
                         batch_size=-1,
