@@ -2,12 +2,16 @@ import re
 from typing import Iterable
 
 
-def rule_name_re(prefix: str) -> str:
+def rule_name_re(name: str, *, legacy: bool = False) -> str:
     """
-    Returns a regular expression string that matches either prefix/ or prefix
-    as the entire string.  The regex is used with re.fullmatch.
+    Return a regex used with ``fullmatch`` for rule selection.
+
+    Both the new and legacy forms match a rule name plus descendants.
+    The legacy form additionally converts a ``:`` prefix separator to ``/``.
     """
-    return f"^{prefix.rstrip('/')}($|/.*$)"
+    if legacy:
+        return f"^{name.replace(':', '/').rstrip('/')}($|/.*$)"
+    return f"^{name.rstrip('/')}($|/.*$)"
 
 
 def zfilename_re(opts: Iterable[str]) -> re.Pattern[str]:
