@@ -75,7 +75,7 @@ def test_double_star_is_not_special() -> None:
 
 def test_step_match_excludes_nested_project_paths() -> None:
     step = GenericPreparedStep(
-        qualname="test_rule",
+        prefixed_name="test_rule",
         patterns=["*.py"],
         project_path="",
         cmdline=[sys.executable, "-c", "pass"],
@@ -90,7 +90,7 @@ def test_step_match_excludes_nested_project_paths() -> None:
 
 def test_step_errors_when_output_hits_excluded_project_path() -> None:
     step = GenericPreparedStep(
-        qualname="test_rule",
+        prefixed_name="test_rule",
         patterns=["*.py"],
         project_path="",
         cmdline=[

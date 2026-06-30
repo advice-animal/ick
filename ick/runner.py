@@ -79,13 +79,12 @@ class ErrorRule(BaseRule):
 
     def add_steps_to_run(self, projects: Any, env: Any, run: Run[str, bytes | Erasure]) -> None:
         step = GenericPreparedStep(
-            qualname=self.rule_config.qualname,
+            prefixed_name=self.rule_config.prefixed_name,
             patterns=("*",),
             project_path="",
             cmdline=[],
             extra_env={},
             append_filenames=False,
-            prefix=self.rule_config.prefix or "",
             eager=False,
             batch_size=-1,
         )
@@ -127,7 +126,7 @@ class Runner:
                     rules.append(get_impl(rule)(rule))
                 except Exception as e:
                     rules.append(ErrorRule(rule, str(e)))
-        return rules
+            return rules
 
         rules = matched_rules(legacy=False)
         legacy_rules: list[BaseRule] = []
