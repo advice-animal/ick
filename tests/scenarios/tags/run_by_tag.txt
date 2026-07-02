@@ -1,0 +1,8 @@
+# -t filters which rules run, matching any of the given tags
+$ ick run -t security
+-> security-rule: NEEDS_WORK
+     Security
+#
+$ ick run -t python,lint
+-> python-rule: NEEDS_WORK
+     Python

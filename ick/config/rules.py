@@ -118,6 +118,7 @@ class RuleConfig(Struct):
     description: Optional[str] = None
     contact: Optional[str] = None
     url: Optional[str] = None
+    tags: Sequence[str] = ()
 
     def __post_init__(self) -> None:
         if not self.full_name:

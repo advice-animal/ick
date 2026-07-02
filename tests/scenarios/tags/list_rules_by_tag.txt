@@ -1,0 +1,20 @@
+# -t filters rules by tag
+$ ick list-rules -t security
+NOW
+===
+* security-rule
+#
+# Multiple tags (comma-separated or repeated) match any of them
+$ ick list-rules -t security,lint
+NOW
+===
+* python-rule
+* security-rule
+#
+# -t cannot be combined with a positional filter
+$ ick list-rules -t security some-rule
+Usage: main list-rules [OPTIONS] [FILTERS]...
+Try 'main list-rules --help' for help.
+
+Error: Cannot use -t/--tag together with -k or positional filters
+(exit status: 2)

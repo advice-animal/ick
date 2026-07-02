@@ -1,0 +1,34 @@
+[[ruleset]]
+path = "."
+
+[[rule]]
+impl = "shell"
+name = "security-rule"
+scope = "repo"
+urgency = "now"
+tags = ["security"]
+data = """
+echo Security
+exit 99
+"""
+
+[[rule]]
+impl = "shell"
+name = "python-rule"
+scope = "repo"
+urgency = "now"
+tags = ["python", "lint"]
+data = """
+echo Python
+exit 99
+"""
+
+[[rule]]
+impl = "shell"
+name = "untagged-rule"
+scope = "repo"
+urgency = "now"
+data = """
+echo Untagged
+exit 99
+"""

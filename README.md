@@ -118,6 +118,12 @@ but it's OK for hard things to still be hard.
 
 ## Changelog
 
+### Unreleased
+
+- Rules can now have `tags` (a list of strings). Filter rules by tag with
+  `-t`/`--tag` on `run`, `test-rules`, and `list-rules`, for example
+  `ick run -t security` or `ick run -t security,python`.
+
 ### v0.11.0 (June 9, 2026)
 
 - File name patterns in `inputs=` settings now match more intuitively. If the

@@ -118,6 +118,9 @@ class Runner:
                 if rule.urgency < self.rtc.filter_config.min_urgency:
                     continue
 
+                if self.rtc.filter_config.tags and not set(rule.tags) & set(self.rtc.filter_config.tags):
+                    continue
+
                 name = rule.prefixed_name.replace(":", "/") if legacy else rule.full_name
                 if not name_filter(name):
                     continue

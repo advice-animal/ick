@@ -5,7 +5,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import IO, Any, Callable, Optional
+from typing import IO, Any, Callable, Iterable, Optional
 
 import click
 import keke
@@ -28,6 +28,11 @@ from .runner import HighLevelResult, Runner, _demo_done_callback, _demo_status_c
 from .types_project import maybe_repo
 
 ALLOW_LEGACY_NAME_FILTER_OPTION = "--allow-legacy-name-filter"
+
+
+def _flatten_tags(tags: Iterable[str]) -> list[str]:
+    """Split comma-separated tag values so `-t a,b` and `-t a -t b` are equivalent."""
+    return [tag for value in tags for tag in value.split(",") if tag]
 
 
 @click.group(cls=FlexibleGroup)
@@ -86,6 +91,7 @@ def find_projects(ctx: click.Context) -> None:
 @click.option(ALLOW_LEGACY_NAME_FILTER_OPTION, is_flag=True, help="Allow legacy slash-joined rule-name filtering")
 @click.option("--json", "json_flag", is_flag=True, help="Outputs json with rules info by prefixed name (can be used with run --json)")
 @click.option("-k", "substring", default="", help="Substring match on rule name")
+@click.option("-t", "--tag", "tags", multiple=True, help="Filter rules by tag; accepts a comma-separated list and/or repeated flags")
 @click.argument("filters", nargs=-1)
 @click.pass_context
 def list_rules(
@@ -93,13 +99,14 @@ def list_rules(
     allow_legacy_name_filter: bool,
     json_flag: bool,
     substring: str,
+    tags: tuple[str, ...],
     filters: list[str],
 ) -> None:
     """
     Lists rules applicable to the current repo
     """
     ctx.obj.filter_config.min_urgency = min(Urgency)  # List all urgencies unless specified by filters
-    apply_filters(ctx, filters, substring, allow_legacy_name_filter=allow_legacy_name_filter)
+    apply_filters(ctx, filters, substring, tags=_flatten_tags(tags), allow_legacy_name_filter=allow_legacy_name_filter)
     r = Runner(ctx.obj, ctx.obj.repo)
     if json_flag:
         r.echo_rules_json()
@@ -111,12 +118,14 @@ def list_rules(
 @click.pass_context
 @click.option(ALLOW_LEGACY_NAME_FILTER_OPTION, is_flag=True, help="Allow legacy slash-joined rule-name filtering")
 @click.option("-k", "substring", default="", help="Substring match on rule name")
+@click.option("-t", "--tag", "tags", multiple=True, help="Filter rules by tag; accepts a comma-separated list and/or repeated flags")
 @click.option("--update", is_flag=True, help="Update expected test output with actual rule output")
 @click.argument("filters", nargs=-1)
 def test_rules(
     ctx: click.Context,
     allow_legacy_name_filter: bool,
     substring: str,
+    tags: tuple[str, ...],
     update: bool,
     filters: list[str],
 ) -> None:
@@ -129,7 +138,7 @@ def test_rules(
     current rule implementation. Review the changes before committing.
     """
     ctx.obj.filter_config.min_urgency = min(Urgency)  # Test all urgencies unless specified by filters
-    apply_filters(ctx, filters, substring, allow_legacy_name_filter=allow_legacy_name_filter)
+    apply_filters(ctx, filters, substring, tags=_flatten_tags(tags), allow_legacy_name_filter=allow_legacy_name_filter)
     r = Runner(ctx.obj, ctx.obj.repo)
     sys.exit(r.test_rules(update=update))
 
@@ -201,7 +210,9 @@ def add_rule(
 @click.option("-n", "--dry-run", is_flag=True, help="Dry run mode, show counts of lines to change (default)")
 @click.option("-p", "--patch", is_flag=True, help="Show patches of changes to make")
 @click.option("--apply", is_flag=True, help="Apply changes")
-@click.option("--json", "json_flag", is_flag=True, help="Outputs modifications json by prefixed rule name (can be used with list-rules --json)")
+@click.option(
+    "--json", "json_flag", is_flag=True, help="Outputs modifications json by prefixed rule name (can be used with list-rules --json)"
+)
 @click.option(
     "--json-file",
     "json_file",
@@ -213,6 +224,7 @@ def add_rule(
 @click.option("--emojis", is_flag=True, help="Show a waterfall of emojis as work is being done")
 @click.option("--parallelism", type=int, default=0, help="Number of parallel workers (default: auto)")
 @click.option("-k", "substring", default="", help="Substring match on rule name (including prefix)")
+@click.option("-t", "--tag", "tags", multiple=True, help="Filter rules by tag; accepts a comma-separated list and/or repeated flags")
 @click.option("-q", "--question", is_flag=True, help="Exit 1 if any rule needs work, exit 2 on errors (like make -q)")
 @click.option(ALLOW_LEGACY_NAME_FILTER_OPTION, is_flag=True, help="Allow legacy slash-joined rule-name filtering")
 @click.argument("filters", nargs=-1)
@@ -229,6 +241,7 @@ def run(
     parallelism: int,
     allow_legacy_name_filter: bool,
     substring: str,
+    tags: tuple[str, ...],
     question: bool,
     filters: list[str],
 ) -> None:
@@ -239,6 +252,9 @@ def run(
 
     Pass either a rule name, rule prefix, or an urgency string like
     "now" to filter the rules.
+
+    Use -t/--tag to filter rules by tag instead; it cannot be combined with
+    -k or positional filters.
 
     Use --apply to apply rules' changes.
     """
@@ -259,7 +275,7 @@ def run(
     else:
         ctx.obj.filter_config.min_urgency = Urgency.LATER
 
-    apply_filters(ctx, filters, substring, allow_legacy_name_filter=allow_legacy_name_filter)
+    apply_filters(ctx, filters, substring, tags=_flatten_tags(tags), allow_legacy_name_filter=allow_legacy_name_filter)
 
     # DO THE NEEDFUL
 
@@ -390,13 +406,17 @@ def apply_filters(
     filters: list[str],
     substring: str,
     *,
+    tags: list[str] | None = None,
     allow_legacy_name_filter: bool = False,
 ) -> None:
     if substring and filters:
         raise click.UsageError("Cannot use -k together with positional filters")
     if substring and " " in substring:
         raise click.UsageError("-k with spaces is not yet supported")
+    if tags and (substring or filters):
+        raise click.UsageError("Cannot use -t/--tag together with -k or positional filters")
 
+    ctx.obj.filter_config.tags = tags
     ctx.obj.filter_config.allow_legacy_name_filter = allow_legacy_name_filter
     if not substring and not filters:
         pass

@@ -214,6 +214,38 @@ def test_no_rules_found_mentions_legacy_flag_when_it_would_help(capsys) -> None:
     assert "--allow-legacy-name-filter" in out
 
 
+def test_iter_rule_impl_filters_by_tag() -> None:
+    class DummyRule(BaseRule):
+        def __init__(self, rule_config: RuleConfig) -> None:
+            super().__init__(rule_config)
+
+    security_rule = RuleConfig(name="security-rule", impl="dummy", tags=["security"])
+    python_rule = RuleConfig(name="python-rule", impl="dummy", tags=["python", "lint"])
+    untagged_rule = RuleConfig(name="untagged-rule", impl="dummy")
+
+    rtc = RuntimeConfig(main_config=MainConfig.DEFAULT, rules_config=RulesConfig(), settings=Settings())
+    runner = Runner(rtc, BaseRepo(root=Path.cwd()))
+    runner.rules = [security_rule, python_rule, untagged_rule]
+    runner.projects = []
+    apply_filters(
+        SimpleNamespace(obj=SimpleNamespace(filter_config=runner.rtc.filter_config)),
+        [],
+        "",
+        tags=["security", "lint"],
+    )
+
+    from ick import runner as runner_module
+
+    original_get_impl = runner_module.get_impl
+    runner_module.get_impl = lambda _: DummyRule
+    try:
+        matched = {rule.rule_config.name for rule in runner.iter_rule_impl()}
+    finally:
+        runner_module.get_impl = original_get_impl
+
+    assert matched == {"security-rule", "python-rule"}
+
+
 def _finished(results: list) -> Finished:
     return next(r for r in results if isinstance(r, Finished))
 

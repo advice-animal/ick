@@ -82,3 +82,7 @@ A single `[[rule]]` in an ick.toml can be configured with the following attribut
 
 - `description` (str): Description of what the rule does. Will print with `ick list-rules`.
 - `contact` (str): Contact information for the rule maintainer: email, Slack channel, etc.
+- `tags` (list[str]): Arbitrary labels for the rule. Filter rules by tag with
+    `-t`/`--tag` on `ick run`, `ick test-rules`, and `ick list-rules`, for
+    example `ick run -t security` or `ick run -t security,python`. Cannot be
+    combined with a name filter or `-k`.

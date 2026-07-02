@@ -36,3 +36,5 @@ class FilterConfig(Struct):
     #: Default means "don't filter any production urgencies"
     min_urgency: Urgency = Urgency.LATER
     min_risk: Risk = Risk.HIGH
+    #: Default means "don't filter by tags"
+    tags: tuple[str, ...] = ()
