@@ -1,6 +1,8 @@
 import textwrap
 from pathlib import Path
 
+import pytest
+
 from ick.config.main import MainConfig, RepoSettings, _load_repo_settings, load_main_config, load_pyproject
 
 
@@ -200,7 +202,7 @@ def test_repo_settings_key_doesnt_exist(tmp_path: Path) -> None:
     assert result.skip_project_root_in_repo_root is False
 
 
-def test_repo_settings_key_wrong_type(tmp_path: Path, caplog) -> None:
+def test_repo_settings_key_wrong_type(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     """A warning is issued if the repo settings key gets to a non-dict."""
     (tmp_path / "ick.toml").write_text(
         textwrap.dedent("""\
@@ -222,7 +224,7 @@ def test_repo_settings_key_wrong_type(tmp_path: Path, caplog) -> None:
     assert warning.endswith("settings.yaml")
 
 
-def test_repo_settings_unknown_file_type(tmp_path: Path, caplog) -> None:
+def test_repo_settings_unknown_file_type(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     """A warning is issued if the repo settings file is a weird type."""
     (tmp_path / "ick.toml").write_text(
         textwrap.dedent("""\

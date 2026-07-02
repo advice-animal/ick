@@ -44,7 +44,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
     def __init__(
         self,
         prefixed_name: str,
-        patterns: Sequence[str],
+        patterns: Sequence[str] | None,
         project_path: str,
         cmdline: Sequence[str | Path],
         extra_env: dict[str, str],

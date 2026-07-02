@@ -1,8 +1,10 @@
 from pathlib import Path
+from typing import cast
 
 import pytest
 from helpers import FakeRun
 
+from ick.base_rule import GenericPreparedStep
 from ick.config import RuleConfig
 from ick.rules.shell import Rule
 from ick.types_project import BaseRepo, Project
@@ -30,4 +32,4 @@ def test_smoke_single_file(cmd: str | list[str], tmp_path: Path) -> None:
     rule.add_steps_to_run(projects, {}, run)
 
     assert len(run.steps) == 1
-    assert run.steps[0].cmdline == ["sed-like", "-e", "s/hello/HELLO/g"]
+    assert cast(GenericPreparedStep, run.steps[0]).cmdline == ["sed-like", "-e", "s/hello/HELLO/g"]

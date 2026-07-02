@@ -1,7 +1,9 @@
 from pathlib import Path
+from typing import cast
 
 from helpers import FakeRun
 
+from ick.base_rule import GenericPreparedStep
 from ick.config import RuleConfig
 from ick.rules.docker import Rule
 from ick.types_project import BaseRepo, Project
@@ -22,7 +24,7 @@ def test_basic_docker(tmp_path: Path) -> None:
     docker_rule.add_steps_to_run(projects, {}, run)
 
     assert len(run.steps) == 1
-    assert run.steps[0].cmdline == [
+    assert cast(GenericPreparedStep, run.steps[0]).cmdline == [
         "docker",
         "run",
         "--rm",

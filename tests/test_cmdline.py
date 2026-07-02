@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import cast
+
+import click
 
 from ick.cmdline import _flatten_tags, apply_filters
 from ick.config import FilterConfig
 
 
-def _ctx() -> SimpleNamespace:
-    return SimpleNamespace(obj=SimpleNamespace(filter_config=FilterConfig()))
+def _ctx() -> click.Context:
+    return cast(click.Context, SimpleNamespace(obj=SimpleNamespace(filter_config=FilterConfig())))
 
 
 def test_apply_filters_uses_new_matching_by_default() -> None:

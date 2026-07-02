@@ -12,7 +12,7 @@ from logging import getLogger
 from pathlib import Path
 from shutil import copytree, rmtree
 from tempfile import TemporaryDirectory
-from typing import Any, Callable, Iterable, Sequence
+from typing import Any, Callable, Iterable, Sequence, cast
 
 import moreorless
 from feedforward import Run, Step
@@ -25,9 +25,9 @@ from ick_protocol import Finished, Modified, RuleStatus
 
 from .base_rule import BaseRule, GenericPreparedStep
 from .config import RuntimeConfig
-from .config.rule_repo import discover_rules, get_impl
+from .config.rule_repo import discover_rules, get_impl as get_impl
 from .project_finder import find_projects
-from .types_project import BaseRepo, Project, Repo, maybe_repo
+from .types_project import BaseRepo, Project, maybe_repo
 from .util import clean_output
 
 LOG = getLogger(__name__)
@@ -93,7 +93,7 @@ class ErrorRule(BaseRule):
 
 
 class Runner:
-    def __init__(self, rtc: RuntimeConfig, repo: Repo, parallelism: int = 0) -> None:
+    def __init__(self, rtc: RuntimeConfig, repo: BaseRepo, parallelism: int = 0) -> None:
         self.rtc = rtc
         self.rules = discover_rules(rtc)
         self.repo: BaseRepo = repo
@@ -461,7 +461,9 @@ class Runner:
                 #     ...
 
                 changes = s.compute_diff_messages()
-                yield HighLevelResult(s.prefixed_name, s.match_prefix, changes[:-1], changes[-1])
+                finished = changes[-1]
+                assert isinstance(finished, Finished)
+                yield HighLevelResult(s.prefixed_name, s.match_prefix, cast("list[Modified]", changes[:-1]), finished)
 
     @ktrace()
     def echo_rules(self) -> None:

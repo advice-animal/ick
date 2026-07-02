@@ -54,15 +54,15 @@ def discover_rules(rtc: RuntimeConfig) -> Sequence[RuleConfig]:
 
         # Note: We want all of the map to finish before we do any of the loading below.
 
-        futures = [(r, executor.submit(load_rule_repo, r)) for r in rulesets_list]
+        load_futures = [(r, executor.submit(load_rule_repo, r)) for r in rulesets_list]
 
     # Prefixes should be unique; they override here
-    rulesets = {}
-    for ruleset, future in futures:
+    rulesets: dict[str, RuleRepoConfig] = {}
+    for load_ruleset, load_future in load_futures:
         try:
-            rulesets[ruleset.prefix] = future.result()
+            rulesets[load_ruleset.prefix] = load_future.result()
         except Exception as e:
-            LOG.warning("Failed to load rule repo %s: %s", ruleset.prefix, e)
+            LOG.warning("Failed to load rule repo %s: %s", load_ruleset.prefix, e)
 
     for k, v in rulesets.items():
         rules.extend(v.rule)

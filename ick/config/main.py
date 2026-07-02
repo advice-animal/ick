@@ -139,13 +139,14 @@ def _load_repo_settings(repo_root: Path, repo_settings: RepoSettings) -> Optiona
         # The file was empty.
         return None
     for k in repo_settings.key.split("."):
-        data = data.get(k)
-        if not isinstance(data, dict):
-            if data is None:
+        found = data.get(k)
+        if not isinstance(found, dict):
+            if found is None:
                 LOG.log(VLOG_1, "repo_settings key %r not found in %s", repo_settings.key, settings_path)
             else:
-                LOG.warning("unexpected type %r found for key %r in %s", type(data).__name__, repo_settings.key, settings_path)
+                LOG.warning("unexpected type %r found for key %r in %s", type(found).__name__, repo_settings.key, settings_path)
             return None
+        data = found
     LOG.log(VLOG_1, "Loaded repo_settings from %s key %r", settings_path, repo_settings.key)
     return msgspec.convert(data, MainConfig)
 

@@ -94,7 +94,7 @@ def test_ruleset_merge_url_with_path() -> None:
     assert specific_config.ruleset[0].prefix == "prefix"
 
 
-def test_discover_parallel(monkeypatch) -> None:
+def test_discover_parallel(monkeypatch: pytest.MonkeyPatch) -> None:
     """Multiple rulesets are loaded concurrently, not serially."""
     barrier = threading.Barrier(2, timeout=5)
     original_load = load_rule_repo
@@ -112,7 +112,7 @@ def test_discover_parallel(monkeypatch) -> None:
     assert len(rules) == 6
 
 
-def test_discover_warns_on_failure(monkeypatch, caplog) -> None:
+def test_discover_warns_on_failure(monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture) -> None:
     """A failing ruleset logs a warning and is skipped rather than raising."""
     good = Ruleset(base_path=Path.cwd(), path="tests/fixture_rules")
     bad = Ruleset(url="https://git.example.com/nonexistent.git", prefix="broken")
