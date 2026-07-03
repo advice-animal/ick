@@ -25,7 +25,8 @@ from ick_protocol import Finished, Modified, RuleStatus
 
 from .base_rule import BaseRule, GenericPreparedStep
 from .config import RuntimeConfig
-from .config.rule_repo import discover_rules, get_impl as get_impl
+from .config.rule_repo import discover_rules
+from .config.rule_repo import get_impl as get_impl
 from .project_finder import find_projects
 from .types_project import BaseRepo, Project, maybe_repo
 from .util import clean_output

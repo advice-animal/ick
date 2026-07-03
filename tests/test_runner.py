@@ -6,7 +6,6 @@ from types import SimpleNamespace
 from typing import Any, Callable, Iterable, cast
 
 import click
-
 import pytest
 from feedforward import Notification, Run, State
 from feedforward.erasure import Erasure  # todo: export this properly from feedforward
