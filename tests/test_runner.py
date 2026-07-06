@@ -225,12 +225,12 @@ def test_iter_rule_impl_filters_by_tag() -> None:
     python_rule = RuleConfig(name="python-rule", impl="dummy", tags=["python", "lint"])
     untagged_rule = RuleConfig(name="untagged-rule", impl="dummy")
 
-    rtc = RuntimeConfig(main_config=MainConfig.DEFAULT, rules_config=RulesConfig(), settings=Settings())
+    rtc = RuntimeConfig(main_config=MainConfig.DEFAULT, rules_config=RulesConfig(), settings=Settings())  # type: ignore[attr-defined]
     runner = Runner(rtc, BaseRepo(root=Path.cwd()))
     runner.rules = [security_rule, python_rule, untagged_rule]
     runner.projects = []
     apply_filters(
-        SimpleNamespace(obj=SimpleNamespace(filter_config=runner.rtc.filter_config)),
+        cast(click.Context, SimpleNamespace(obj=SimpleNamespace(filter_config=runner.rtc.filter_config))),
         [],
         "",
         tags=["security", "lint"],
@@ -239,7 +239,7 @@ def test_iter_rule_impl_filters_by_tag() -> None:
     from ick import runner as runner_module
 
     original_get_impl = runner_module.get_impl
-    runner_module.get_impl = lambda _: DummyRule
+    runner_module.get_impl = lambda rule: DummyRule
     try:
         matched = {rule.rule_config.name for rule in runner.iter_rule_impl()}
     finally:
