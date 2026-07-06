@@ -1,0 +1,18 @@
+# -t filters rules by tag
+$ ick list-rules -t security
+NOW
+===
+* security-rule
+#
+# Multiple tags (comma-separated or repeated) match any of them
+$ ick list-rules -t security,lint
+NOW
+===
+* python-rule
+* security-rule
+#
+# -t combines with a positional name filter (AND)
+$ ick list-rules -t lint python-rule
+NOW
+===
+* python-rule
