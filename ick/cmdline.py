@@ -253,8 +253,8 @@ def run(
     Pass either a rule name, rule prefix, or an urgency string like
     "now" to filter the rules.
 
-    Use -t/--tag to filter rules by tag instead; it cannot be combined with
-    -k or positional filters.
+    Use -t/--tag to further narrow the rules by tag; it combines with a name
+    filter or -k.
 
     Use --apply to apply rules' changes.
     """
@@ -413,8 +413,6 @@ def apply_filters(
         raise click.UsageError("Cannot use -k together with positional filters")
     if substring and " " in substring:
         raise click.UsageError("-k with spaces is not yet supported")
-    if tags and (substring or filters):
-        raise click.UsageError("Cannot use -t/--tag together with -k or positional filters")
 
     ctx.obj.filter_config.tags = tags
     ctx.obj.filter_config.allow_legacy_name_filter = allow_legacy_name_filter

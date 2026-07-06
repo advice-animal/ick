@@ -2,9 +2,6 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-import click
-import pytest
-
 from ick.cmdline import _flatten_tags, apply_filters
 from ick.config import FilterConfig
 
@@ -47,16 +44,20 @@ def test_apply_filters_sets_tags() -> None:
     assert ctx.obj.filter_config.tags == ["security", "python"]
 
 
-def test_apply_filters_rejects_tags_with_positional_filters() -> None:
+def test_apply_filters_combines_tags_with_positional_filters() -> None:
     ctx = _ctx()
-    with pytest.raises(click.UsageError):
-        apply_filters(ctx, ["some_rule"], "", tags=["security"])
+    apply_filters(ctx, ["some_rule"], "", tags=["security"])
+
+    assert ctx.obj.filter_config.tags == ["security"]
+    assert ctx.obj.filter_config.name_filter_re == "^some_rule($|/.*$)"
 
 
-def test_apply_filters_rejects_tags_with_substring() -> None:
+def test_apply_filters_combines_tags_with_substring() -> None:
     ctx = _ctx()
-    with pytest.raises(click.UsageError):
-        apply_filters(ctx, [], "needle", tags=["security"])
+    apply_filters(ctx, [], "needle", tags=["security"])
+
+    assert ctx.obj.filter_config.tags == ["security"]
+    assert ctx.obj.filter_config.name_filter_re == ".*needle.*"
 
 
 def test_flatten_tags_splits_commas_and_dedupes_flags() -> None:
