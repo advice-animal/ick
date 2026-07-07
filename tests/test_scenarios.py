@@ -22,7 +22,7 @@ SCENARIOS = sorted(str(f.relative_to(SCENARIO_DIR)) for f in SCENARIO_DIR.glob("
 
 
 @pytest.mark.parametrize("filename", SCENARIOS)
-def test_scenario(filename, monkeypatch) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_scenario(filename: str, monkeypatch: pytest.MonkeyPatch) -> None:
     __tracebackhide__ = True
     # Avoid reading user-level config in tests, as they probably would change
     # the available rules
@@ -191,7 +191,7 @@ def parse_scenario(lines: Iterable[str]) -> Iterable[ScenarioCommand]:
         ),
     ],
 )
-def test_parse_scenario(text, commands) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_parse_scenario(text: str, commands: list[ScenarioCommand]) -> None:
     lines = textwrap.dedent(text[1:]).splitlines(keepends=True)
     assert list(parse_scenario(lines)) == commands
 

@@ -4,6 +4,7 @@ from pathlib import Path
 from subprocess import CalledProcessError
 
 import pytest
+from pytest_mock import MockerFixture
 
 from ick.config import MainConfig, RuleConfig, RuleRepoConfig, RulesConfig, Ruleset, RuntimeConfig, Settings
 from ick.config.rule_repo import discover_rules, get_impl, load_pyproject, load_rule_repo
@@ -58,7 +59,7 @@ def test_discover() -> None:
     assert len(rules) == 3
 
 
-def test_load_rule_repo_ruleset_url_propagates(mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_load_rule_repo_ruleset_url_propagates(mocker: MockerFixture) -> None:
     fixture_path = Path("tests/fixture_rules").resolve()
     mocker.patch("ick.config.rule_repo.update_local_cache", return_value=fixture_path)
     r = Ruleset(url="https://github.com/example/rules.git", prefix="rule")

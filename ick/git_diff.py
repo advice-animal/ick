@@ -9,8 +9,8 @@ from .sh import run_cmd
 
 def get_diff_messages(msg: str, rule_name: str, workdir: Path) -> Iterable[Msg]:
     buf: list[str] = []
-    plus_count = None
-    minus_count = None
+    plus_count: int = 0
+    minus_count: int = 0
     filename = ""
     status = RuleStatus.SUCCESS  # all's ok
 
@@ -64,10 +64,10 @@ def get_diff_messages(msg: str, rule_name: str, workdir: Path) -> Iterable[Msg]:
             elif line.startswith(" "):
                 buf.append(line)
             elif line.startswith("+"):
-                plus_count += 1  # type: ignore[operator] # FIX ME
+                plus_count += 1
                 buf.append(line)
             elif line.startswith("-"):
-                minus_count += 1  # type: ignore[operator] # FIX ME
+                minus_count += 1
                 buf.append(line)
             elif line.startswith("Binary files "):
                 pass

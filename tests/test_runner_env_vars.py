@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ick.config import MainConfig, RulesConfig, RuntimeConfig, Settings
+from ick.config import DEFAULT_MAIN_CONFIG, RulesConfig, RuntimeConfig, Settings
 from ick.runner import Runner
 from ick.sh import run_cmd
 from ick.types_project import Repo
@@ -15,7 +15,7 @@ def _init_repo(path: Path) -> None:
 
 def _make_runner(repo: Repo) -> Runner:
     rtc = RuntimeConfig(
-        main_config=MainConfig.DEFAULT,  # type: ignore[attr-defined]
+        main_config=DEFAULT_MAIN_CONFIG,
         rules_config=RulesConfig(ruleset=[]),
         settings=Settings(),
     )

@@ -1,4 +1,4 @@
-from .main import MainConfig, RuntimeConfig, load_main_config
+from .main import DEFAULT_MAIN_CONFIG, MainConfig, RuntimeConfig, load_main_config
 from .rules import PyprojectRulesConfig, RuleConfig, RuleRepoConfig, RulesConfig, Ruleset, load_rules_config, one_repo_config
 from .settings import FilterConfig, Settings
 
@@ -10,6 +10,7 @@ __all__ = [
     "RulesConfig",
     "load_rules_config",
     "MainConfig",
+    "DEFAULT_MAIN_CONFIG",
     "RuntimeConfig",
     "load_main_config",
     "FilterConfig",
