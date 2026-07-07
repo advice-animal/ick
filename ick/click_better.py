@@ -67,5 +67,10 @@ class FlexibleGroup(click.Group):
         except click.UsageError as e:
             formatter = click.HelpFormatter()
             with formatter.section("Available commands"):
-                formatter.write_dl([(name, self.get_command(ctx, name).get_short_help_str()) for name in sorted(self.list_commands(ctx))])
+                rows = []
+                for name in sorted(self.list_commands(ctx)):
+                    cmd = self.get_command(ctx, name)
+                    if cmd is not None:
+                        rows.append((name, cmd.get_short_help_str()))
+                formatter.write_dl(rows)
             raise click.UsageError(f"{e.format_message()}\n\n{formatter.getvalue().rstrip()}") from e

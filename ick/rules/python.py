@@ -12,12 +12,12 @@ from ..venv import PythonEnv
 
 
 class CoveragePythonEnv(PythonEnv):
-    def __init__(self, coverage_contents, env_path, deps):
+    def __init__(self, coverage_contents: str, env_path: Path, deps: list[str] | None) -> None:
         super().__init__(env_path, deps)
         self.coverage_contents = coverage_contents
         self.coveragerc = Path(self.env_path / "coverage.ini")
 
-    def prepare_complete(self):
+    def prepare_complete(self) -> None:
         # This hook should only happen once per venv setup, with the lock still held.
         self.coveragerc.write_text(self.coverage_contents)
 
@@ -56,6 +56,7 @@ class Rule(BaseRule):
             # so it won't conflict with other rules running at the same time.
             # The data file is written to the current directory when this rule
             # was insantiated, so the user's working directory.
+            assert self.rule_config.script_path is not None
             conf = textwrap.dedent(f"""\
                 [run]
                 branch = True
@@ -64,7 +65,7 @@ class Rule(BaseRule):
                 parallel = True
                 source = {self.rule_config.script_path.parent}
             """)
-            self.venv = CoveragePythonEnv(conf, venv_path, deps)
+            self.venv: PythonEnv = CoveragePythonEnv(conf, venv_path, deps)
         else:
             self.venv = PythonEnv(venv_path, deps)
 
@@ -75,6 +76,7 @@ class Rule(BaseRule):
             self.coverage = False
         else:
             if self.coverage:
+                assert isinstance(self.venv, CoveragePythonEnv)
                 self.command_parts += ["-m", "coverage", "run", "--rcfile", self.venv.coveragerc]
             py_script = self.rule_config.script_path.with_suffix(".py")  # type: ignore[union-attr] # FIX ME
             if not py_script.exists():
@@ -82,6 +84,7 @@ class Rule(BaseRule):
                 self.status = f"Couldn't find implementation {py_script}"
 
             # Run as a module to support relative imports
+            assert rule_config.repo_path is not None
             assert py_script.is_relative_to(rule_config.repo_path)
             relative_path = py_script.relative_to(rule_config.repo_path)
             module_path = path_to_module(relative_path)

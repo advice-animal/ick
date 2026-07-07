@@ -185,7 +185,7 @@ def add_rule(
         print("Rule structure initialization for non-python rules is not implemented yet")
         sys.exit(1)
 
-    if scope == scope.FILE and not inputs:
+    if scope == Scope.FILE and not inputs:
         print("File-scoped rules (the default) require an `inputs` section to work!")
         sys.exit(1)
 
@@ -334,7 +334,7 @@ def run(
         sys.stdout.write("\n")
 
     else:
-        json_results = collections.defaultdict(list)
+        json_results: dict[str, Any] = collections.defaultdict(list)
         for result in r.run_steps(steps):
             if json_file is not None:
                 _collect_json_result(result, json_results)
@@ -345,6 +345,7 @@ def run(
                     exit_code = max(exit_code, 2)
                     print("[red]ERROR[/red]")
                     lines = result.finished.message.splitlines()
+                    assert ctx.parent is not None
                     if ctx.parent.params.get("v", 0) > 0:
                         for line in lines:
                             print("    ", line)

@@ -25,9 +25,10 @@ from ick_protocol import Finished, Modified, RuleStatus
 
 from .base_rule import BaseRule, GenericPreparedStep
 from .config import RuntimeConfig
-from .config.rule_repo import discover_rules, get_impl
+from .config.rule_repo import discover_rules
+from .config.rule_repo import get_impl as get_impl
 from .project_finder import find_projects
-from .types_project import BaseRepo, Project, Repo, maybe_repo
+from .types_project import BaseRepo, Project, maybe_repo
 from .util import clean_output
 
 LOG = getLogger(__name__)
@@ -93,7 +94,7 @@ class ErrorRule(BaseRule):
 
 
 class Runner:
-    def __init__(self, rtc: RuntimeConfig, repo: Repo, parallelism: int = 0) -> None:
+    def __init__(self, rtc: RuntimeConfig, repo: BaseRepo, parallelism: int = 0) -> None:
         self.rtc = rtc
         self.rules = discover_rules(rtc)
         self.repo: BaseRepo = repo
@@ -460,8 +461,8 @@ class Runner:
                 # if any(e == 99 for e in s.exit_codes):
                 #     ...
 
-                changes = s.compute_diff_messages()
-                yield HighLevelResult(s.prefixed_name, s.match_prefix, changes[:-1], changes[-1])
+                changes, finished = s.compute_diff_messages()
+                yield HighLevelResult(s.prefixed_name, s.match_prefix, changes, finished)
 
     @ktrace()
     def echo_rules(self) -> None:

@@ -8,13 +8,13 @@ from vmodule import DEFAULT_FORMAT, VLOG_1, VLOG_2
 
 from ._regex_translate import zfilename_re
 from .config import MainConfig, load_main_config
-from .types_project import Project, Repo
+from .types_project import BaseRepo, Project, Repo
 from .util import dir_in_dirlist, dir_in_dirlist_or_subdir
 
 LOG = getLogger(__name__)
 
 
-def find_projects(repo: Repo, zstr: str, conf: MainConfig) -> list[Project]:
+def find_projects(repo: BaseRepo, zstr: str, conf: MainConfig) -> list[Project]:
     """
     Returns topmost projects
     """

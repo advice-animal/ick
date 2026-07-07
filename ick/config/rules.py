@@ -30,9 +30,9 @@ class RulesConfig(Struct):
     # `[[ruleset]]` syntax in the TOML files.
     ruleset: Sequence[Ruleset] = ()
 
-    def inherit(self, less_specific_defaults):  # type: ignore[no-untyped-def] # FIX ME
+    def inherit(self, less_specific_defaults: RulesConfig) -> None:
         # Merge rulesets by prefix. Order after merge doesn't matter - rules get sorted anyway.
-        rulesets_by_prefix = {}
+        rulesets_by_prefix: dict[Optional[str], Ruleset] = {}
 
         # Add defaults first
         for ruleset in less_specific_defaults.ruleset:
@@ -154,7 +154,7 @@ def load_rules_config(cur: Path, isolated_repo: bool) -> RulesConfig:
 
         # TODO finalize ruleset paths so relative works
         try:
-            conf.inherit(c)  # type: ignore[no-untyped-call] # FIX ME
+            conf.inherit(c)
         except Exception as e:
             raise Exception(f"While merging {config_path}: {e!r}")
 

@@ -2,6 +2,7 @@ import os
 import re
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 
 def merge(a, b):  # type: ignore[no-untyped-def] # FIX ME
@@ -48,7 +49,7 @@ def dir_in_dirlist_or_subdir(d: str, dlist: Sequence[str]) -> bool:
     return False
 
 
-def merge_dicts(d1: dict | None, d2: dict | None) -> dict | None:
+def merge_dicts(d1: dict[str, Any] | None, d2: dict[str, Any] | None) -> dict[str, Any] | None:
     if not d1:
         return d2
 

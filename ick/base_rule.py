@@ -44,7 +44,7 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
     def __init__(
         self,
         prefixed_name: str,
-        patterns: Sequence[str],
+        patterns: Sequence[str] | None,
         project_path: str,
         cmdline: Sequence[str | Path],
         extra_env: dict[str, str],
@@ -240,12 +240,12 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
 
             yield from outputs
 
-    def compute_diff_messages(self) -> list[Modified | Finished]:
+    def compute_diff_messages(self) -> tuple[list[Modified], Finished]:
         assert not self.cancelled
         assert self.outputs_final
         assert self.index is not None
 
-        changes: list[Modified | Finished] = []
+        changes: list[Modified] = []
         for k in sorted(set(self.accepted_state) | set(self.output_state)):
             if k in self.accepted_state and k in self.output_state:
                 # Diff but be careful of erasures...
@@ -344,10 +344,10 @@ class GenericPreparedStep(Step[str, bytes | Erasure]):
             # As documented in ick_protocol, it's a fail if there are changes...
             self.rule_status = RuleStatus.NEEDS_WORK
 
-        changes.append(
+        return (
+            changes,
             Finished(self.prefixed_name, status=self.rule_status, message="".join(msgs), metadata=metadata),
         )
-        return changes
 
 
 def analyze_dir(directory: str, expected: Mapping[str, bytes | Erasure]) -> tuple[set[str], set[str], set[str]]:

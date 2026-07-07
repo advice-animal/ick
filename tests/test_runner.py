@@ -3,10 +3,12 @@ import sys
 import threading
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Iterable
+from typing import Callable, Iterable, cast
 
+import click
 import pytest
 from feedforward import Notification, Run, State
+from feedforward.erasure import Erasure  # todo: export this properly from feedforward
 from feedforward.step import Step
 
 from ick.base_rule import BaseRule, GenericPreparedStep, match_prefix_patterns
@@ -14,10 +16,9 @@ from ick.cmdline import apply_filters
 from ick.config import MainConfig, RuleConfig, RulesConfig, RuntimeConfig, Settings
 from ick.runner import Runner
 from ick.types_project import BaseRepo
-from ick_protocol import Finished
 
 
-def _step(patterns: list[str], rule_prepare=None) -> GenericPreparedStep:
+def _step(patterns: list[str], rule_prepare: Callable[[], bool] | None = None) -> GenericPreparedStep:
     return GenericPreparedStep(
         prefixed_name="test_rule",
         patterns=patterns,
@@ -136,7 +137,7 @@ def test_timeout_in_prepare_run_continues_with_next_step(parallelism: int) -> No
     def failing_prepare() -> bool:
         raise subprocess.TimeoutExpired(cmd="uv", timeout=120)
 
-    run = Run(parallelism=parallelism)
+    run: Run[str, bytes | Erasure] = Run(parallelism=parallelism)
     step0 = _step(["*.py"], rule_prepare=failing_prepare)
     step1 = GenericPreparedStep(
         prefixed_name="test_rule_2",
@@ -175,7 +176,7 @@ def test_default_parallelism_is_at_least_two() -> None:
     assert not step.cancelled
 
 
-def test_no_rules_found_mentions_legacy_flag_when_it_would_help(capsys) -> None:
+def test_no_rules_found_mentions_legacy_flag_when_it_would_help(capsys: pytest.CaptureFixture[str]) -> None:
     class DummyRule(BaseRule):
         def __init__(self, rule_config: RuleConfig) -> None:
             super().__init__(rule_config)
@@ -186,18 +187,18 @@ def test_no_rules_found_mentions_legacy_flag_when_it_would_help(capsys) -> None:
         full_name="subdir/rule",
         prefixed_name="prefix:subdir/rule",
     )
-    rtc = RuntimeConfig(main_config=MainConfig.DEFAULT, rules_config=RulesConfig(), settings=Settings())
+    rtc = RuntimeConfig(main_config=MainConfig.DEFAULT, rules_config=RulesConfig(), settings=Settings())  # type: ignore[attr-defined]
     runner = Runner(rtc, BaseRepo(root=Path.cwd()))
     runner.rules = [rule]
     runner.projects = []
     apply_filters(
-        SimpleNamespace(obj=SimpleNamespace(filter_config=runner.rtc.filter_config)),
+        cast(click.Context, SimpleNamespace(obj=SimpleNamespace(filter_config=runner.rtc.filter_config))),
         ["prefix:subdir/rule"],
         "",
         allow_legacy_name_filter=False,
     )
 
-    def fake_get_impl(_: RuleConfig) -> type[BaseRule]:
+    def fake_get_impl(rule: RuleConfig) -> type[BaseRule]:
         return DummyRule
 
     from ick import runner as runner_module
@@ -223,12 +224,12 @@ def test_iter_rule_impl_filters_by_tag() -> None:
     python_rule = RuleConfig(name="python-rule", impl="dummy", tags=["python", "lint"])
     untagged_rule = RuleConfig(name="untagged-rule", impl="dummy")
 
-    rtc = RuntimeConfig(main_config=MainConfig.DEFAULT, rules_config=RulesConfig(), settings=Settings())
+    rtc = RuntimeConfig(main_config=MainConfig.DEFAULT, rules_config=RulesConfig(), settings=Settings())  # type: ignore[attr-defined]
     runner = Runner(rtc, BaseRepo(root=Path.cwd()))
     runner.rules = [security_rule, python_rule, untagged_rule]
     runner.projects = []
     apply_filters(
-        SimpleNamespace(obj=SimpleNamespace(filter_config=runner.rtc.filter_config)),
+        cast(click.Context, SimpleNamespace(obj=SimpleNamespace(filter_config=runner.rtc.filter_config))),
         [],
         "",
         tags=["security", "lint"],
@@ -237,17 +238,13 @@ def test_iter_rule_impl_filters_by_tag() -> None:
     from ick import runner as runner_module
 
     original_get_impl = runner_module.get_impl
-    runner_module.get_impl = lambda _: DummyRule
+    runner_module.get_impl = lambda rule: DummyRule
     try:
         matched = {rule.rule_config.name for rule in runner.iter_rule_impl()}
     finally:
         runner_module.get_impl = original_get_impl
 
     assert matched == {"security-rule", "python-rule"}
-
-
-def _finished(results: list) -> Finished:
-    return next(r for r in results if isinstance(r, Finished))
 
 
 def test_stale_gen_metadata_is_dropped() -> None:
@@ -263,7 +260,7 @@ def test_stale_gen_metadata_is_dropped() -> None:
     }
     step.outputs_final = True
 
-    finished = _finished(step.compute_diff_messages())
+    _, finished = step.compute_diff_messages()
 
     assert finished.metadata == {"findings": ["current"]}
     assert finished.message == "current message\n"
@@ -280,7 +277,7 @@ def test_current_gen_metadata_survives() -> None:
     }
     step.outputs_final = True
 
-    finished = _finished(step.compute_diff_messages())
+    _, finished = step.compute_diff_messages()
 
     assert finished.metadata == {"findings": ["kept"]}
     assert finished.message == "the message\n"
