@@ -71,15 +71,15 @@ class MainConfig(Struct):
     skip_project_root_in_repo_root: Optional[bool] = None
 
     # Intended to be set in a "repo" config
-    explicit_project_dirs: Optional[list] = None  # type: ignore[type-arg] # FIX ME
-    ignore_project_dirs: Optional[list] = None  # type: ignore[type-arg] # FIX ME
-    outer_project_dirs: Optional[list] = None  # type: ignore[type-arg] # FIX ME
+    explicit_project_dirs: list[str] | None = None
+    ignore_project_dirs: list[str] | None = None
+    outer_project_dirs: list[str] | None = None
 
     # A file name and key used to read additional per-repo settings. Typically
     # set in user settings.
     repo_settings: Optional[RepoSettings] = None
 
-    def inherit(self, less_specific_defaults):  # type: ignore[no-untyped-def] # FIX ME
+    def inherit(self, less_specific_defaults: MainConfig) -> None:
         # TODO this is way more verbose than I'd like.
         # "union" semantics
         self.project_root_markers = merge(self.project_root_markers, less_specific_defaults.project_root_markers)  # type: ignore[no-untyped-call] # FIX ME
@@ -102,11 +102,11 @@ class MainConfig(Struct):
         self.repo_settings = self.repo_settings if self.repo_settings is not None else less_specific_defaults.repo_settings
 
 
-MainConfig.DEFAULT = MainConfig(  # type: ignore[attr-defined] # FIX ME
+DEFAULT_MAIN_CONFIG = MainConfig(
     project_root_markers=DEFAULT_PROJECT_MARKERS,
-    explicit_project_dirs=False,  # type: ignore[arg-type] # FIX ME
+    explicit_project_dirs=None,
     skip_project_root_in_repo_root=False,
-    outer_project_dirs=False,  # type: ignore[arg-type] # FIX ME
+    outer_project_dirs=None,
 )
 
 
@@ -160,17 +160,17 @@ def load_main_config(cur: Path, isolated_repo: bool) -> MainConfig:
         else:
             c = load_regular(config_path, config_path.read_bytes())
         LOG.log(VLOG_2, "Loaded %s of %r", config_path, c)
-        conf.inherit(c)  # type: ignore[no-untyped-call] # FIX ME
+        conf.inherit(c)
 
     # If `repo_settings` has been set by one of the defaults config files,
     # go read those repo settings.
     if conf.repo_settings:
         repo_config = _load_repo_settings(find_repo_root(cur), conf.repo_settings)
         if repo_config is not None:
-            repo_config.inherit(conf)  # type: ignore[no-untyped-call] # FIX ME
+            repo_config.inherit(conf)
             conf = repo_config
 
-    conf.inherit(MainConfig.DEFAULT)  # type: ignore[attr-defined, no-untyped-call] # FIX ME
+    conf.inherit(DEFAULT_MAIN_CONFIG)
 
     return conf
 

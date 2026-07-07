@@ -23,14 +23,6 @@ def merge(a, b):  # type: ignore[no-untyped-def] # FIX ME
     raise NotImplementedError(f"Can't merge {type(a)} with {type(b)} having values {a} and {b}")
 
 
-def bucket(items, key):  # type: ignore[no-untyped-def] # FIX ME
-    d = {}  # type: ignore[var-annotated] # FIX ME
-    for i in items:
-        k = key(i)
-        d.setdefault(k, []).append(i)
-    return d
-
-
 def dir_in_dirlist(d: str, dlist: Sequence[str]) -> bool:
     """Is directory `d` exactly in `dlist`? Normalizes trailing slashes."""
     for dd in dlist:

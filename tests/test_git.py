@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from pytest_mock import MockerFixture
 
 from ick.git import _get_local_cache_name, _is_sha, _split_url_ref, find_repo_root, update_local_cache
 from ick.sh import run_cmd
@@ -64,7 +65,7 @@ def test_split_url_ref() -> None:
 
 
 @pytest.mark.no_mock_platformdirs
-def test_update_local_cache_smoke(mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_update_local_cache_smoke(mocker: MockerFixture) -> None:
     """Smoke test that update_local_cache returns correct paths."""
     mocker.patch("ick.git.run_cmd", autospec=True)
 
@@ -90,7 +91,7 @@ def test_update_local_cache_smoke(mocker) -> None:  # type: ignore[no-untyped-de
     )
 
 
-def test_update_local_cache_main_clone(tmp_path, mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_update_local_cache_main_clone(tmp_path: Path, mocker: MockerFixture) -> None:
     """Test cloning main branch."""
     mocker.patch("platformdirs.user_cache_dir", return_value=tmp_path)
 
@@ -101,7 +102,7 @@ def test_update_local_cache_main_clone(tmp_path, mocker) -> None:  # type: ignor
     assert branch == "main"
 
 
-def test_update_local_cache_branch_clone(tmp_path, mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_update_local_cache_branch_clone(tmp_path: Path, mocker: MockerFixture) -> None:
     """Test cloning a non-main branch."""
     mocker.patch("platformdirs.user_cache_dir", return_value=tmp_path)
 
@@ -114,7 +115,7 @@ def test_update_local_cache_branch_clone(tmp_path, mocker) -> None:  # type: ign
 
 # Apple git doesn't ship with the --revision flag just yet
 @pytest.mark.skipif(sys.platform == "darwin", reason="Apple git lacks --revision flag")
-def test_update_local_cache_sha_clone(tmp_path, mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_update_local_cache_sha_clone(tmp_path: Path, mocker: MockerFixture) -> None:
     """Test cloning a SHA ref."""
     mocker.patch("platformdirs.user_cache_dir", return_value=tmp_path)
 
@@ -132,7 +133,7 @@ def test_update_local_cache_sha_clone(tmp_path, mocker) -> None:  # type: ignore
 
 # Apple git doesn't ship with the --revision flag just yet
 @pytest.mark.skipif(sys.platform == "darwin", reason="Apple git lacks --revision flag")
-def test_update_local_cache_sha_immutable(tmp_path, mocker) -> None:  # type: ignore[no-untyped-def] # FIX ME
+def test_update_local_cache_sha_immutable(tmp_path: Path, mocker: MockerFixture) -> None:
     """Test that SHA refs don't get updated (immutable)."""
     mocker.patch("platformdirs.user_cache_dir", return_value=tmp_path)
 

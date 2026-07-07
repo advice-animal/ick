@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from ick.util import bucket, convert_path_to_python_identifiers, merge
+from ick.util import convert_path_to_python_identifiers, merge
 
 
 def test_merge() -> None:
@@ -13,13 +13,6 @@ def test_merge() -> None:
     assert merge((), ["y"]) == ["y"]  # type: ignore[no-untyped-call] # FIX ME
     assert merge({"a": ["b"]}, {"a": ["c"]}) == {"a": ["b", "c"]}  # type: ignore[no-untyped-call] # FIX ME
     assert merge({"a": ["b"]}, {"b": ["c"]}) == {"a": ["b"], "b": ["c"]}  # type: ignore[no-untyped-call] # FIX ME
-
-
-def test_bucket() -> None:
-    rv = bucket([], key=lambda i: i == 2)  # type: ignore[no-untyped-call] # FIX ME
-    assert rv == {}
-    rv = bucket([1, 2, 3, 4], key=lambda i: i == 2)  # type: ignore[no-untyped-call] # FIX ME
-    assert rv == {True: [2], False: [1, 3, 4]}
 
 
 @pytest.mark.parametrize(

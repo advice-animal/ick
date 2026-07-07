@@ -122,7 +122,7 @@ def load_rule_repo(ruleset: Ruleset) -> RuleRepoConfig:
             if not rule.url:
                 rule.url = ruleset.url
 
-        rc.inherit(c)  # type: ignore[no-untyped-call] # FIX ME
+        rc.inherit(c)
 
     return rc
 

@@ -13,7 +13,7 @@ from feedforward.step import Step
 
 from ick.base_rule import BaseRule, GenericPreparedStep, match_prefix_patterns
 from ick.cmdline import apply_filters
-from ick.config import MainConfig, RuleConfig, RulesConfig, RuntimeConfig, Settings
+from ick.config import DEFAULT_MAIN_CONFIG, RuleConfig, RulesConfig, RuntimeConfig, Settings
 from ick.runner import Runner
 from ick.types_project import BaseRepo
 
@@ -187,7 +187,7 @@ def test_no_rules_found_mentions_legacy_flag_when_it_would_help(capsys: pytest.C
         full_name="subdir/rule",
         prefixed_name="prefix:subdir/rule",
     )
-    rtc = RuntimeConfig(main_config=MainConfig.DEFAULT, rules_config=RulesConfig(), settings=Settings())  # type: ignore[attr-defined]
+    rtc = RuntimeConfig(main_config=DEFAULT_MAIN_CONFIG, rules_config=RulesConfig(), settings=Settings())
     runner = Runner(rtc, BaseRepo(root=Path.cwd()))
     runner.rules = [rule]
     runner.projects = []
@@ -224,7 +224,7 @@ def test_iter_rule_impl_filters_by_tag() -> None:
     python_rule = RuleConfig(name="python-rule", impl="dummy", tags=["python", "lint"])
     untagged_rule = RuleConfig(name="untagged-rule", impl="dummy")
 
-    rtc = RuntimeConfig(main_config=MainConfig.DEFAULT, rules_config=RulesConfig(), settings=Settings())  # type: ignore[attr-defined]
+    rtc = RuntimeConfig(main_config=DEFAULT_MAIN_CONFIG, rules_config=RulesConfig(), settings=Settings())
     runner = Runner(rtc, BaseRepo(root=Path.cwd()))
     runner.rules = [security_rule, python_rule, untagged_rule]
     runner.projects = []

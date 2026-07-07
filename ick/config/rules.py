@@ -74,7 +74,7 @@ class RuleRepoConfig(Struct):
     rule: list[RuleConfig] = field(default_factory=list)
     repo_path: Optional[Path] = None
 
-    def inherit(self, less_specific_defaults):  # type: ignore[no-untyped-def] # FIX ME
+    def inherit(self, less_specific_defaults: RuleRepoConfig) -> None:
         self.rule = merge(self.rule, less_specific_defaults.rule)  # type: ignore[no-untyped-call] # FIX ME
 
 

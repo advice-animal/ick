@@ -47,7 +47,7 @@ def find_projects(repo: BaseRepo, zstr: str, conf: MainConfig) -> list[Project]:
             projects[key] = Project(repo, dirname, typ, filename)
 
     # this is a tuple to make .startswith happy
-    final_project_names: tuple[str] = ()  # type: ignore[assignment] # FIX ME
+    final_project_names: tuple[str, ...] = ()
     final_projects: list[Project] = []
 
     for project in sorted(projects.values(), key=lambda p: (p.subdir.count("/"), p.subdir)):
@@ -67,7 +67,7 @@ def find_projects(repo: BaseRepo, zstr: str, conf: MainConfig) -> list[Project]:
         else:
             LOG.debug("Keeping project at %r", project.subdir)
         final_projects.append(project)
-        final_project_names = (*final_project_names, project.subdir)  # type: ignore[assignment] # FIX ME
+        final_project_names = (*final_project_names, project.subdir)
 
     return final_projects
 
