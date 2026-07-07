@@ -12,7 +12,7 @@ from logging import getLogger
 from pathlib import Path
 from shutil import copytree, rmtree
 from tempfile import TemporaryDirectory
-from typing import Any, Callable, Iterable, Sequence, cast
+from typing import Any, Callable, Iterable, Sequence
 
 import moreorless
 from feedforward import Run, Step
@@ -461,10 +461,8 @@ class Runner:
                 # if any(e == 99 for e in s.exit_codes):
                 #     ...
 
-                changes = s.compute_diff_messages()
-                finished = changes[-1]
-                assert isinstance(finished, Finished)
-                yield HighLevelResult(s.prefixed_name, s.match_prefix, cast("list[Modified]", changes[:-1]), finished)
+                changes, finished = s.compute_diff_messages()
+                yield HighLevelResult(s.prefixed_name, s.match_prefix, changes, finished)
 
     @ktrace()
     def echo_rules(self) -> None:

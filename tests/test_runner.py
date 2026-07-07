@@ -3,7 +3,7 @@ import sys
 import threading
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Callable, Iterable, cast
+from typing import Callable, Iterable, cast
 
 import click
 import pytest
@@ -16,7 +16,6 @@ from ick.cmdline import apply_filters
 from ick.config import MainConfig, RuleConfig, RulesConfig, RuntimeConfig, Settings
 from ick.runner import Runner
 from ick.types_project import BaseRepo
-from ick_protocol import Finished
 
 
 def _step(patterns: list[str], rule_prepare: Callable[[], bool] | None = None) -> GenericPreparedStep:
@@ -248,10 +247,6 @@ def test_iter_rule_impl_filters_by_tag() -> None:
     assert matched == {"security-rule", "python-rule"}
 
 
-def _finished(results: list[Any]) -> Finished:
-    return next(r for r in results if isinstance(r, Finished))
-
-
 def test_stale_gen_metadata_is_dropped() -> None:
     """Metadata keyed to a superseded generation is silently dropped (last-writer-wins)."""
     step = _step(["*.py"])
@@ -265,7 +260,7 @@ def test_stale_gen_metadata_is_dropped() -> None:
     }
     step.outputs_final = True
 
-    finished = _finished(step.compute_diff_messages())
+    _, finished = step.compute_diff_messages()
 
     assert finished.metadata == {"findings": ["current"]}
     assert finished.message == "current message\n"
@@ -282,7 +277,7 @@ def test_current_gen_metadata_survives() -> None:
     }
     step.outputs_final = True
 
-    finished = _finished(step.compute_diff_messages())
+    _, finished = step.compute_diff_messages()
 
     assert finished.metadata == {"findings": ["kept"]}
     assert finished.message == "the message\n"
