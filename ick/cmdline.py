@@ -30,9 +30,9 @@ from .types_project import maybe_repo
 ALLOW_LEGACY_NAME_FILTER_OPTION = "--allow-legacy-name-filter"
 
 
-def _flatten_tags(tags: Iterable[str]) -> list[str]:
+def _flatten_tags(tags: Iterable[str]) -> frozenset[str]:
     """Split comma-separated tag values so `-t a,b` and `-t a -t b` are equivalent."""
-    return [tag for value in tags for tag in value.split(",") if tag]
+    return frozenset(tag.strip() for value in tags for tag in value.split(",") if tag)
 
 
 @click.group(cls=FlexibleGroup)
@@ -407,7 +407,7 @@ def apply_filters(
     filters: list[str],
     substring: str,
     *,
-    tags: list[str] | None = None,
+    tags: Iterable[str] = (),
     allow_legacy_name_filter: bool = False,
 ) -> None:
     if substring and filters:
@@ -415,7 +415,7 @@ def apply_filters(
     if substring and " " in substring:
         raise click.UsageError("-k with spaces is not yet supported")
 
-    ctx.obj.filter_config.tags = tags
+    ctx.obj.filter_config.tags = frozenset(tags)
     ctx.obj.filter_config.allow_legacy_name_filter = allow_legacy_name_filter
     if not substring and not filters:
         pass

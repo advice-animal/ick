@@ -232,7 +232,7 @@ def test_iter_rule_impl_filters_by_tag() -> None:
         cast(click.Context, SimpleNamespace(obj=SimpleNamespace(filter_config=runner.rtc.filter_config))),
         [],
         "",
-        tags=["security", "lint"],
+        tags={"security", "lint"},
     )
 
     from ick import runner as runner_module
