@@ -17,6 +17,21 @@ class CoveragePythonEnv(PythonEnv):
         self.coverage_contents = coverage_contents
         self.coveragerc = Path(self.env_path / "coverage.ini")
 
+    def health_check(self) -> bool:
+        if not super().health_check():
+            return False
+        # The coverage.ini has the current directory written into it.
+        # If the existing .ini isn't what we want, force the venv to be remade.
+        try:
+            existing_contents = self.coveragerc.read_text()
+        except OSError:
+            self._cached_health = False
+            return False
+        if existing_contents != self.coverage_contents:
+            self._cached_health = False
+            return False
+        return True
+
     def prepare_complete(self) -> None:
         # This hook should only happen once per venv setup, with the lock still held.
         self.coveragerc.write_text(self.coverage_contents)
