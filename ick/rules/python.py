@@ -11,32 +11,6 @@ from ..config import RuleConfig
 from ..venv import PythonEnv
 
 
-class CoveragePythonEnv(PythonEnv):
-    def __init__(self, coverage_contents: str, env_path: Path, deps: list[str] | None) -> None:
-        super().__init__(env_path, deps)
-        self.coverage_contents = coverage_contents
-        self.coveragerc = Path(self.env_path / "coverage.ini")
-
-    def health_check(self) -> bool:
-        if not super().health_check():
-            return False
-        # The coverage.ini has the current directory written into it.
-        # If the existing .ini isn't what we want, force the venv to be remade.
-        try:
-            existing_contents = self.coveragerc.read_text()
-        except OSError:
-            self._cached_health = False
-            return False
-        if existing_contents != self.coverage_contents:
-            self._cached_health = False
-            return False
-        return True
-
-    def prepare_complete(self) -> None:
-        # This hook should only happen once per venv setup, with the lock still held.
-        self.coveragerc.write_text(self.coverage_contents)
-
-
 def path_to_module(relative_path: Path) -> str:
     """Convert a file path to a Python module path.
 
@@ -62,15 +36,16 @@ class Rule(BaseRule):
 
         # TODO validate path / rule.name ".py" exists
         assert rule_config.prefixed_name != ""
-        venv_key = rule_config.prefixed_name + ("-cov" if self.coverage else "")
+        venv_key = rule_config.prefixed_name
         venv_path = Path(platformdirs.user_cache_dir("ick", "advice-animal"), "envs", venv_key)
         deps = self.rule_config.deps or []
+        extra_files: list[tuple[str, str]] = []
         if self.coverage:
             deps += ["coverage"]
             # This config file is written into the rule's venv directory
             # so it won't conflict with other rules running at the same time.
             # The data file is written to the current directory when this rule
-            # was insantiated, so the user's working directory.
+            # was instantiated, so the user's working directory.
             assert self.rule_config.script_path is not None
             conf = textwrap.dedent(f"""\
                 [run]
@@ -80,9 +55,9 @@ class Rule(BaseRule):
                 parallel = True
                 source = {self.rule_config.script_path.parent}
             """)
-            self.venv: PythonEnv = CoveragePythonEnv(conf, venv_path, deps)
-        else:
-            self.venv = PythonEnv(venv_path, deps)
+            extra_files.append(("coverage.ini", conf))
+
+        self.venv = PythonEnv(venv_path, deps, extra_files)
 
         self.command_parts = [self.venv.bin("python")]
 
@@ -91,8 +66,7 @@ class Rule(BaseRule):
             self.coverage = False
         else:
             if self.coverage:
-                assert isinstance(self.venv, CoveragePythonEnv)
-                self.command_parts += ["-m", "coverage", "run", "--rcfile", self.venv.coveragerc]
+                self.command_parts += ["-m", "coverage", "run", "--rcfile", self.venv.env_path / "coverage.ini"]
             py_script = self.rule_config.script_path.with_suffix(".py")  # type: ignore[union-attr] # FIX ME
             if not py_script.exists():
                 self.runnable = False

@@ -1,8 +1,10 @@
+import hashlib
 import json
 import os
 import shutil
 import sys
 from pathlib import Path
+from typing import Iterable
 
 from filelock import FileLock
 
@@ -16,9 +18,18 @@ def find_uv() -> Path:
 
 
 class PythonEnv:
-    def __init__(self, env_path: Path, deps: list[str] | None) -> None:
+    def __init__(
+        self,
+        env_path: Path,
+        deps: list[str] | None = None,
+        extra_files: Iterable[tuple[str, str]] = (),
+    ) -> None:
+        if extra_files:
+            h = hashlib.sha256(repr(extra_files).encode("utf-8")).hexdigest()
+            env_path = Path(f"{env_path}-{h[:12]}")
         self.env_path = env_path
         self.deps = deps or []
+        self.extra_files = extra_files
         self._cached_health: bool | None = None
 
     def bin(self, prog) -> Path:  # type: ignore[no-untyped-def] # FIX ME
@@ -121,9 +132,10 @@ class PythonEnv:
                     timeout=120,
                 )
             self._deps_path().write_text(json.dumps(self.deps))
-            self._cached_health = None
-            self.prepare_complete()
-        return True
 
-    def prepare_complete(self) -> None:
-        pass
+            for fname, content in self.extra_files:
+                (self.env_path / fname).write_text(content)
+
+            self._cached_health = None
+
+        return True
