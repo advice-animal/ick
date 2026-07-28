@@ -25,7 +25,8 @@ class PythonEnv:
         extra_files: Iterable[tuple[str, str]] = (),
     ) -> None:
         if extra_files:
-            h = hashlib.sha256(repr(extra_files).encode("utf-8")).hexdigest()
+            # A cache key based on file contents, to avoid collisions.
+            h = hashlib.sha256(repr(extra_files).encode("utf-8"), usedforsecurity=False).hexdigest()
             env_path = Path(f"{env_path}-{h[:12]}")
         self.env_path = env_path
         self.deps = deps or []
