@@ -16,3 +16,8 @@ $ ick list-rules -t lint python-rule
 NOW
 ===
 * python-rule
+#
+$ ick list-rules -t security-rule
+NOW
+===
+* security-rule

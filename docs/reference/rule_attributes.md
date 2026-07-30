@@ -84,6 +84,8 @@ A single `[[rule]]` in an ick.toml can be configured with the following attribut
 - `contact` (str): Contact information for the rule maintainer: email, Slack channel, etc.
 - `tags` (list[str]): Arbitrary labels for the rule. Filter rules by tag with
     `-t`/`--tag` on `ick run`, `ick test-rules`, and `ick list-rules`, for
-    example `ick run -t security` or `ick run -t security,python`. Tags are a
-    flat arbitrary set of strings. Combine with a name filter or `-k` to narrow
-    the results further.
+    example `ick run -t security` or `ick run -t security,python`. Every rule
+    is also automatically tagged with its `prefixed_name` (e.g.
+    `myrules:python/lint`), so you can select a single rule via `-t`. Tags are
+    a flat arbitrary set of strings. Combine with a name filter or `-k` to
+    narrow the results further.

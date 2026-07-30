@@ -120,6 +120,9 @@ but it's OK for hard things to still be hard.
 
 ### Unreleased
 
+- Every rule is now automatically tagged with its prefixed name (e.g.
+  `myrules:python/lint`), so `-t` can select a single rule by that name.
+
 - The `ICK_COVERAGE_PY` setting could re-use virtualenvs configured to write
   coverage data files into incorrect directories. This is now fixed.
 
