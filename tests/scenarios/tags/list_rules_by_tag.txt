@@ -21,3 +21,10 @@ $ ick list-rules -t security-rule
 NOW
 ===
 * security-rule
+#
+$ ick list-rules -t demo
+NOW
+===
+* python-rule
+* security-rule
+* untagged-rule

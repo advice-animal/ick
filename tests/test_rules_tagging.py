@@ -42,3 +42,18 @@ command = "true"
     rc = load_rule_repo(r)
     assert list(rc.rule[0].tags) == ["hello"]
     assert rc.rule[0].prefixed_name == "hello"
+
+
+def test_load_rule_repo_propagates_ruleset_tags(tmp_path: Path) -> None:
+    (tmp_path / "ick.toml").write_text(
+        """\
+[[rule]]
+name = "hello"
+impl = "shell"
+command = "true"
+tags = ["rule-tag"]
+"""
+    )
+    r = Ruleset(path=tmp_path.as_posix(), prefix="demo", tags=["team", "mandatory"])
+    rc = load_rule_repo(r)
+    assert list(rc.rule[0].tags) == ["team", "mandatory", "rule-tag", "demo:hello"]
