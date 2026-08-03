@@ -176,6 +176,45 @@ def test_default_parallelism_is_at_least_two() -> None:
     assert not step.cancelled
 
 
+def _select(rules: list[RuleConfig], filters: list[str], *, allow_legacy: bool) -> list[str]:
+    """Return the prefixed names ``iter_rule_impl`` selects for ``filters``."""
+
+    class DummyRule(BaseRule):
+        def __init__(self, rule_config: RuleConfig) -> None:
+            super().__init__(rule_config)
+
+    rtc = RuntimeConfig(main_config=DEFAULT_MAIN_CONFIG, rules_config=RulesConfig(), settings=Settings())
+    runner = Runner(rtc, BaseRepo(root=Path.cwd()))
+    runner.rules = rules
+    runner.projects = []
+    apply_filters(
+        cast(click.Context, SimpleNamespace(obj=SimpleNamespace(filter_config=runner.rtc.filter_config))),
+        filters,
+        "",
+        allow_legacy_name_filter=allow_legacy,
+    )
+
+    from ick import runner as runner_module
+
+    original_get_impl = runner_module.get_impl
+    runner_module.get_impl = lambda rule: DummyRule
+    try:
+        return [impl.rule_config.prefixed_name for impl in runner.iter_rule_impl()]
+    finally:
+        runner_module.get_impl = original_get_impl
+
+
+def test_legacy_and_new_style_filters_can_be_mixed() -> None:
+    rules = [
+        RuleConfig(name="a", impl="dummy", full_name="sub/a", prefixed_name="prefix:sub/a"),
+        RuleConfig(name="b", impl="dummy", full_name="sub/b", prefixed_name="other:sub/b"),
+    ]
+    assert _select(rules, ["prefix:sub/a", "other/sub/b"], allow_legacy=True) == [
+        "prefix:sub/a",
+        "other:sub/b",
+    ]
+
+
 def test_no_rules_found_mentions_legacy_flag_when_it_would_help(capsys: pytest.CaptureFixture[str]) -> None:
     class DummyRule(BaseRule):
         def __init__(self, rule_config: RuleConfig) -> None:
