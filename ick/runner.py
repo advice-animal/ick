@@ -23,6 +23,7 @@ from rich import print
 
 from ick_protocol import Finished, Modified, RuleStatus
 
+from ._regex_translate import rule_name_re
 from .base_rule import BaseRule, GenericPreparedStep
 from .config import RuntimeConfig
 from .config.rule_repo import discover_rules
@@ -133,6 +134,16 @@ class Runner:
                 runnable_rules.append(get_impl(rule_config)(rule_config))
             except Exception as e:
                 runnable_rules.append(ErrorRule(rule_config, str(e)))
+
+        if runnable_rules:
+            for name in fc.name_filters:
+                if matched_by(rule_name_re(name), legacy_style=False):
+                    continue
+                legacy_only = matched_by(rule_name_re(name, legacy=True), legacy_style=True)
+                if legacy_only and fc.allow_legacy_name_filter:
+                    continue
+                hint = " Try --allow-legacy-name-filter." if legacy_only else ""
+                print(f"[red]No rules matched '{name}'.{hint}[/red]")
 
         if not runnable_rules and len(self.rules) > 0:
             legacy_only = [] if fc.allow_legacy_name_filter else matched_by(fc.legacy_name_filter_re, legacy_style=True)

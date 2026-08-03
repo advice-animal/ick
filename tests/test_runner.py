@@ -238,6 +238,28 @@ def test_legacy_style_prefix_filter_selects_ruleset_only_with_the_flag() -> None
     assert _select(rules, ["prefix/"], allow_legacy=False) == []
 
 
+def test_filter_matching_nothing_is_reported_even_when_another_matches(capsys: pytest.CaptureFixture[str]) -> None:
+    rules = [
+        RuleConfig(name="a", impl="dummy", full_name="sub/a", prefixed_name="prefix:sub/a"),
+        RuleConfig(name="b", impl="dummy", full_name="sub/b", prefixed_name="other:sub/b"),
+    ]
+    assert _select(rules, ["prefix:sub/a", "other/sub/b"], allow_legacy=False) == ["prefix:sub/a"]
+
+    out = capsys.readouterr().out
+    assert "No rules matched 'other/sub/b'." in out
+    assert "--allow-legacy-name-filter" in out
+
+
+def test_unmatched_filter_is_not_reported_once_the_legacy_flag_covers_it(capsys: pytest.CaptureFixture[str]) -> None:
+    rules = [
+        RuleConfig(name="a", impl="dummy", full_name="sub/a", prefixed_name="prefix:sub/a"),
+        RuleConfig(name="b", impl="dummy", full_name="sub/b", prefixed_name="other:sub/b"),
+    ]
+    _select(rules, ["prefix:sub/a", "other/sub/b"], allow_legacy=True)
+
+    assert "No rules matched" not in capsys.readouterr().out
+
+
 def test_legacy_and_new_style_filters_can_be_mixed() -> None:
     rules = [
         RuleConfig(name="a", impl="dummy", full_name="sub/a", prefixed_name="prefix:sub/a"),
