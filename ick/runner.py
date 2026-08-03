@@ -119,20 +119,20 @@ class Runner:
             match = re.compile(pattern).fullmatch
             if legacy_style:
                 return [rule for rule in candidates if match(rule.prefixed_name.replace(":", "/"))]
-            return [rule for rule in candidates if match(rule.full_name)]
+            return [rule for rule in candidates if match(rule.full_name) or match(rule.prefixed_name)]
 
-        configs = matched_by(fc.name_filter_re, legacy_style=False)
+        rule_configs = matched_by(fc.name_filter_re, legacy_style=False)
         if fc.allow_legacy_name_filter:
             legacy_configs = matched_by(fc.legacy_name_filter_re, legacy_style=True)
-            chosen = {rule.prefixed_name for rule in configs + legacy_configs}
-            configs = [rule for rule in candidates if rule.prefixed_name in chosen]
+            chosen = {rule.prefixed_name for rule in rule_configs + legacy_configs}
+            rule_configs = [rule for rule in candidates if rule.prefixed_name in chosen]
 
         runnable_rules: list[BaseRule] = []
-        for config in configs:
+        for rule_config in rule_configs:
             try:
-                runnable_rules.append(get_impl(config)(config))
+                runnable_rules.append(get_impl(rule_config)(rule_config))
             except Exception as e:
-                runnable_rules.append(ErrorRule(config, str(e)))
+                runnable_rules.append(ErrorRule(rule_config, str(e)))
 
         if not runnable_rules and len(self.rules) > 0:
             legacy_only = [] if fc.allow_legacy_name_filter else matched_by(fc.legacy_name_filter_re, legacy_style=True)
