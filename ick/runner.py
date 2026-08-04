@@ -122,11 +122,10 @@ class Runner:
                 return [rule for rule in candidates if match(rule.prefixed_name.replace(":", "/"))]
             return [rule for rule in candidates if match(rule.full_name) or match(rule.prefixed_name)]
 
-        rule_configs = matched_by(fc.name_filter_re, legacy_style=False)
+        chosen = {rule.prefixed_name for rule in matched_by(fc.name_filter_re, legacy_style=False)}
         if fc.allow_legacy_name_filter:
-            legacy_configs = matched_by(fc.legacy_name_filter_re, legacy_style=True)
-            chosen = {rule.prefixed_name for rule in rule_configs + legacy_configs}
-            rule_configs = [rule for rule in candidates if rule.prefixed_name in chosen]
+            chosen |= {rule.prefixed_name for rule in matched_by(fc.legacy_name_filter_re, legacy_style=True)}
+        rule_configs = [rule for rule in candidates if rule.prefixed_name in chosen]
 
         runnable_rules: list[BaseRule] = []
         for rule_config in rule_configs:
