@@ -114,7 +114,9 @@ class Runner:
 
     def iter_rule_impl(self) -> Iterable[BaseRule]:
         fc = self.rtc.filter_config
-        candidates = [rule for rule in self.rules if not rule.urgency < fc.min_urgency and (not fc.tags or set(rule.tags) & set(fc.tags))]
+        candidates = [rule for rule in self.rules if not rule.urgency < fc.min_urgency]
+        if fc.tags:
+            candidates = [rule for rule in candidates if set(rule.tags) & set(fc.tags)]
 
         def matched_by(pattern: str, legacy_style: bool) -> list[RuleConfig]:
             match = re.compile(pattern).fullmatch
