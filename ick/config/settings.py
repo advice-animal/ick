@@ -33,6 +33,8 @@ class FilterConfig(Struct):
     legacy_name_filter_re: str = ".*"
     #: If true, use the legacy prefix-aware matcher instead of the new one.
     allow_legacy_name_filter: bool = False
+    #: The name filters as typed, before joining into name_filter_re.
+    name_filters: tuple[str, ...] = ()
     #: Default means "don't filter any production urgencies"
     min_urgency: Urgency = Urgency.LATER
     min_risk: Risk = Risk.HIGH

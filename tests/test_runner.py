@@ -176,6 +176,101 @@ def test_default_parallelism_is_at_least_two() -> None:
     assert not step.cancelled
 
 
+def _select(rules: list[RuleConfig], filters: list[str], *, allow_legacy: bool) -> list[str]:
+    """Return the prefixed names ``iter_rule_impl`` selects for ``filters``."""
+
+    class DummyRule(BaseRule):
+        def __init__(self, rule_config: RuleConfig) -> None:
+            super().__init__(rule_config)
+
+    rtc = RuntimeConfig(main_config=DEFAULT_MAIN_CONFIG, rules_config=RulesConfig(), settings=Settings())
+    runner = Runner(rtc, BaseRepo(root=Path.cwd()))
+    runner.rules = rules
+    runner.projects = []
+    apply_filters(
+        cast(click.Context, SimpleNamespace(obj=SimpleNamespace(filter_config=runner.rtc.filter_config))),
+        filters,
+        "",
+        allow_legacy_name_filter=allow_legacy,
+    )
+
+    from ick import runner as runner_module
+
+    original_get_impl = runner_module.get_impl
+    runner_module.get_impl = lambda rule: DummyRule
+    try:
+        return [impl.rule_config.prefixed_name for impl in runner.iter_rule_impl()]
+    finally:
+        runner_module.get_impl = original_get_impl
+
+
+def test_prefixed_name_filter_matches_without_legacy_flag() -> None:
+    rules = [RuleConfig(name="rule", impl="dummy", full_name="subdir/rule", prefixed_name="prefix:subdir/rule")]
+    assert _select(rules, ["prefix:subdir/rule"], allow_legacy=False) == ["prefix:subdir/rule"]
+
+
+def test_bare_prefix_filter_selects_whole_ruleset_without_legacy_flag() -> None:
+    rules = [
+        RuleConfig(name="a", impl="dummy", full_name="sub/a", prefixed_name="prefix:sub/a"),
+        RuleConfig(name="b", impl="dummy", full_name="sub/b", prefixed_name="prefix:sub/b"),
+        RuleConfig(name="c", impl="dummy", full_name="sub/c", prefixed_name="other:sub/c"),
+    ]
+    assert _select(rules, ["prefix:"], allow_legacy=False) == ["prefix:sub/a", "prefix:sub/b"]
+
+
+def test_bare_prefix_filter_does_not_reach_other_rulesets() -> None:
+    rules = [
+        RuleConfig(name="a", impl="dummy", full_name="sub/a", prefixed_name="prefix:sub/a"),
+        # Paths that merely start with the prefix, in another and in no ruleset.
+        RuleConfig(name="b", impl="dummy", full_name="prefix/b", prefixed_name="other:prefix/b"),
+        RuleConfig(name="c", impl="dummy", full_name="prefix/c", prefixed_name="prefix/c"),
+    ]
+    assert _select(rules, ["prefix:"], allow_legacy=False) == ["prefix:sub/a"]
+
+
+def test_legacy_style_prefix_filter_selects_ruleset_only_with_the_flag() -> None:
+    rules = [
+        RuleConfig(name="a", impl="dummy", full_name="sub/a", prefixed_name="prefix:sub/a"),
+        RuleConfig(name="b", impl="dummy", full_name="sub/b", prefixed_name="prefix:sub/b"),
+        RuleConfig(name="c", impl="dummy", full_name="sub/c", prefixed_name="other:sub/c"),
+    ]
+    assert _select(rules, ["prefix/"], allow_legacy=True) == ["prefix:sub/a", "prefix:sub/b"]
+    assert _select(rules, ["prefix/"], allow_legacy=False) == []
+
+
+def test_filter_matching_nothing_is_reported_even_when_another_matches(capsys: pytest.CaptureFixture[str]) -> None:
+    rules = [
+        RuleConfig(name="a", impl="dummy", full_name="sub/a", prefixed_name="prefix:sub/a"),
+        RuleConfig(name="b", impl="dummy", full_name="sub/b", prefixed_name="other:sub/b"),
+    ]
+    assert _select(rules, ["prefix:sub/a", "other/sub/b"], allow_legacy=False) == ["prefix:sub/a"]
+
+    out = capsys.readouterr().out
+    assert "No rules matched 'other/sub/b'." in out
+    assert "--allow-legacy-name-filter" in out
+
+
+def test_unmatched_filter_is_not_reported_once_the_legacy_flag_covers_it(capsys: pytest.CaptureFixture[str]) -> None:
+    rules = [
+        RuleConfig(name="a", impl="dummy", full_name="sub/a", prefixed_name="prefix:sub/a"),
+        RuleConfig(name="b", impl="dummy", full_name="sub/b", prefixed_name="other:sub/b"),
+    ]
+    _select(rules, ["prefix:sub/a", "other/sub/b"], allow_legacy=True)
+
+    assert "No rules matched" not in capsys.readouterr().out
+
+
+def test_legacy_and_new_style_filters_can_be_mixed() -> None:
+    rules = [
+        RuleConfig(name="a", impl="dummy", full_name="sub/a", prefixed_name="prefix:sub/a"),
+        RuleConfig(name="b", impl="dummy", full_name="sub/b", prefixed_name="other:sub/b"),
+    ]
+    assert _select(rules, ["prefix:sub/a", "other/sub/b"], allow_legacy=True) == [
+        "prefix:sub/a",
+        "other:sub/b",
+    ]
+
+
 def test_no_rules_found_mentions_legacy_flag_when_it_would_help(capsys: pytest.CaptureFixture[str]) -> None:
     class DummyRule(BaseRule):
         def __init__(self, rule_config: RuleConfig) -> None:
@@ -193,7 +288,7 @@ def test_no_rules_found_mentions_legacy_flag_when_it_would_help(capsys: pytest.C
     runner.projects = []
     apply_filters(
         cast(click.Context, SimpleNamespace(obj=SimpleNamespace(filter_config=runner.rtc.filter_config))),
-        ["prefix:subdir/rule"],
+        ["prefix/subdir/rule"],
         "",
         allow_legacy_name_filter=False,
     )

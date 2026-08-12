@@ -8,9 +8,17 @@ def rule_name_re(name: str, *, legacy: bool = False) -> str:
 
     Both the new and legacy forms match a rule name plus descendants.
     The legacy form additionally converts a ``:`` prefix separator to ``/``.
+
+    The ``:`` is kept so the result stays unambiguous when tried against both
+    the prefixed and unprefixed name: a pattern containing one can only match a
+    prefixed name, and a pattern without one can only match an unprefixed name.
+    A trailing ``:`` therefore selects a whole ruleset without also picking up
+    rules whose path merely starts with that prefix.
     """
     if legacy:
         return f"^{name.replace(':', '/').rstrip('/')}($|/.*$)"
+    if name.endswith(":"):
+        return f"^{name}.*$"
     return f"^{name.rstrip('/')}($|/.*$)"
 
 

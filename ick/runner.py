@@ -23,10 +23,12 @@ from rich import print
 
 from ick_protocol import Finished, Modified, RuleStatus
 
+from ._regex_translate import rule_name_re
 from .base_rule import BaseRule, GenericPreparedStep
 from .config import RuntimeConfig
 from .config.rule_repo import discover_rules
 from .config.rule_repo import get_impl as get_impl
+from .config.rules import RuleConfig
 from .project_finder import find_projects
 from .types_project import BaseRepo, Project, maybe_repo
 from .util import clean_output
@@ -111,45 +113,47 @@ class Runner:
         self.projects: list[Project] = find_projects(repo, repo.zfiles, self.rtc.main_config)
 
     def iter_rule_impl(self) -> Iterable[BaseRule]:
-        def matched_rules(*, legacy: bool) -> list[BaseRule]:
-            filter_re = self.rtc.filter_config.legacy_name_filter_re if legacy else self.rtc.filter_config.name_filter_re
-            name_filter = re.compile(filter_re).fullmatch
-            rules: list[BaseRule] = []
-            for rule in self.rules:
-                if rule.urgency < self.rtc.filter_config.min_urgency:
+        fc = self.rtc.filter_config
+        candidates = [rule for rule in self.rules if not rule.urgency < fc.min_urgency]
+        if fc.tags:
+            candidates = [rule for rule in candidates if set(rule.tags) & set(fc.tags)]
+
+        def matched_by(pattern: str, legacy_style: bool) -> list[RuleConfig]:
+            match = re.compile(pattern).fullmatch
+            if legacy_style:
+                return [rule for rule in candidates if match(rule.prefixed_name.replace(":", "/"))]
+            return [rule for rule in candidates if match(rule.full_name) or match(rule.prefixed_name)]
+
+        chosen = {rule.prefixed_name for rule in matched_by(fc.name_filter_re, legacy_style=False)}
+        if fc.allow_legacy_name_filter:
+            chosen |= {rule.prefixed_name for rule in matched_by(fc.legacy_name_filter_re, legacy_style=True)}
+        rule_configs = [rule for rule in candidates if rule.prefixed_name in chosen]
+
+        runnable_rules: list[BaseRule] = []
+        for rule_config in rule_configs:
+            try:
+                runnable_rules.append(get_impl(rule_config)(rule_config))
+            except Exception as e:
+                runnable_rules.append(ErrorRule(rule_config, str(e)))
+
+        if runnable_rules:
+            for name in fc.name_filters:
+                if matched_by(rule_name_re(name), legacy_style=False):
                     continue
-
-                if self.rtc.filter_config.tags and not set(rule.tags) & set(self.rtc.filter_config.tags):
+                legacy_only = matched_by(rule_name_re(name, legacy=True), legacy_style=True)
+                if legacy_only and fc.allow_legacy_name_filter:
                     continue
+                hint = " Try --allow-legacy-name-filter." if legacy_only else ""
+                print(f"[red]No rules matched '{name}'.{hint}[/red]")
 
-                name = rule.prefixed_name.replace(":", "/") if legacy else rule.full_name
-                if not name_filter(name):
-                    continue
-
-                try:
-                    rules.append(get_impl(rule)(rule))
-                except Exception as e:
-                    rules.append(ErrorRule(rule, str(e)))
-            return rules
-
-        rules = matched_rules(legacy=False)
-        legacy_rules: list[BaseRule] = []
-        if not rules and self.rtc.filter_config.allow_legacy_name_filter:
-            rules = matched_rules(legacy=True)
-        elif not rules:
-            legacy_rules = matched_rules(legacy=True)
-
-        if not rules and len(self.rules) > 0:
-            pattern = self.rtc.filter_config.name_filter_re
-            hint = ""
-            if legacy_rules:
-                hint = " Try --allow-legacy-name-filter."
+        if not runnable_rules and len(self.rules) > 0:
+            legacy_only = [] if fc.allow_legacy_name_filter else matched_by(fc.legacy_name_filter_re, legacy_style=True)
+            hint = " Try --allow-legacy-name-filter." if legacy_only else ""
             print(
-                f"[red]No rules found with urgency '{self.rtc.filter_config.min_urgency.value}' or greater that matches the pattern '{pattern}'.{hint}[/red]"
+                f"[red]No rules found with urgency '{fc.min_urgency.value}' or greater that matches the pattern '{fc.name_filter_re}'.{hint}[/red]"
             )
 
-        for rule in rules:
-            yield rule
+        yield from runnable_rules
 
     def build_steps_for_rules(
         self,

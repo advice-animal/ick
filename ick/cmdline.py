@@ -429,6 +429,7 @@ def apply_filters(
         ctx.obj.filter_config.name_filter_re = f".*{re.escape(substring)}.*"
         ctx.obj.filter_config.legacy_name_filter_re = ctx.obj.filter_config.name_filter_re
     else:
+        ctx.obj.filter_config.name_filters = tuple(filters)
         ctx.obj.filter_config.name_filter_re = "|".join(rule_name_re(name) for name in filters)
         ctx.obj.filter_config.legacy_name_filter_re = "|".join(rule_name_re(name, legacy=True) for name in filters)
 

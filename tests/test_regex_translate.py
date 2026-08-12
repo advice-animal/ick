@@ -23,6 +23,17 @@ def test_advice_name_matching_subdir_rule_across_prefixes() -> None:
     assert not foo_match("food_truck")
 
 
+def test_advice_name_matching_selects_whole_ruleset_by_prefix() -> None:
+    foo_match = re.compile(rule_name_re("py:")).fullmatch
+    assert foo_match("py:foo")
+    assert foo_match("py:")
+    assert foo_match("py:foo/bar")
+    assert not foo_match("other:foo")
+    assert not foo_match("pyx:foo")
+    assert not foo_match("py/foo")
+    assert not foo_match("other:py/foo")
+
+
 def test_advice_name_matching_prefix_with_legacy_join() -> None:
     foo_match = re.compile(rule_name_re("foo:bar", legacy=True)).fullmatch
     assert foo_match("foo/bar")
