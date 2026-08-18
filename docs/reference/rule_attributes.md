@@ -13,6 +13,8 @@ The following attributes can be set in an `ick.toml` or `pyproject.toml`.
 
 - `prefix` (str): A prefix to use for the rules from this ruleset. If not
   specified, it will be derived from the last component of the URL or path.
+- `tags` (list[str]): Labels applied to every rule loaded from this ruleset.
+    Combined with each rule's own `tags`.
 
 
 ## `[[rule]]` attributes

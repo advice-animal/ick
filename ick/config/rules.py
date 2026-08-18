@@ -52,6 +52,7 @@ class Ruleset(Struct):
 
     prefix: Optional[str] = None
     base_path: Optional[Path] = None  # Dir of the config that referenced this
+    tags: Sequence[str] = ()
 
     repo: Optional[RuleRepoConfig] = None
 

@@ -121,6 +121,7 @@ def load_rule_repo(ruleset: Ruleset) -> RuleRepoConfig:
             rule.repo_path = repo_path
             if not rule.url:
                 rule.url = ruleset.url
+            rule.tags = [*ruleset.tags, *rule.tags]
 
         rc.inherit(c)
 

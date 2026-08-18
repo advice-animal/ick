@@ -1,5 +1,6 @@
 [[ruleset]]
 path = "."
+tags = ["demo"]
 
 [[rule]]
 impl = "shell"

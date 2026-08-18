@@ -16,3 +16,10 @@ $ ick list-rules -t lint python-rule
 NOW
 ===
 * python-rule
+#
+$ ick list-rules -t demo
+NOW
+===
+* python-rule
+* security-rule
+* untagged-rule

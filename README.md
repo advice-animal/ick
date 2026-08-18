@@ -120,6 +120,9 @@ but it's OK for hard things to still be hard.
 
 ### Unreleased
 
+- `[[ruleset]]` can set `tags`, which are applied to every rule in that
+  ruleset.
+
 - The `ICK_COVERAGE_PY` setting could re-use virtualenvs configured to write
   coverage data files into incorrect directories. This is now fixed.
 
