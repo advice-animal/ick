@@ -10,12 +10,15 @@ import pytest
 from feedforward import Notification, Run, State
 from feedforward.erasure import Erasure  # todo: export this properly from feedforward
 from feedforward.step import Step
+from pytest_mock import MockerFixture
 
 from ick.base_rule import BaseRule, GenericPreparedStep, match_prefix_patterns
 from ick.cmdline import apply_filters
 from ick.config import DEFAULT_MAIN_CONFIG, RuleConfig, RulesConfig, RuntimeConfig, Settings
 from ick.runner import Runner
+from ick.runner import TestResult as _TestResult
 from ick.types_project import BaseRepo
+from ick_protocol import RuleStatus
 
 
 def _step(patterns: list[str], rule_prepare: Callable[[], bool] | None = None) -> GenericPreparedStep:
@@ -156,6 +159,32 @@ def test_timeout_in_prepare_run_continues_with_next_step(parallelism: int) -> No
     assert step0.cancelled
     assert not step1.cancelled
     assert result["b.txt"].value == b"modified"
+
+
+def test_rule_test_name_is_relative_to_rules_repo(tmp_path: Path, mocker: MockerFixture) -> None:
+    target_repo = tmp_path / "target"
+    target_repo.mkdir()
+    rules_repo = tmp_path / "rules"
+    test_path = rules_repo / "tests" / "example" / "case"
+    (test_path / "input").mkdir(parents=True)
+    (test_path / "output").mkdir()
+
+    rtc = RuntimeConfig(main_config=DEFAULT_MAIN_CONFIG, rules_config=RulesConfig(), settings=Settings())
+    runner = Runner(rtc, BaseRepo(root=target_repo))
+    rule = BaseRule(RuleConfig(name="example", impl="dummy", repo_path=rules_repo, test_path=test_path))
+    result = _TestResult(rule, test_path)
+    build_steps = mocker.patch.object(runner, "build_steps_for_test", return_value=object())
+    mocker.patch.object(
+        runner,
+        "run_steps",
+        return_value=iter([SimpleNamespace(modifications=[], finished=SimpleNamespace(message="", status=RuleStatus.SUCCESS))]),
+    )
+    mocker.patch("ick.runner.maybe_repo", side_effect=lambda path, *_args, **_kwargs: BaseRepo(path))
+
+    runner._perform_test(rule, test_path, result)
+
+    assert build_steps.call_args.kwargs["test_name"] == "tests/example/case"
+    assert result.success
 
 
 def test_default_parallelism_is_at_least_two() -> None:
