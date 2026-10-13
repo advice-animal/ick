@@ -310,7 +310,7 @@ def run(
         """Collect results into a dict for JSON output."""
         modifications = []
         for mod in result.modifications:
-            modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat})
+            modifications.append({"file_name": mod.filename, "diff_stat": mod.diffstat, "diff": mod.diff})
         output = {
             "project_name": result.project,
             "status": result.finished.status,
