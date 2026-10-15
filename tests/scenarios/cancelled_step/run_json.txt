@@ -16,6 +16,7 @@ $ ick run --json
                 "metadata": null,
                 "modified": [
                     {
+                        "diff": "--- a/pyproject.toml\n+++ b/pyproject.toml\n@@ -0,0 +1 @@\n+# managed by ick\n",
                         "diff_stat": "+1",
                         "file_name": "pyproject.toml"
                     }

@@ -25,10 +25,12 @@ $ ick run --json
                 "metadata": null,
                 "modified": [
                     {
+                        "diff": "--- a/file_a.cfg\n+++ b/file_a.cfg\n@@ -1,3 +0,0 @@\n-[settings]\n-line_length = 88\n-multi_line_output = 3\n\\ No newline at end of file\n",
                         "diff_stat": "-3",
                         "file_name": "file_a.cfg"
                     },
                     {
+                        "diff": "--- a/file_b.toml\n+++ b/file_b.toml\n@@ -0,0 +1,3 @@\n+[tool.isort]\n+line_length = \"88\"\n+multi_line_output = \"3\"\n",
                         "diff_stat": "+3",
                         "file_name": "file_b.toml"
                     }
