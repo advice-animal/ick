@@ -295,10 +295,12 @@ class Runner:
 
             repo = maybe_repo(tp, stack.enter_context, for_testing=True)
 
+            rule_repo_path = rule_instance.rule_config.repo_path
+            assert rule_repo_path is not None
             steps = self.build_steps_for_test(
                 impl=rule_instance,
                 repo=repo,
-                test_name=str(test_path.relative_to(Path.cwd())),
+                test_name=str(test_path.relative_to(rule_repo_path)),
             )
             run_result = next(iter(self.run_steps(steps, repo=repo)))
             response = run_result.modifications
