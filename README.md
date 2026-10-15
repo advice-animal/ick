@@ -118,7 +118,10 @@ but it's OK for hard things to still be hard.
 
 ## Changelog
 
-### Unreleased
+### v0.13.0 (October 15, 2026)
+
+- `ick run --json` output now includes a `"diff"` key with the full diff of any
+  changes.
 
 - `[[ruleset]]` can set `tags`, which are applied to every rule in that
   ruleset.
